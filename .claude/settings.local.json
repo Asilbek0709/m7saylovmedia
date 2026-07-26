@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc -t markdown \"MS-7.docx\" -o \"C:/Users/HP/AppData/Local/Temp/claude/C--Users-HP-Desktop-saylov-m7/60634b89-a1be-46b1-b79e-f826bc33e537/scratchpad/ms7.md\")",
+      "PowerShell(if \\(Test-Path \"C:\\\\Users\\\\HP\\\\Desktop\\\\saylov-m7\"\\) { Write-Output \"EXISTS\"; \\(Get-ChildItem -Force \"C:\\\\Users\\\\HP\\\\Desktop\\\\saylov-m7\" | Measure-Object\\).Count } else { Write-Output \"MISSING\" }; Write-Output \"--- node/npm ---\"; try { node -v } catch { Write-Output \"no node\" }; try { npm -v } catch { Write-Output \"no npm\" })",
+      "Bash(mkdir -p C:/Users/HP/AppData/Local/Temp/claude/C--Users-HP-Desktop-saylov-m7/60634b89-a1be-46b1-b79e-f826bc33e537/scratchpad/docx)",
+      "Bash(unzip -o -q \"C:/Users/HP/Desktop/MS-7.docx\")",
+      "Bash(python -c ' *)"
+    ]
+  }
+}
