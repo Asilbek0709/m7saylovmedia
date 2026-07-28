@@ -1,26 +1,257 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/*
+  MS-7 / Saylov-Media — Government Premium theme.
+  Desaturated navy + slate on a clean white surface. No neon, no high-chroma accents.
+*/
+:root {
+  --background: #f6f7f9; /* page plane */
+  --foreground: #16202b;
+  --card: #ffffff; /* chart + content surface */
+  --card-foreground: #16202b;
+  --popover: #ffffff;
+  --popover-foreground: #16202b;
+  --primary: #0f2a47; /* deep navy — 14.5:1 on white */
+  --primary-foreground: #ffffff;
+  --secondary: #eef1f5;
+  --secondary-foreground: #0f2a47;
+  --muted: #f1f3f7;
+  --muted-foreground: #6b7684; /* 4.6:1 on white */
+  --accent: #eef1f5;
+  --accent-foreground: #0f2a47;
+  --destructive: #752b28;
+  --border: #e4e7ec; /* hairline */
+  --input: #dfe3e9;
+  --ring: #1c3f66;
+  --radius: 0.5rem;
+
+  /* Brand ink scale */
+  --navy-900: #0b1f35;
+  --navy-800: #0f2a47;
+  --navy-700: #163756;
+  --navy-600: #1c3f66;
+  --slate-body: #3f4c5a; /* 8.8:1 */
+  --slate-muted: #6b7684; /* 4.6:1 */
+  --hairline: #e4e7ec;
+
+  /*
+    SMSI band scale — an ORDINAL status scale, validated as such:
+    monotone OKLCH lightness (ΔL >= 0.06 between neighbours) so the rank still
+    reads in greyscale and under protan/deuteran vision, and every band clears
+    3:1 on white. Hue spread is intentional (the MS-7 methodology mandates
+    green -> amber -> red), so every band is ALWAYS shipped with its text label:
+    colour never carries the verdict on its own.
+  */
+  --smsi-critical: #752b28; /* 0–44   Инқирозли    9.9:1 */
+  --smsi-poor: #854326; /* 45–59  Қониқарсиз   7.4:1 */
+  --smsi-moderate: #86641e; /* 60–74  Ўртача       5.5:1 */
+  --smsi-high: #628a55; /* 75–89  Юқори        4.0:1 */
+  --smsi-veryhigh: #58a37d; /* 90–100 Жуда юқори   3.0:1 */
+
+  --smsi-critical-wash: #ffebe9;
+  --smsi-poor-wash: #feece5;
+  --smsi-moderate-wash: #f8efe0;
+  --smsi-high-wash: #e9f4e6;
+  --smsi-veryhigh-wash: #e4f5eb;
+
+  --smsi-critical-ink: #59040a;
+  --smsi-poor-ink: #6a2300;
+  --smsi-moderate-ink: #6b4700;
+  --smsi-high-ink: #426d33;
+  --smsi-veryhigh-ink: #2d865d;
+
+  /* Chart chrome */
+  --chart-grid: #e4e7ec;
+  --chart-axis: #6b7684;
+  --chart-benchmark: #94a3b8;
+
+  --chart-1: #58a37d;
+  --chart-2: #628a55;
+  --chart-3: #86641e;
+  --chart-4: #854326;
+  --chart-5: #752b28;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #16202b;
+  --sidebar-primary: #0f2a47;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef1f5;
+  --sidebar-accent-foreground: #0f2a47;
+  --sidebar-border: #e4e7ec;
+  --sidebar-ring: #1c3f66;
+}
+
+/*
+  Тёмная тема — не инверсия светлой, а собственный набор ступеней,
+  выведенный под тёмную подложку (глубокий navy/slate).
+  Полосы SMSI пересчитаны заново: светлота по-прежнему монотонна
+  (ΔL = 0.065 в OKLCH), но поднята так, чтобы даже самый тёмный уровень
+  давал ≥ 3.4:1 на карточке.
+*/
+.dark {
+  --background: #080e1a;
+  --foreground: #e8edf5;
+  --card: #0f1829;
+  --card-foreground: #e8edf5;
+  --popover: #0f1829;
+  --popover-foreground: #e8edf5;
+  --primary: #dbe4f0;
+  --primary-foreground: #0b1424;
+  --secondary: #17223a;
+  --secondary-foreground: #dbe4f0;
+  --muted: #141d31;
+  --muted-foreground: #93a1b8;
+  --accent: #17223a;
+  --accent-foreground: #dbe4f0;
+  --destructive: #995d58;
+  --border: #1e2a40;
+  --input: #24314b;
+  --ring: #4d7ab5;
+
+  --navy-900: #050b16;
+  --navy-800: #0b1424;
+  --navy-700: #13203a;
+  --navy-600: #1c3f66;
+  --slate-body: #c3cee0;
+  --slate-muted: #93a1b8;
+  --hairline: #1e2a40;
+
+  --smsi-critical: #995d58; /* 3.43:1 на карточке */
+  --smsi-poor: #ac735c; /* 4.53:1 */
+  --smsi-moderate: #af925c; /* 5.99:1 */
+  --smsi-high: #92b786; /* 7.90:1 */
+  --smsi-veryhigh: #92d0ae; /* 10.02:1 */
+
+  --smsi-critical-wash: #2b1817;
+  --smsi-poor-wash: #2a1913;
+  --smsi-moderate-wash: #251d0d;
+  --smsi-high-wash: #172114;
+  --smsi-veryhigh-wash: #112219;
+
+  /* На тёмном подложка чипа тонирована, а текст берёт сам цвет уровня. */
+  --smsi-critical-ink: #995d58;
+  --smsi-poor-ink: #ac735c;
+  --smsi-moderate-ink: #af925c;
+  --smsi-high-ink: #92b786;
+  --smsi-veryhigh-ink: #92d0ae;
+
+  --chart-grid: #22304a;
+  --chart-axis: #8a99b3;
+  --chart-benchmark: #7d8ea8;
+
+  --chart-1: #92d0ae;
+  --chart-2: #92b786;
+  --chart-3: #af925c;
+  --chart-4: #ac735c;
+  --chart-5: #995d58;
+
+  --sidebar: #0f1829;
+  --sidebar-foreground: #e8edf5;
+  --sidebar-primary: #dbe4f0;
+  --sidebar-primary-foreground: #0b1424;
+  --sidebar-accent: #17223a;
+  --sidebar-accent-foreground: #dbe4f0;
+  --sidebar-border: #1e2a40;
+  --sidebar-ring: #4d7ab5;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04";
+  }
+  html {
+    @apply font-sans;
+  }
+  /* Columns of figures must align; standalone display numbers must not. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Entrance animation — a single restrained rise+fade, staggered by --d. */
+  @keyframes ms7-rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .ms7-rise {
+    animation: ms7-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ms7-rise {
+      animation: none;
+    }
+  }
+
+  /* Hairline ring used on every premium surface. */
+  .ms7-surface {
+    box-shadow:
+      0 1px 2px rgb(15 42 71 / 0.04),
+      0 1px 3px rgb(15 42 71 / 0.06);
+  }
+  /* На тёмном фоне мягкая тень не читается — глубину держит подсветка канта. */
+  .dark .ms7-surface {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.4),
+      inset 0 1px 0 rgb(255 255 255 / 0.03);
+  }
 }

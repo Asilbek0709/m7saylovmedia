@@ -1,0 +1,273 @@
+{
+  "common": {
+    "brand": "MS-7: Saylov-Media",
+    "tagline": "Analytical assessment system",
+    "nav": {
+      "home": "Home",
+      "rating": "Ranking",
+      "calculator": "SMSI Calculator",
+      "methodology": "Methodology"
+    },
+    "login": "Sign in",
+    "tryDemo": "Try the demo",
+    "language": "Language",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "footer": "University of Journalism and Mass Communications of Uzbekistan. MVP built on the author's methodology.",
+    "points": "pts",
+    "of100": "/ 100"
+  },
+  "landing": {
+    "eyebrow": "MS-7 model · SMSI composite index",
+    "title": "Saylov-Media: transforming political journalism",
+    "subtitle": "A platform for the comprehensive assessment, monitoring and comparative analysis of digital media covering electoral processes, across seven criteria.",
+    "ctaPrimary": "Try the demo",
+    "ctaSecondary": "Read the methodology",
+    "stats": {
+      "criteria": "assessment criteria",
+      "scale": "point scale",
+      "levels": "interpretation levels"
+    },
+    "model": {
+      "eyebrow": "Assessment model",
+      "title": "The seven criteria of the MS-7 model",
+      "subtitle": "Each criterion measures a distinct aspect of a digital outlet's work. Together they form a single composite indicator.",
+      "weight": "weight"
+    },
+    "scale": {
+      "eyebrow": "Interpretation",
+      "title": "The SMSI assessment scale",
+      "subtitle": "The index is interpreted on a 100-point scale and supports evidence-based management decisions."
+    },
+    "cta": {
+      "title": "See the system in action",
+      "subtitle": "Enter scores across the seven criteria — the composite index and radar chart recalculate in real time.",
+      "button": "Open the calculator"
+    }
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Enter your credentials to access the expert panel.",
+    "email": "Email",
+    "emailPlaceholder": "name@example.uz",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "submit": "Sign in",
+    "forgot": "Forgot your password?",
+    "back": "Back to home",
+    "demoNote": "Demo mode: Supabase is not connected, so sign-in is disabled and every page is open.",
+    "invalid": "Please fill in both email and password.",
+    "submitting": "Signing in...",
+    "failed": "Sign-in failed. Check your email and password.",
+    "unavailable": "Sign-in is unavailable: Supabase is not connected."
+  },
+  "auth": {
+    "signOut": "Sign out",
+    "signedInAs": "Account"
+  },
+  "calculator": {
+    "eyebrow": "MS-7 · Web calculator",
+    "title": "Calculate the SMSI composite index",
+    "subtitle": "Enter scores across the seven criteria — the system computes the composite index and its level in real time.",
+    "weightedMode": "MS-7 weighting",
+    "equalMode": "Equal weights",
+    "scoresTitle": "Expert scores",
+    "scoresSubtitle": "Each criterion is scored from 0 to 100.",
+    "indexTitle": "SMSI — composite index",
+    "indexSubtitleWeighted": "Saylov Media Samaradorligi Indexi · with weighting coefficients",
+    "indexSubtitleEqual": "Saylov Media Samaradorligi Indexi · with equal weights",
+    "search": {
+      "trigger": "Search outlets...",
+      "placeholder": "Type an outlet name",
+      "empty": "No results found",
+      "group": "Assessed outlets",
+      "hint": "Pick one — its scores load automatically"
+    },
+    "selected": {
+      "label": "Selected outlet",
+      "clear": "Clear",
+      "baseline": "Baseline assessment",
+      "modified": "Modified",
+      "whatIf": "\"What if?\" mode — move the sliders and the index recalculates instantly.",
+      "restore": "Restore baseline scores",
+      "delta": "Change from baseline"
+    },
+    "presets": {
+      "high": "High level",
+      "mid": "Moderate",
+      "crisis": "Critical",
+      "reset": "Reset"
+    },
+    "chart": {
+      "outlet": "Assessed outlet",
+      "benchmark": "Sector average",
+      "score": "Score",
+      "weight": "Weighting coefficient",
+      "difference": "Difference"
+    },
+    "strongest": "Strongest criterion",
+    "weakest": "Needs improvement",
+    "allEqual": "All criteria are scored the same — vary the scores to reveal strengths and weaknesses.",
+    "scaleTitle": "Assessment scale and interpretation",
+    "scaleSubtitle": "The SMSI index is interpreted on a 100-point scale."
+  },
+  "rating": {
+    "eyebrow": "Ranking",
+    "title": "Digital media effectiveness ranking",
+    "subtitle": "A comparative ranking of outlets assessed with the MS-7 model, based on the SMSI composite index.",
+    "openCalculator": "Open the SMSI calculator",
+    "demoNoticeTitle": "Demo data.",
+    "demoNotice": "The scores below were generated to showcase the interface and are not the result of real monitoring. Once Supabase is connected, the ranking is read from the media_rankings table.",
+    "kpi": {
+      "outlets": "Outlets assessed",
+      "outletsNote": "with the MS-7 model",
+      "average": "Average SMSI",
+      "leader": "Ranking leader",
+      "criteria": "Criteria",
+      "criteriaNote": "with weighting coefficients"
+    },
+    "tableTitle": "Top 10 digital outlets",
+    "columns": {
+      "rank": "#",
+      "outlet": "Outlet",
+      "ownership": "Ownership",
+      "smsi": "SMSI",
+      "band": "Level"
+    },
+    "ownership": {
+      "davlat": "State-owned",
+      "nodavlat": "Private"
+    },
+    "scaleLegend": "SMSI scale:"
+  },
+  "methodology": {
+    "eyebrow": "Methodology",
+    "title": "The MS-7 assessment model and the SMSI composite index",
+    "subtitle": "MS-7 (Media Saylov — 7 mezonli baholash) is a model for the comprehensive assessment of how digital media cover electoral processes. Each criterion carries a weighting coefficient, and the result is expressed as a single figure — the SMSI index.",
+    "algorithmTitle": "Calculation algorithm",
+    "algorithmSubtitle": "The composite index is the weighted sum of the criterion scores.",
+    "formulaNote": "Each criterion is scored from 0 to 100, so the index also falls between 0 and 100. Legal compliance and information quality carry the greatest weight: during an election they determine the legality and reliability of the information flow.",
+    "indicators": "Indicators",
+    "scaleTitle": "Assessment scale and interpretation",
+    "scaleSubtitle": "The scale supports interpretation of results and management decisions."
+  },
+  "criteria": {
+    "legal": {
+      "code": "LC",
+      "short": "Legal",
+      "name": "Legal compliance",
+      "latin": "Legal Compliance",
+      "description": "How closely the outlet follows current legislation and journalistic ethics when covering elections.",
+      "indicators": [
+        "Impartiality and balance of coverage",
+        "Transparency of sources",
+        "Equal treatment of all political actors",
+        "No covert campaigning"
+      ]
+    },
+    "quality": {
+      "code": "IQ",
+      "short": "Information",
+      "name": "Information quality",
+      "latin": "Information Quality",
+      "description": "The substance, completeness and reliability of the information published.",
+      "indicators": [
+        "Factual accuracy",
+        "Use of reliable sources",
+        "Completeness of information",
+        "Presence of analytical depth"
+      ]
+    },
+    "speed": {
+      "code": "OE",
+      "short": "Speed",
+      "name": "Operational efficiency",
+      "latin": "Operational Efficiency",
+      "description": "The ability to deliver information about electoral events promptly and on time.",
+      "indicators": [
+        "Speed of publication",
+        "Rate of content updates",
+        "Use of live broadcasts",
+        "Share of breaking coverage"
+      ]
+    },
+    "multimedia": {
+      "code": "MI",
+      "short": "Multimedia",
+      "name": "Multimedia integration",
+      "latin": "Multimedia Integration",
+      "description": "How well information is presented across formats — text, visual and audio.",
+      "indicators": [
+        "Photo and video content",
+        "Infographics and visualisation",
+        "Audio and podcasts",
+        "Animation and interactive formats"
+      ]
+    },
+    "interactivity": {
+      "code": "AI",
+      "short": "Interaction",
+      "name": "Audience interaction",
+      "latin": "Audience Interaction",
+      "description": "The breadth of opportunities for dialogue and exchange with the audience.",
+      "indicators": [
+        "Ability to leave comments",
+        "Online polls and Q&A sessions",
+        "Active engagement on social networks",
+        "Responses to audience enquiries"
+      ]
+    },
+    "engagement": {
+      "code": "AE",
+      "short": "Engagement",
+      "name": "Audience engagement",
+      "latin": "Audience Engagement",
+      "description": "How the audience receives digital content and how widely it spreads.",
+      "indicators": [
+        "View counts",
+        "Likes, comments and shares",
+        "Saved items",
+        "Subscriber activity trends"
+      ]
+    },
+    "convergence": {
+      "code": "MC",
+      "short": "Convergence",
+      "name": "Media convergence",
+      "latin": "Media Convergence",
+      "description": "Simultaneous distribution across digital platforms and a cross-platform approach.",
+      "indicators": [
+        "Website and mobile app",
+        "Telegram and messengers",
+        "Social network reach",
+        "Unified editorial policy"
+      ]
+    }
+  },
+  "bands": {
+    "veryhigh": {
+      "label": "Very high",
+      "interpretation": "The media system fully meets international standards, is stable and innovatively developed."
+    },
+    "high": {
+      "label": "High",
+      "interpretation": "A stable system is in place; certain areas still require improvement."
+    },
+    "moderate": {
+      "label": "Moderate",
+      "interpretation": "Core institutions function, but the system has weak points."
+    },
+    "poor": {
+      "label": "Unsatisfactory",
+      "interpretation": "Stability is low; legal and economic problems are pronounced."
+    },
+    "critical": {
+      "label": "Critical",
+      "interpretation": "The media system has systemic problems; institutional and economic reform is required."
+    }
+  }
+}

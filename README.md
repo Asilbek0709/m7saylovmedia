@@ -1,36 +1,179 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MS-7: Saylov-Media
 
-## Getting Started
+Платформа комплексной оценки цифровых СМИ в период выборов по авторской модели
+**MS-7** (7 критериев) и интегральному индексу **SMSI** (0–100).
 
-First, run the development server:
+## Запуск
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Открыть http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Платформа запускается **без Supabase** — рейтинг работает на демо-наборе
+(`lib/demo-data.ts`). Это сделано намеренно: презентация не должна зависеть от сети.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Подключение Supabase
 
-## Learn More
+1. Создать проект на supabase.com.
+2. SQL Editor → выполнить `supabase/schema.sql` (таблицы, RLS, представление
+   `media_rankings`, демо-записи).
+3. Скопировать `.env.example` в `.env.local` и заполнить:
 
-To learn more about Next.js, take a look at the following resources:
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+После перезапуска дашборд автоматически переключится на данные из БД, а плашка
+«Демо-маълумот» исчезнет.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Страницы
 
-## Deploy on Vercel
+| Маршрут | Назначение |
+|---|---|
+| `/` | Лендинг: hero с анимированным заголовком, Bento-сетка 7 критериев, шкала, CTA |
+| `/calculator` | Калькулятор: Spotlight-поиск СМИ, 7 ползунков, индекс и Radar Chart в реальном времени |
+| `/rating` | Рейтинг Топ-10: KPI, таблица с зеброй, полосы SMSI, уровни |
+| `/methodology` | 7 критериев, индикаторы, веса, формула и шкала интерпретации |
+| `/login` | Вход: форма по центру, блюр-фон (провайдер авторизации ещё не подключён) |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Авторизация и защита маршрутов
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Supabase Auth через `@supabase/ssr`. Три слоя:
+
+1. `proxy.ts` — продлевает сессию (токены живут в куках, обновить их можно
+   только там, где есть доступ на запись к ответу) и делает **оптимистичный**
+   редирект. В Next 16 это замена middleware.
+2. `lib/auth.ts` — Data Access Layer: `getCurrentUser()` на `cache()` +
+   `requireUser()`. Здесь авторитетная проверка, потому что документация Next
+   прямо предупреждает не полагаться на proxy как на единственную защиту.
+   Используется `getUser()`, а не `getSession()`: первый проверяет токен на
+   сервере Supabase, данные сессии из куки можно подделать.
+3. Страница вызывает `requireUser()` рядом с данными — см. `app/rating/page.tsx`.
+
+**Ключевое свойство: пока `.env.local` не заполнен, платформа работает в
+демо-режиме — авторизация отключена, маршруты НЕ закрываются, рейтинг берётся
+из демо-набора.** Незаполненный `.env` или недоступная сеть не могут закрыть
+платформу прямо на презентации.
+
+Закрытые маршруты перечислены в `PROTECTED_PREFIXES` (`lib/supabase/config.ts`),
+сейчас там `/rating`. Лендинг, калькулятор и методика открыты всегда.
+
+Регистрации нет по замыслу: экспертов заводит администратор в Supabase →
+Authentication → Users → Add user. Политики RLS в `supabase/schema.sql` уже
+разрешают запись только роли `authenticated`.
+
+## Языки и тема
+
+Три языка (`uz` / `ru` / `en`) на next-intl **без locale-роутинга**: язык хранится
+в куке `ms7-locale`, читается в `i18n/request.ts`, переключается server action'ом
+`app/actions/locale.ts` + `router.refresh()`. Так не нужен `proxy` (в Next 16
+`middleware` переименован в `proxy`), а маршруты остаются плоскими. Все
+отображаемые строки — в `messages/*.json`; `lib/ms7.ts` держит только модель.
+
+Тема — next-themes (`attribute="class"`), переключение без перезагрузки.
+Гидратация определяется через `useSyncExternalStore` (`lib/use-hydrated.ts`), а
+не `setState` в эффекте.
+
+## Умный поиск и режим «А что если?»
+
+`⌘K` / `Ctrl+K` или клик по строке поиска открывает палитру (cmdk). Выбор
+издания подставляет его баллы во все 7 ползунков с плавным переходом. Дальше
+ползунки остаются активными: индекс и диаграмма пересчитываются мгновенно, а на
+радаре появляется **пунктирный базовый профиль** — видно, что именно изменилось
+относительно исходной оценки. Дельта индекса и покритериальные изменения
+(`88 → 100`) показаны текстом.
+
+> `CommandDialog` из shadcn отдаёт только `Dialog` + `DialogContent` и **не**
+> оборачивает содержимое в cmdk-root. Без явного `<Command>` внутри дочерние
+> `CommandInput`/`CommandList` падают с `reading 'subscribe'` — см.
+> `app/calculator/page.tsx`.
+
+## Модель
+
+Ядро — `lib/ms7.ts`: критерии с весами, `calculateSMSI()`, `resolveBand()`.
+
+```
+SMSI = Σ (Мезонᵢ × Вазнᵢ),  i = 1…7,  Σ Вазн = 1.00
+```
+
+Веса: правовое соответствие 0.18, качество информации 0.18, оперативность 0.14,
+аудиторная активность 0.14, мультимедийность 0.12, интерактивность 0.12,
+медиаконвергенция 0.12.
+
+Уровни определяются **по нижней границе** (`>= 90`, `>= 75`, `>= 60`, `>= 45`,
+иначе кризисный). Границы в методике целые, а индекс дробный: проверка вида
+`60 <= x <= 74` оставила бы значения 74.1–74.9 без уровня. Та же логика
+продублирована в `public.smsi_band()` — БД и клиент не могут разойтись.
+
+## Цветовая шкала SMSI
+
+Пять уровней — это **ординальная шкала**, а не набор произвольных цветов.
+Значения подобраны и проверены так, чтобы:
+
+- светлота убывала монотонно (ΔL ≥ 0.06 в OKLCH) — порядок уровней читается
+  в оттенках серого и при любой форме дальтонизма;
+- каждый уровень давал ≥ 3:1 контраста на белом фоне;
+- цветность оставалась приглушённой (C ≈ 0.09–0.105).
+
+| Диапазон | Уровень | HEX | Контраст |
+|---|---|---|---|
+| 90–100 | Жуда юқори | `#58a37d` | 3.0 : 1 |
+| 75–89 | Юқори | `#628a55` | 4.0 : 1 |
+| 60–74 | Ўртача | `#86641e` | 5.5 : 1 |
+| 45–59 | Қониқарсиз | `#854326` | 7.4 : 1 |
+| 0–44 | Инқирозли | `#752b28` | 9.9 : 1 |
+
+Дуга «зелёный → красный» задана методикой, поэтому одним оттенком шкалу выразить
+нельзя. Компенсация — **цвет нигде не используется в одиночку**: компонент
+`SmsiBadge` всегда печатает текстовую метку уровня рядом с цветовой точкой.
+
+Для тёмной темы ступени выведены заново под тёмную подложку (не инверсия
+светлых): та же монотонность (ΔL = 0.065), контраст на карточке от 3.4 : 1
+(`#995d58`) до 10.0 : 1 (`#92d0ae`).
+
+| Уровень | Светлая | Тёмная |
+|---|---|---|
+| Жуда юқори | `#58a37d` | `#92d0ae` |
+| Юқори | `#628a55` | `#92b786` |
+| Ўртача | `#86641e` | `#af925c` |
+| Қониқарсиз | `#854326` | `#ac735c` |
+| Инқирозли | `#752b28` | `#995d58` |
+
+Оба набора живут в CSS-переменных, поэтому диаграмма перекрашивается вместе с
+темой: `SMSI_BANDS` отдаёт `var(--smsi-*)`, а браузеры разрешают `var()` и в
+презентационных атрибутах SVG.
+
+## Анимация диаграммы
+
+Собственная анимация `Radar` в Recharts 3 отключена (`isAnimationActive={false}`):
+при частой смене данных она не доигрывала и оставляла полигон схлопнутым в центр.
+Плавность даёт интерполяция самих баллов (`useAnimatedScores` в
+`app/calculator/page.tsx`) — при переходе между пресетами синхронно двигаются и
+ползунки, и фигура. У перехода есть страховочный таймер: в фоновой вкладке
+`requestAnimationFrame` приостанавливается, и без него значения застряли бы
+на стартовых.
+
+## Стек
+
+Next.js 16 (App Router, Turbopack) · React 19 · TypeScript · Tailwind CSS v4 ·
+shadcn/ui (Radix) · Recharts 3 · framer-motion 12 · next-intl 4 · next-themes ·
+cmdk · Supabase
+
+## Проверки
+
+```bash
+npx tsc --noEmit
+npx eslint .
+npm run build
+```
+
+## Демо-данные
+
+Баллы в `lib/demo-data.ts` и в конце `supabase/schema.sql` сформированы **для
+показа интерфейса** и не являются результатом реального мониторинга
+перечисленных изданий. На дашборде это отмечено плашкой. Перед публичным
+использованием их следует заменить данными фактической экспертизы.
