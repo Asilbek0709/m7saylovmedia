@@ -134,7 +134,7 @@ export default async function MethodologyPage() {
                     band={band}
                     label={tb(`${band.id}.label`)}
                     size="sm"
-                    className="shrink-0"
+                    className="min-w-0"
                   />
                   <span className="min-w-0 flex-1 text-xs text-muted-foreground">
                     {tb(`${band.id}.interpretation`)}

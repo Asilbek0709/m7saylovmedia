@@ -994,7 +994,7 @@ export function CalculatorPanel({
                       band={b}
                       label={tb(`${b.id}.label`)}
                       size="sm"
-                      className="shrink-0"
+                      className="min-w-0"
                     />
                     <span className="min-w-0 flex-1 text-xs text-muted-foreground">
                       {tb(`${b.id}.interpretation`)}

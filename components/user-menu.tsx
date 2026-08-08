@@ -28,9 +28,21 @@ export function UserMenu({
 
   if (!email) {
     return (
-      <Button asChild size="sm" className="ml-1 hidden sm:inline-flex">
-        <Link href="/login">{t("login")}</Link>
-      </Button>
+      <div className="ml-1 flex items-center gap-1">
+        {/* На узких экранах прячем: шапка не вмещает обе кнопки.
+            Со страницы входа регистрация всё равно доступна ссылкой. */}
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="hidden px-2 text-muted-foreground hover:text-foreground sm:inline-flex"
+        >
+          <Link href="/register">{t("register")}</Link>
+        </Button>
+        <Button asChild size="sm">
+          <Link href="/login">{t("login")}</Link>
+        </Button>
+      </div>
     );
   }
 

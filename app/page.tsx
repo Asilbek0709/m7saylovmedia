@@ -186,26 +186,35 @@ export default async function LandingPage() {
             </p>
           </Reveal>
 
-          <ul className="mt-10 grid gap-3">
-            {SMSI_BANDS.map((band, index) => (
-              <Reveal key={band.id} delay={0.04 * index}>
-                <li className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-md border border-border bg-card px-4 py-3.5">
-                  <span className="w-20 shrink-0 text-sm font-semibold text-foreground tabular">
+          {/* Reveal обёрнут вокруг всего списка, а не каждого пункта:
+              motion.div прямо внутри <ul> — невалидный HTML, и именно он
+              распирал страницу по горизонтали на узких экранах. */}
+          <Reveal delay={0.06}>
+            <ul className="mt-10 grid gap-3">
+              {SMSI_BANDS.map((band) => (
+                <li
+                  key={band.id}
+                  // На узких экранах строка складывается вертикально: в одну
+                  // линию «диапазон + метка уровня + толкование» не помещаются,
+                  // и раскладка начинала распирать страницу вбок.
+                  className="flex flex-col items-start gap-2 rounded-md border border-border bg-card px-4 py-3.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2"
+                >
+                  <span className="shrink-0 text-sm font-semibold text-foreground tabular sm:w-20">
                     {band.min}–{band.max}
                   </span>
                   <SmsiBadge
                     band={band}
                     label={tb(`${band.id}.label`)}
                     size="sm"
-                    className="shrink-0"
+                    className="min-w-0"
                   />
                   <span className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
                     {tb(`${band.id}.interpretation`)}
                   </span>
                 </li>
-              </Reveal>
-            ))}
-          </ul>
+              ))}
+            </ul>
+          </Reveal>
         </div>
       </section>
 

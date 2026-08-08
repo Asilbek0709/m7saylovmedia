@@ -66,7 +66,10 @@ export function Navbar({
           </span>
         </Link>
 
-        <nav className="ml-auto flex items-center gap-0.5 overflow-x-auto lg:gap-1">
+        {/* flex-1 + min-w-0: меню забирает остаток строки и прокручивается
+            внутри себя. Без min-w-0 flex-элемент не сжимается меньше своего
+            содержимого, и на узких экранах вбок едет вся страница. */}
+        <nav className="flex min-w-0 flex-1 items-center justify-end gap-0.5 overflow-x-auto lg:gap-1">
           {NAV.map((item) => {
             const active = pathname.startsWith(item.href);
             return (

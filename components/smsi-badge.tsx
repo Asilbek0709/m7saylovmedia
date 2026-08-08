@@ -20,7 +20,11 @@ export function SmsiBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-md border font-medium whitespace-nowrap",
+        // Самая длинная метка уровня («Неудовлетворительный») неразрывна и
+        // задавала минимальную ширину строки — страница ехала вбок на узких
+        // экранах. Нужен именно `anywhere`, а не `break-word`: только он
+        // уменьшает min-content элемента, из которого flex считает минимум.
+        "inline-flex min-w-0 items-center gap-2 rounded-md border font-medium [overflow-wrap:anywhere]",
         size === "sm" ? "px-2 py-0.5 text-xs" : "px-2.5 py-1 text-sm",
         className,
       )}
