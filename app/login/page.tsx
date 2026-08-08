@@ -160,7 +160,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6 flex items-center justify-center">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
           <Button
             asChild
             variant="ghost"
@@ -172,6 +172,12 @@ export default function LoginPage() {
               {t("back")}
             </Link>
           </Button>
+          <Link
+            href="/register"
+            className="text-xs font-medium text-foreground underline underline-offset-4"
+          >
+            {tc("register")}
+          </Link>
         </div>
 
         <p className="mt-6 text-center text-[11px] text-muted-foreground">

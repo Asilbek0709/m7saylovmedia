@@ -54,7 +54,10 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <NextIntlClientProvider locale={locale} messages={messages}>
-            <Navbar userEmail={user?.email ?? null} />
+            <Navbar
+              userEmail={user?.email ?? null}
+              userRole={user?.role ?? null}
+            />
             <main className="flex-1">{children}</main>
             <footer className="border-t border-border bg-card">
               <div className="mx-auto w-full max-w-7xl px-4 py-6 text-xs leading-relaxed text-muted-foreground sm:px-6">

@@ -28,25 +28,31 @@ export async function getRankings(limit = 10): Promise<RankingsResult> {
   const supabase = await createClient();
 
   if (supabase) {
-    const { data, error } = await supabase
-      .from("media_rankings")
-      .select(
-        "outlet_id, name, slug, website, ownership, region, period, legal, quality, speed, multimedia, interactivity, engagement, convergence, smsi",
-      )
-      .order("smsi", { ascending: false })
-      .limit(limit);
+    try {
+      const { data, error } = await supabase
+        .from("media_rankings")
+        .select(
+          "outlet_id, name, slug, website, ownership, region, period, legal, quality, speed, multimedia, interactivity, engagement, convergence, smsi",
+        )
+        .order("smsi", { ascending: false })
+        .limit(limit);
 
-    if (!error && data?.length) {
-      const fetched = data as unknown as (RankingRow & {
-        smsi: number;
-        period: string;
-      })[];
+      if (!error && data?.length) {
+        const fetched = data as unknown as (RankingRow & {
+          smsi: number;
+          period: string;
+        })[];
 
-      return {
-        rows: fetched.map((row, i) => ({ ...row, rank: i + 1 })),
-        period: fetched[0].period ?? DEMO_PERIOD,
-        live: true,
-      };
+        return {
+          rows: fetched.map((row, i) => ({ ...row, rank: i + 1 })),
+          period: fetched[0].period ?? DEMO_PERIOD,
+          live: true,
+        };
+      }
+    } catch {
+      // Недоступная сеть или неверный хост роняют запрос исключением, а не
+      // полем error. Без перехвата страница отдала бы 500 — ровно тот сбой,
+      // от которого демо-набор и должен страховать.
     }
   }
 

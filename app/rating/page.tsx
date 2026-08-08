@@ -21,7 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { requireUser } from "@/lib/auth";
 import { MS7_CRITERIA, resolveBand, SMSI_BANDS } from "@/lib/ms7";
 import { getRankings } from "@/lib/rankings";
 
@@ -31,10 +30,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RatingPage() {
-  // Авторитетная проверка доступа рядом с данными. Редирект в proxy.ts —
-  // только оптимистичный, полагаться на него одного нельзя.
-  await requireUser("/rating");
-
+  // Рейтинг публичен: методика описывает его как инструмент прозрачности.
+  // Авторизацией закрыта запись — см. app/actions/evaluations.ts.
   const t = await getTranslations("rating");
   const tc = await getTranslations("criteria");
   const tb = await getTranslations("bands");

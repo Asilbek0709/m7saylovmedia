@@ -15,7 +15,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function UserMenu({ email }: { email: string | null }) {
+export function UserMenu({
+  email,
+  role,
+}: {
+  email: string | null;
+  role: "pending" | "expert" | "admin" | null;
+}) {
   const t = useTranslations("common");
   const ta = useTranslations("auth");
   const [pending, startTransition] = React.useTransition();
@@ -27,6 +33,13 @@ export function UserMenu({ email }: { email: string | null }) {
       </Button>
     );
   }
+
+  const roleLabel =
+    role === "admin"
+      ? ta("roleAdmin")
+      : role === "expert"
+        ? ta("roleExpert")
+        : ta("rolePending");
 
   const initial = email.trim().charAt(0).toUpperCase();
 
@@ -53,6 +66,9 @@ export function UserMenu({ email }: { email: string | null }) {
             {ta("signedInAs")}
           </p>
           <p className="mt-0.5 truncate text-sm font-medium">{email}</p>
+          {/* Роль показывается всегда: пользователь со статусом «ожидает»
+              иначе не понимает, почему кнопка сохранения недоступна. */}
+          <p className="mt-1 text-[11px] text-muted-foreground">{roleLabel}</p>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem

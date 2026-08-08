@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { RotateCcw, Search, X } from "lucide-react";
+import Link from "next/link";
+import { Check, Loader2, RotateCcw, Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   Legend,
@@ -35,10 +36,12 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DEMO_RANKINGS, type RankingRow } from "@/lib/demo-data";
+import { saveEvaluation } from "@/app/actions/evaluations";
+import { type RankingRow } from "@/lib/demo-data";
 import {
   calculateSMSI,
   DEFAULT_SCORES,
@@ -64,24 +67,35 @@ function scoresOf(row: RankingRow): CriteriaScores {
   ) as CriteriaScores;
 }
 
-/** Каталог для поиска: издания с посчитанным индексом, по убыванию. */
-const OUTLETS = DEMO_RANKINGS.map((row) => ({
-  ...row,
-  scores: scoresOf(row),
-  smsi: calculateSMSI(scoresOf(row)),
-})).sort((a, b) => b.smsi - a.smsi);
+export interface Outlet extends RankingRow {
+  scores: CriteriaScores;
+  smsi: number;
+}
 
-type Outlet = (typeof OUTLETS)[number];
+/** Каталог для поиска: издания с посчитанным индексом, по убыванию. */
+function buildCatalog(rows: RankingRow[]): Outlet[] {
+  return rows
+    .map((row) => ({ ...row, scores: scoresOf(row), smsi: calculateSMSI(scoresOf(row)) }))
+    .sort((a, b) => b.smsi - a.smsi);
+}
 
 /** Средние баллы по каталогу — контрольная линия «среднее по отрасли». */
-const SECTOR_AVERAGE: CriteriaScores = Object.fromEntries(
-  MS7_CRITERIA.map((c) => [
-    c.id,
-    Math.round(
-      (OUTLETS.reduce((s, o) => s + o.scores[c.id], 0) / OUTLETS.length) * 10,
-    ) / 10,
-  ]),
-) as CriteriaScores;
+function sectorAverageOf(outlets: Outlet[]): CriteriaScores {
+  if (outlets.length === 0) {
+    return Object.fromEntries(
+      MS7_CRITERIA.map((c) => [c.id, 0]),
+    ) as CriteriaScores;
+  }
+
+  return Object.fromEntries(
+    MS7_CRITERIA.map((c) => [
+      c.id,
+      Math.round(
+        (outlets.reduce((s, o) => s + o.scores[c.id], 0) / outlets.length) * 10,
+      ) / 10,
+    ]),
+  ) as CriteriaScores;
+}
 
 const PRESETS: { key: "high" | "mid" | "crisis"; scores: CriteriaScores }[] = [
   {
@@ -298,16 +312,46 @@ function RadarTooltip({ active, payload }: TooltipContentProps) {
 /*  Страница                                                           */
 /* ------------------------------------------------------------------ */
 
-export default function CalculatorPage() {
+export interface CalculatorPanelProps {
+  /** Каталог для поиска: из Supabase, а в демо-режиме — из lib/demo-data.ts. */
+  rows: RankingRow[];
+  /** Сохранение доступно только подтверждённому эксперту. */
+  canSave: boolean;
+  /** Почему сохранение недоступно — показывается вместо формы. */
+  saveHint: "demo" | "signin" | "pending" | null;
+  defaultPeriod: string;
+}
+
+export function CalculatorPanel({
+  rows,
+  canSave,
+  saveHint,
+  defaultPeriod,
+}: CalculatorPanelProps) {
   const t = useTranslations("calculator");
   const tc = useTranslations("criteria");
   const tb = useTranslations("bands");
   const tCommon = useTranslations("common");
 
+  const outlets = React.useMemo(() => buildCatalog(rows), [rows]);
+  const sectorAverage = React.useMemo(
+    () => sectorAverageOf(outlets),
+    [outlets],
+  );
+
   const { scores, setOne, animateTo } = useAnimatedScores(DEFAULT_SCORES);
   const [weighted, setWeighted] = React.useState(true);
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<Outlet | null>(null);
+
+  const [outletName, setOutletName] = React.useState("");
+  const [period, setPeriod] = React.useState(defaultPeriod);
+  const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
+  const [saved, setSaved] = React.useState<{
+    outletName: string;
+    smsi: number;
+  } | null>(null);
 
   // ⌘K / Ctrl+K — как в Spotlight.
   React.useEffect(() => {
@@ -338,14 +382,39 @@ export default function CalculatorPage() {
     name: tc(`${criterion.id}.name`),
     weight: criterion.weight,
     value: scores[criterion.id],
-    benchmark: SECTOR_AVERAGE[criterion.id],
+    benchmark: sectorAverage[criterion.id],
     baseline: baseline ? baseline[criterion.id] : null,
   }));
 
   const pickOutlet = (outlet: Outlet) => {
     setSelected(outlet);
     setSearchOpen(false);
+    setOutletName(outlet.name);
+    setSaved(null);
+    setSaveError(null);
     animateTo(outlet.scores);
+  };
+
+  const submitSave = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSaving(true);
+    setSaveError(null);
+    setSaved(null);
+
+    const result = await saveEvaluation({
+      // Из демо-набора приходит slug, а не UUID — действие это распознаёт.
+      outletId: selected?.outlet_id ?? null,
+      outletName,
+      period,
+      scores,
+    });
+
+    setSaving(false);
+    if (result.ok) {
+      setSaved({ outletName: result.outletName, smsi: result.smsi });
+    } else {
+      setSaveError(t(`save.${result.reason}`));
+    }
   };
 
   const applyPreset = (next: CriteriaScores) => {
@@ -415,7 +484,7 @@ export default function CalculatorPage() {
           <CommandList>
             <CommandEmpty>{t("search.empty")}</CommandEmpty>
             <CommandGroup heading={t("search.group")}>
-              {OUTLETS.map((outlet) => {
+              {outlets.map((outlet) => {
                 const outletBand = resolveBand(outlet.smsi);
                 return (
                   <CommandItem
@@ -614,6 +683,90 @@ export default function CalculatorPage() {
                   );
                 })}
               </div>
+
+              {/* ------------------- сохранение оценки ------------------- */}
+              <Separator className="my-6" />
+
+              <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                {t("save.title")}
+              </p>
+
+              {canSave ? (
+                <form onSubmit={submitSave} className="mt-3 space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="save-outlet" className="text-xs">
+                      {t("save.outlet")}
+                    </Label>
+                    <Input
+                      id="save-outlet"
+                      value={outletName}
+                      disabled={saving}
+                      placeholder={t("save.outletPlaceholder")}
+                      onChange={(e) => setOutletName(e.target.value)}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="save-period" className="text-xs">
+                      {t("save.period")}
+                    </Label>
+                    <Input
+                      id="save-period"
+                      value={period}
+                      disabled={saving}
+                      onChange={(e) => setPeriod(e.target.value)}
+                      className="h-8 text-sm"
+                    />
+                  </div>
+
+                  {saveError && (
+                    <p role="alert" className="text-xs text-destructive">
+                      {saveError}
+                    </p>
+                  )}
+
+                  {saved && (
+                    <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <Check aria-hidden className="size-3.5" />
+                      {t("save.success")} · {saved.outletName}{" "}
+                      <span className="tabular">{saved.smsi.toFixed(1)}</span>
+                      <Link
+                        href="/rating"
+                        className="font-medium text-foreground underline underline-offset-4"
+                      >
+                        {t("save.viewRating")}
+                      </Link>
+                    </p>
+                  )}
+
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={saving}
+                    className="w-full"
+                  >
+                    {saving && <Loader2 className="size-3.5 animate-spin" />}
+                    {saving ? t("save.submitting") : t("save.submit")}
+                  </Button>
+                </form>
+              ) : (
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                  {saveHint === "signin" && (
+                    <>
+                      {t("save.signin")}{" "}
+                      <Link
+                        href="/login?next=%2Fcalculator"
+                        className="font-medium text-foreground underline underline-offset-4"
+                      >
+                        {t("save.signinCta")}
+                      </Link>
+                    </>
+                  )}
+                  {saveHint === "pending" && t("save.pending")}
+                  {saveHint === "demo" && t("save.demo")}
+                </p>
+              )}
             </CardContent>
           </Card>
         </Reveal>

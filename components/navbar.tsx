@@ -14,10 +14,17 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "/rating", key: "rating" },
   { href: "/calculator", key: "calculator" },
+  { href: "/outlets", key: "outlets" },
   { href: "/methodology", key: "methodology" },
 ] as const;
 
-export function Navbar({ userEmail }: { userEmail: string | null }) {
+export function Navbar({
+  userEmail,
+  userRole,
+}: {
+  userEmail: string | null;
+  userRole: "pending" | "expert" | "admin" | null;
+}) {
   const t = useTranslations("common");
   const pathname = usePathname();
   const { scrollY } = useScroll();
@@ -83,7 +90,7 @@ export function Navbar({ userEmail }: { userEmail: string | null }) {
         <div className="flex shrink-0 items-center gap-0.5 border-l border-border pl-2 sm:gap-1 sm:pl-3">
           <LanguageSwitcher />
           <ThemeToggle />
-          <UserMenu email={userEmail} />
+          <UserMenu email={userEmail} role={userRole} />
         </div>
       </div>
     </motion.header>
