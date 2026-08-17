@@ -2,11 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
-/**
- * Появление при скролле — общий fade-in-up для всех блоков.
- * `once: true`, чтобы блок не мигал при обратной прокрутке; при
- * включённом «уменьшении движения» анимация выключается полностью.
- */
+
 export function Reveal({
   children,
   className,

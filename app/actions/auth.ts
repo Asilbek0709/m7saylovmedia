@@ -10,8 +10,7 @@ export async function signOut() {
   if (supabase) {
     await supabase.auth.signOut();
   }
-  // Навбар рисуется в layout и кешируется — без сброса пользователь
-  // остался бы «вошедшим» до полной перезагрузки.
+
   revalidatePath("/", "layout");
   redirect("/");
 }

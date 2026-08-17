@@ -2,11 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
-/**
- * Заголовок появляется по словам. Разбиение — только визуальное:
- * целая строка остаётся в aria-label, чтобы скринридер прочитал её
- * одним предложением, а не по одному слову.
- */
+
 export function AnimatedHeading({
   text,
   className,

@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("eyebrow"), description: t("subtitle") };
 }
 
-/** Справочник изданий: читают все, изменяют подтверждённые эксперты. */
+
 export default async function OutletsPage() {
   const supabase = await createClient();
   const user = isSupabaseConfigured ? await getCurrentUser() : null;
@@ -37,7 +37,7 @@ export default async function OutletsPage() {
         };
       });
     } catch {
-      // Сеть недоступна — показываем пустой справочник, но страницу не роняем.
+
     }
   }
 

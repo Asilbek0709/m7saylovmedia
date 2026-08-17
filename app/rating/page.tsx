@@ -30,8 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RatingPage() {
-  // Рейтинг публичен: методика описывает его как инструмент прозрачности.
-  // Авторизацией закрыта запись — см. app/actions/evaluations.ts.
+
   const t = await getTranslations("rating");
   const tc = await getTranslations("criteria");
   const tb = await getTranslations("bands");
@@ -129,8 +128,7 @@ export default async function RatingPage() {
           </CardHeader>
 
           <CardContent className="px-0">
-            {/* Таблица шире экрана на мобильных — скроллится внутри себя,
-                страница по горизонтали не едет. */}
+
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>

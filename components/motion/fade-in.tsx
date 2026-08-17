@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
-/** Появление сразу при загрузке (для первого экрана, без ожидания скролла). */
+
 export function FadeIn({
   children,
   className,

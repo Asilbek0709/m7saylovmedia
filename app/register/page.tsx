@@ -52,7 +52,7 @@ export default function RegisterPage() {
       email: email.trim(),
       password,
       options: {
-        // Триггер on_auth_user_created переносит это в public.profiles.
+
         data: {
           full_name: fullName.trim(),
           organization: organization.trim(),
@@ -71,7 +71,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Если в проекте включено подтверждение почты, сессии ещё нет.
     setDone(data.session ? "review" : "confirm");
   };
 

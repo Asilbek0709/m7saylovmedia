@@ -27,10 +27,7 @@ export type OutletResult =
         | "failed";
     };
 
-/**
- * Slug обязан быть уникальным. Кириллические названия («UzA — Ўзбекистон МА»)
- * латиницы не дают, поэтому для них берётся детерминированный хэш.
- */
+
 function slugify(name: string): string {
   const latin = name
     .toLowerCase()

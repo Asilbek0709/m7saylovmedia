@@ -19,10 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MS7_CRITERIA, SMSI_BANDS, type CriterionId } from "@/lib/ms7";
 
-/**
- * Bento-раскладка: ширина плитки следует весу критерия — самые весомые
- * мезоны занимают больше места. Суммы по строкам: 3+3, 2+2+2, 3+3.
- */
+
 const TILE: Record<CriterionId, { span: string; icon: typeof ShieldCheck }> = {
   legal: { span: "lg:col-span-3", icon: ShieldCheck },
   quality: { span: "lg:col-span-3", icon: FileSearch },
@@ -40,9 +37,9 @@ export default async function LandingPage() {
 
   return (
     <div className="flex flex-col">
-      {/* ================================ HERO ================================ */}
+      
       <section className="relative overflow-hidden">
-        {/* Мягкий градиент и сетка — фон должен читаться в обеих темах. */}
+        
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_50%_0%,color-mix(in_srgb,var(--primary)_9%,transparent),transparent_70%)]"
@@ -107,7 +104,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ============================== МОДЕЛЬ MS-7 ============================== */}
+      
       <section className="border-t border-border bg-card/40">
         <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
           <Reveal className="max-w-2xl">
@@ -128,7 +125,7 @@ export default async function LandingPage() {
               const Icon = tile.icon;
               const name = tc(`${criterion.id}.name`);
               const latin = tc(`${criterion.id}.latin`);
-              // В английской локали подпись совпадает с названием.
+              
               const showLatin = latin.toLowerCase() !== name.toLowerCase();
 
               return (
@@ -171,7 +168,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ============================== ШКАЛА SMSI ============================== */}
+      
       <section className="border-t border-border">
         <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
           <Reveal className="max-w-2xl">
@@ -186,17 +183,13 @@ export default async function LandingPage() {
             </p>
           </Reveal>
 
-          {/* Reveal обёрнут вокруг всего списка, а не каждого пункта:
-              motion.div прямо внутри <ul> — невалидный HTML, и именно он
-              распирал страницу по горизонтали на узких экранах. */}
+          
           <Reveal delay={0.06}>
             <ul className="mt-10 grid gap-3">
               {SMSI_BANDS.map((band) => (
                 <li
                   key={band.id}
-                  // На узких экранах строка складывается вертикально: в одну
-                  // линию «диапазон + метка уровня + толкование» не помещаются,
-                  // и раскладка начинала распирать страницу вбок.
+                  
                   className="flex flex-col items-start gap-2 rounded-md border border-border bg-card px-4 py-3.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2"
                 >
                   <span className="shrink-0 text-sm font-semibold text-foreground tabular sm:w-20">
@@ -218,7 +211,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ================================ CTA ================================ */}
+      
       <section className="border-t border-border bg-card/40">
         <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
           <Reveal>

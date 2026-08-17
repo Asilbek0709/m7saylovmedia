@@ -39,7 +39,7 @@ export default async function MethodologyPage() {
         </p>
       </Reveal>
 
-      {/* -------------------------- формула -------------------------- */}
+
       <Reveal delay={0.06}>
         <Card className="ms7-surface mt-6">
           <CardHeader className="border-b border-border pb-4">
@@ -58,7 +58,7 @@ export default async function MethodologyPage() {
         </Card>
       </Reveal>
 
-      {/* -------------------------- 7 мезон -------------------------- */}
+
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {MS7_CRITERIA.map((criterion, i) => {
           const indicators = tc.raw(
@@ -66,7 +66,7 @@ export default async function MethodologyPage() {
           ) as unknown as string[];
           const name = tc(`${criterion.id}.name`);
           const latin = tc(`${criterion.id}.latin`);
-          // В английской локали подпись совпадает с названием.
+
           const showLatin = latin.toLowerCase() !== name.toLowerCase();
 
           return (
@@ -113,7 +113,6 @@ export default async function MethodologyPage() {
         })}
       </div>
 
-      {/* -------------------------- шкала -------------------------- */}
       <Reveal delay={0.2}>
         <Card className="ms7-surface mt-6">
           <CardHeader className="border-b border-border pb-4">

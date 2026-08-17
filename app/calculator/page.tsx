@@ -11,17 +11,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("eyebrow"), description: t("subtitle") };
 }
 
-/**
- * Серверная обёртка: панель — клиентская, а вошедшего пользователя и каталог
- * изданий знает только сервер. Калькулятор публичен; авторизация нужна лишь
- * для сохранения оценки.
- */
+
 export default async function CalculatorPage() {
   const { rows, period } = await getRankings(50);
   const user = isSupabaseConfigured ? await getCurrentUser() : null;
 
-  // Три причины запрета, и каждую нужно объяснить по-своему: без Supabase
-  // сохранять некуда, без входа — некому, без подтверждения роли — нельзя.
+
   const canSave = canWrite(user);
   const saveHint = canSave
     ? null

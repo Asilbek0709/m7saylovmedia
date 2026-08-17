@@ -8,10 +8,7 @@ import {
   SUPABASE_URL,
 } from "./config";
 
-/**
- * Клиент для серверных компонентов и server actions.
- * `null`, если Supabase не настроен — вызывающий код обязан это проверять.
- */
+
 export async function createClient(): Promise<SupabaseClient | null> {
   if (!isSupabaseConfigured) return null;
 
@@ -28,8 +25,7 @@ export async function createClient(): Promise<SupabaseClient | null> {
             store.set(name, value, options);
           }
         } catch {
-          // В Server Component куки только на чтение. Это штатная ситуация:
-          // обновлением сессии занимается proxy.ts.
+          
         }
       },
     },

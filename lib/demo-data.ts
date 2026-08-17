@@ -1,11 +1,6 @@
 import type { CriteriaScores } from "@/lib/ms7";
 
-/**
- * ДЕМО-НАБОР. Баллы сгенерированы для показа интерфейса и НЕ являются
- * результатом реального мониторинга перечисленных изданий. Тот же набор
- * лежит в supabase/schema.sql; после подключения Supabase данные
- * приходят из таблицы `media_rankings`.
- */
+
 export interface RankingRow extends CriteriaScores {
   outlet_id: string;
   name: string;

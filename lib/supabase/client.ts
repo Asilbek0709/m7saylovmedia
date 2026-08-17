@@ -11,10 +11,7 @@ import {
 
 let cached: SupabaseClient | null = null;
 
-/**
- * Клиент для браузера. `null` в демо-режиме — форма входа обязана это
- * проверять и показывать соответствующее сообщение, а не падать.
- */
+
 export function createClient(): SupabaseClient | null {
   if (!isSupabaseConfigured) return null;
   cached ??= createBrowserClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);

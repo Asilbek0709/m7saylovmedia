@@ -4,11 +4,7 @@ export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = "uz";
 
-/**
- * Язык хранится в куке, а не в сегменте URL. Для MVP это осознанный выбор:
- * не нужен proxy/middleware (в Next 16 middleware переименован в proxy),
- * маршруты остаются плоскими, а переключение — это server action + refresh.
- */
+
 export const LOCALE_COOKIE = "ms7-locale";
 
 export const LOCALE_LABELS: Record<Locale, { native: string; short: string }> =
@@ -18,7 +14,7 @@ export const LOCALE_LABELS: Record<Locale, { native: string; short: string }> =
     en: { native: "English", short: "EN" },
   };
 
-/** Тег для атрибута lang — узбекский интерфейс набран кириллицей. */
+
 export const HTML_LANG: Record<Locale, string> = {
   uz: "uz-Cyrl",
   ru: "ru",

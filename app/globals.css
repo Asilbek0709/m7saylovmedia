@@ -48,53 +48,43 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/*
-  MS-7 / Saylov-Media — Government Premium theme.
-  Desaturated navy + slate on a clean white surface. No neon, no high-chroma accents.
-*/
+
 :root {
-  --background: #f6f7f9; /* page plane */
+  --background: #f6f7f9; 
   --foreground: #16202b;
-  --card: #ffffff; /* chart + content surface */
+  --card: #ffffff; 
   --card-foreground: #16202b;
   --popover: #ffffff;
   --popover-foreground: #16202b;
-  --primary: #0f2a47; /* deep navy — 14.5:1 on white */
+  --primary: #0f2a47; 
   --primary-foreground: #ffffff;
   --secondary: #eef1f5;
   --secondary-foreground: #0f2a47;
   --muted: #f1f3f7;
-  --muted-foreground: #6b7684; /* 4.6:1 on white */
+  --muted-foreground: #6b7684; 
   --accent: #eef1f5;
   --accent-foreground: #0f2a47;
   --destructive: #752b28;
-  --border: #e4e7ec; /* hairline */
+  --border: #e4e7ec; 
   --input: #dfe3e9;
   --ring: #1c3f66;
   --radius: 0.5rem;
 
-  /* Brand ink scale */
+ 
   --navy-900: #0b1f35;
   --navy-800: #0f2a47;
   --navy-700: #163756;
   --navy-600: #1c3f66;
-  --slate-body: #3f4c5a; /* 8.8:1 */
-  --slate-muted: #6b7684; /* 4.6:1 */
+  --slate-body: #3f4c5a; 
+  --slate-muted: #6b7684; 
   --hairline: #e4e7ec;
 
-  /*
-    SMSI band scale — an ORDINAL status scale, validated as such:
-    monotone OKLCH lightness (ΔL >= 0.06 between neighbours) so the rank still
-    reads in greyscale and under protan/deuteran vision, and every band clears
-    3:1 on white. Hue spread is intentional (the MS-7 methodology mandates
-    green -> amber -> red), so every band is ALWAYS shipped with its text label:
-    colour never carries the verdict on its own.
-  */
-  --smsi-critical: #752b28; /* 0–44   Инқирозли    9.9:1 */
-  --smsi-poor: #854326; /* 45–59  Қониқарсиз   7.4:1 */
-  --smsi-moderate: #86641e; /* 60–74  Ўртача       5.5:1 */
-  --smsi-high: #628a55; /* 75–89  Юқори        4.0:1 */
-  --smsi-veryhigh: #58a37d; /* 90–100 Жуда юқори   3.0:1 */
+  
+  --smsi-critical: #752b28;
+  --smsi-poor: #854326; 
+  --smsi-moderate: #86641e; 
+  --smsi-high: #628a55; 
+  --smsi-veryhigh: #58a37d; 
 
   --smsi-critical-wash: #ffebe9;
   --smsi-poor-wash: #feece5;
@@ -108,7 +98,7 @@
   --smsi-high-ink: #426d33;
   --smsi-veryhigh-ink: #2d865d;
 
-  /* Chart chrome */
+  
   --chart-grid: #e4e7ec;
   --chart-axis: #6b7684;
   --chart-benchmark: #94a3b8;
@@ -129,13 +119,7 @@
   --sidebar-ring: #1c3f66;
 }
 
-/*
-  Тёмная тема — не инверсия светлой, а собственный набор ступеней,
-  выведенный под тёмную подложку (глубокий navy/slate).
-  Полосы SMSI пересчитаны заново: светлота по-прежнему монотонна
-  (ΔL = 0.065 в OKLCH), но поднята так, чтобы даже самый тёмный уровень
-  давал ≥ 3.4:1 на карточке.
-*/
+
 .dark {
   --background: #080e1a;
   --foreground: #e8edf5;
@@ -164,11 +148,11 @@
   --slate-muted: #93a1b8;
   --hairline: #1e2a40;
 
-  --smsi-critical: #995d58; /* 3.43:1 на карточке */
-  --smsi-poor: #ac735c; /* 4.53:1 */
-  --smsi-moderate: #af925c; /* 5.99:1 */
-  --smsi-high: #92b786; /* 7.90:1 */
-  --smsi-veryhigh: #92d0ae; /* 10.02:1 */
+  --smsi-critical: #995d58; 
+  --smsi-poor: #ac735c; 
+  --smsi-moderate: #af925c; 
+  --smsi-high: #92b786; 
+  --smsi-veryhigh: #92d0ae; 
 
   --smsi-critical-wash: #2b1817;
   --smsi-poor-wash: #2a1913;
@@ -176,7 +160,7 @@
   --smsi-high-wash: #172114;
   --smsi-veryhigh-wash: #112219;
 
-  /* На тёмном подложка чипа тонирована, а текст берёт сам цвет уровня. */
+  
   --smsi-critical-ink: #995d58;
   --smsi-poor-ink: #ac735c;
   --smsi-moderate-ink: #af925c;
@@ -214,14 +198,14 @@
   html {
     @apply font-sans;
   }
-  /* Columns of figures must align; standalone display numbers must not. */
+  
   .tabular {
     font-variant-numeric: tabular-nums;
   }
 }
 
 @layer utilities {
-  /* Entrance animation — a single restrained rise+fade, staggered by --d. */
+  
   @keyframes ms7-rise {
     from {
       opacity: 0;
@@ -242,13 +226,13 @@
     }
   }
 
-  /* Hairline ring used on every premium surface. */
+  
   .ms7-surface {
     box-shadow:
       0 1px 2px rgb(15 42 71 / 0.04),
       0 1px 3px rgb(15 42 71 / 0.06);
   }
-  /* На тёмном фоне мягкая тень не читается — глубину держит подсветка канта. */
+  
   .dark .ms7-surface {
     box-shadow:
       0 1px 2px rgb(0 0 0 / 0.4),

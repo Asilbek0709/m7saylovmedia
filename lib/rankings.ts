@@ -10,7 +10,7 @@ export interface RankedOutlet extends RankingRow {
 export interface RankingsResult {
   rows: RankedOutlet[];
   period: string;
-  /** `true`, если данные пришли из Supabase; `false` — работает демо-набор. */
+
   live: boolean;
 }
 
@@ -20,10 +20,7 @@ const rank = (rows: RankingRow[]): RankedOutlet[] =>
     .sort((a, b) => b.smsi - a.smsi || a.name.localeCompare(b.name))
     .map((row, i) => ({ ...row, rank: i + 1 }));
 
-/**
- * Рейтинг Топ-10. Если Supabase не подключён или запрос не прошёл,
- * возвращает демо-набор — презентация не должна падать из-за сети.
- */
+
 export async function getRankings(limit = 10): Promise<RankingsResult> {
   const supabase = await createClient();
 
@@ -50,9 +47,7 @@ export async function getRankings(limit = 10): Promise<RankingsResult> {
         };
       }
     } catch {
-      // Недоступная сеть или неверный хост роняют запрос исключением, а не
-      // полем error. Без перехвата страница отдала бы 500 — ровно тот сбой,
-      // от которого демо-набор и должен страховать.
+
     }
   }
 

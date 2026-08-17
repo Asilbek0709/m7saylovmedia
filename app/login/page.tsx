@@ -23,7 +23,7 @@ export default function LoginPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [pending, setPending] = React.useState(false);
 
-  // В демо-режиме клиента нет — форма показывает пояснение и не отправляется.
+
   const supabase = createClient();
   const authAvailable = supabase !== null;
 
@@ -56,8 +56,7 @@ export default function LoginPage() {
     const next =
       new URLSearchParams(window.location.search).get("next") ?? "/rating";
     router.push(next);
-    // Сессия живёт в куках, а навбар рисуется на сервере — без refresh он
-    // остался бы в состоянии «не вошёл».
+
     router.refresh();
   };
 

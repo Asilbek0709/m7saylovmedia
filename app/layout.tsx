@@ -9,7 +9,7 @@ import { HTML_LANG, type Locale } from "@/i18n/config";
 import { getCurrentUser } from "@/lib/auth";
 import "./globals.css";
 
-// Кириллица обязательна: узбекский интерфейс методики набран кириллицей.
+
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin", "cyrillic"],
@@ -40,7 +40,7 @@ export default async function RootLayout({
   const user = await getCurrentUser();
 
   return (
-    // suppressHydrationWarning — next-themes дописывает класс темы до гидратации.
+    
     <html
       lang={HTML_LANG[locale]}
       className={`${inter.variable} h-full antialiased`}

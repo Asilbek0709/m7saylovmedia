@@ -1,19 +1,13 @@
--- =====================================================================
---  MS-7: Saylov-Media — схема базы данных (Supabase / PostgreSQL)
---  Выполнить в Supabase → SQL Editor → New query → Run.
--- =====================================================================
+
 
 create extension if not exists "pgcrypto";
 
--- ---------------------------------------------------------------------
--- 1. Справочник цифровых СМИ
--- ---------------------------------------------------------------------
+
 create table if not exists public.media_outlets (
   id          uuid primary key default gen_random_uuid(),
   name        text not null,
   slug        text not null unique,
   website     text,
-  -- давлат = государственное, нодавлат = негосударственное
   ownership   text not null default 'nodavlat'
               check (ownership in ('davlat', 'nodavlat')),
   region      text not null default 'Тошкент',
@@ -24,35 +18,31 @@ create table if not exists public.media_outlets (
 comment on table  public.media_outlets is 'Рақамли ОАВ рўйхати — объекты мониторинга MS-7.';
 comment on column public.media_outlets.ownership is 'Форма собственности: davlat / nodavlat.';
 
--- ---------------------------------------------------------------------
--- 2. Оценки по модели MS-7
---    Семь критериев, шкала 0–100. SMSI считается базой как generated
---    column, поэтому индекс невозможно рассогласовать с баллами.
--- ---------------------------------------------------------------------
+
 create table if not exists public.evaluations (
   id             uuid primary key default gen_random_uuid(),
   outlet_id      uuid not null references public.media_outlets (id) on delete cascade,
 
-  -- Период мониторинга, напр. 'Сайлов-2026, 1-босқич'
+
   period         text not null,
   evaluator      text,
 
-  -- 1. Ҳуқуқий мувофиқлик
+
   legal          smallint not null check (legal          between 0 and 100),
-  -- 2. Ахборот сифати
+
   quality        smallint not null check (quality        between 0 and 100),
-  -- 3. Тезкорлик
+
   speed          smallint not null check (speed          between 0 and 100),
-  -- 4. Мультимедиалилик
+
   multimedia     smallint not null check (multimedia     between 0 and 100),
-  -- 5. Интерактивлик
+
   interactivity  smallint not null check (interactivity  between 0 and 100),
-  -- 6. Аудитория фаоллиги
+
   engagement     smallint not null check (engagement     between 0 and 100),
-  -- 7. Медиаконвергенция
+
   convergence    smallint not null check (convergence    between 0 and 100),
 
-  -- Интегральный индекс SMSI: взвешенная сумма (веса модели MS-7, сумма = 1.00)
+
   smsi numeric(4, 1) generated always as (
     round(
       ( legal         * 0.18
@@ -78,26 +68,22 @@ create index if not exists evaluations_period_idx on public.evaluations (period)
 comment on column public.evaluations.smsi is
   'SMSI — интегральный индекс 0–100, вычисляется базой по весам модели MS-7.';
 
--- ---------------------------------------------------------------------
--- 3. Уровень (даража) по шкале интерпретации SMSI
--- ---------------------------------------------------------------------
+
 create or replace function public.smsi_band(score numeric)
 returns text
 language sql
 immutable
 as $$
   select case
-    when score >= 90 then 'veryhigh'   -- Жуда юқори
-    when score >= 75 then 'high'       -- Юқори
-    when score >= 60 then 'moderate'   -- Ўртача
-    when score >= 45 then 'poor'       -- Қониқарсиз
-    else                  'critical'   -- Инқирозли
+    when score >= 90 then 'veryhigh'   
+    when score >= 75 then 'high'       
+    when score >= 60 then 'moderate'   
+    when score >= 45 then 'poor'       
+    else                  'critical'   
   end;
 $$;
 
--- ---------------------------------------------------------------------
--- 4. Готовый рейтинг для дашборда
--- ---------------------------------------------------------------------
+
 create or replace view public.media_rankings as
 select
   row_number() over (partition by e.period order by e.smsi desc, o.name) as rank,
@@ -116,10 +102,7 @@ select
 from public.evaluations e
 join public.media_outlets o on o.id = e.outlet_id;
 
--- ---------------------------------------------------------------------
--- 5. Row Level Security
---    Рейтинг публичен, изменять оценки может только вошедший эксперт.
--- ---------------------------------------------------------------------
+
 alter table public.media_outlets enable row level security;
 alter table public.evaluations   enable row level security;
 
@@ -147,12 +130,7 @@ create policy "experts manage evaluations"
   to authenticated
   using (true) with check (true);
 
--- =====================================================================
---  ДЕМО-ДАННЫЕ
---  ВНИМАНИЕ: баллы ниже — иллюстративные, сгенерированы для показа
---  интерфейса. Это НЕ результат реального мониторинга и не может
---  использоваться как оценка перечисленных изданий.
--- =====================================================================
+
 insert into public.media_outlets (name, slug, website, ownership, region) values
   ('Kun.uz',            'kun-uz',      'kun.uz',       'nodavlat', 'Тошкент'),
   ('Gazeta.uz',         'gazeta-uz',   'gazeta.uz',    'nodavlat', 'Тошкент'),
@@ -185,4 +163,4 @@ from (values
 join public.media_outlets o on o.slug = v.slug
 on conflict (outlet_id, period) do nothing;
 
--- Проверка: select rank, name, smsi, band from public.media_rankings order by rank;
+
