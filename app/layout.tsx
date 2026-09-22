@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
+import { ScrollProgress } from "@/components/motion/scroll-progress";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { HTML_LANG, type Locale } from "@/i18n/config";
@@ -54,6 +55,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <NextIntlClientProvider locale={locale} messages={messages}>
+            <ScrollProgress />
             <Navbar
               userEmail={user?.email ?? null}
               userRole={user?.role ?? null}

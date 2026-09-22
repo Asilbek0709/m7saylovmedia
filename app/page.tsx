@@ -12,12 +12,23 @@ import {
 import { getTranslations } from "next-intl/server";
 
 import { AnimatedHeading } from "@/components/motion/animated-heading";
+import { CountUp } from "@/components/motion/count-up";
 import { FadeIn } from "@/components/motion/fade-in";
+import { HeroBackdrop } from "@/components/motion/hero-backdrop";
 import { Reveal } from "@/components/motion/reveal";
+import { ScrollFormula } from "@/components/motion/scroll-formula";
+import { StaggerItem, StaggerList } from "@/components/motion/stagger-list";
 import { SmsiBadge } from "@/components/smsi-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MS7_CRITERIA, SMSI_BANDS, type CriterionId } from "@/lib/ms7";
+import {
+  calculateSMSI,
+  DEFAULT_SCORES,
+  MS7_CRITERIA,
+  resolveBand,
+  SMSI_BANDS,
+  type CriterionId,
+} from "@/lib/ms7";
 
 
 const TILE: Record<CriterionId, { span: string; icon: typeof ShieldCheck }> = {
@@ -35,19 +46,20 @@ export default async function LandingPage() {
   const tc = await getTranslations("criteria");
   const tb = await getTranslations("bands");
 
+  const profileBand = resolveBand(calculateSMSI(DEFAULT_SCORES));
+  const formulaSteps = MS7_CRITERIA.map((criterion) => ({
+    id: criterion.id,
+    weight: criterion.weight,
+    value: DEFAULT_SCORES[criterion.id],
+    short: tc(`${criterion.id}.short`),
+    name: tc(`${criterion.id}.name`),
+  }));
+
   return (
     <div className="flex flex-col">
       
       <section className="relative overflow-hidden">
-        
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_50%_0%,color-mix(in_srgb,var(--primary)_9%,transparent),transparent_70%)]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.35] [background-image:linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(70%_50%_at_50%_0%,#000,transparent)]"
-        />
+        <HeroBackdrop />
 
         <div className="mx-auto w-full max-w-7xl px-4 pt-16 pb-20 sm:px-6 sm:pt-24 sm:pb-28">
           <div className="max-w-3xl">
@@ -86,13 +98,13 @@ export default async function LandingPage() {
           <FadeIn delay={0.45}>
             <dl className="mt-16 grid max-w-2xl grid-cols-3 gap-6 border-t border-border pt-8">
               {[
-                { value: "7", label: t("stats.criteria") },
-                { value: "100", label: t("stats.scale") },
-                { value: "5", label: t("stats.levels") },
+                { value: 7, label: t("stats.criteria") },
+                { value: 100, label: t("stats.scale") },
+                { value: 5, label: t("stats.levels") },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <dt className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                    {stat.value}
+                  <dt className="text-3xl font-semibold tracking-tight text-foreground tabular sm:text-4xl">
+                    <CountUp value={stat.value} />
                   </dt>
                   <dd className="mt-1 text-xs leading-snug text-muted-foreground">
                     {stat.label}
@@ -168,8 +180,37 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      
       <section className="border-t border-border">
+        <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
+          <Reveal className="max-w-2xl">
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+              {t("formula.eyebrow")}
+            </p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance text-foreground">
+              {t("formula.title")}
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              {t("formula.subtitle")}
+            </p>
+          </Reveal>
+
+          <ScrollFormula
+            steps={formulaSteps}
+            bandLabel={tb(`${profileBand.id}.label`)}
+            bandColor={profileBand.color}
+            labels={{
+              contribution: t("formula.contribution"),
+              running: t("formula.running"),
+              total: t("formula.total"),
+              score: t("formula.score"),
+              weight: t("formula.weight"),
+              profile: t("formula.profile"),
+            }}
+          />
+        </div>
+      </section>
+
+      <section className="border-t border-border bg-card/40">
         <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
           <Reveal className="max-w-2xl">
             <p className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
@@ -184,35 +225,32 @@ export default async function LandingPage() {
           </Reveal>
 
           
-          <Reveal delay={0.06}>
-            <ul className="mt-10 grid gap-3">
-              {SMSI_BANDS.map((band) => (
-                <li
-                  key={band.id}
-                  
-                  className="flex flex-col items-start gap-2 rounded-md border border-border bg-card px-4 py-3.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2"
-                >
-                  <span className="shrink-0 text-sm font-semibold text-foreground tabular sm:w-20">
-                    {band.min}–{band.max}
-                  </span>
-                  <SmsiBadge
-                    band={band}
-                    label={tb(`${band.id}.label`)}
-                    size="sm"
-                    className="min-w-0"
-                  />
-                  <span className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
-                    {tb(`${band.id}.interpretation`)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Reveal>
+          <StaggerList className="mt-10 grid gap-3">
+            {SMSI_BANDS.map((band) => (
+              <StaggerItem
+                key={band.id}
+                className="flex flex-col items-start gap-2 rounded-md border border-border bg-card px-4 py-3.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2"
+              >
+                <span className="shrink-0 text-sm font-semibold text-foreground tabular sm:w-20">
+                  {band.min}–{band.max}
+                </span>
+                <SmsiBadge
+                  band={band}
+                  label={tb(`${band.id}.label`)}
+                  size="sm"
+                  className="min-w-0"
+                />
+                <span className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
+                  {tb(`${band.id}.interpretation`)}
+                </span>
+              </StaggerItem>
+            ))}
+          </StaggerList>
         </div>
       </section>
 
       
-      <section className="border-t border-border bg-card/40">
+      <section className="border-t border-border">
         <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
           <Reveal>
             <div className="flex flex-col items-start gap-6 rounded-lg border border-border bg-card px-6 py-10 sm:px-10 md:flex-row md:items-center md:justify-between">

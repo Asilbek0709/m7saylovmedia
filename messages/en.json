@@ -49,6 +49,17 @@
       "title": "See the system in action",
       "subtitle": "Enter scores across the seven criteria — the composite index and radar chart recalculate in real time.",
       "button": "Open the calculator"
+    },
+    "formula": {
+      "eyebrow": "Algorithm",
+      "title": "How the SMSI index adds up",
+      "subtitle": "Scroll — each criterion contributes its weighted share while the radar builds vertex by vertex.",
+      "contribution": "Contribution",
+      "running": "Running total",
+      "total": "Final SMSI",
+      "score": "Score",
+      "weight": "Weight",
+      "profile": "Outlet profile (example)"
     }
   },
   "login": {
