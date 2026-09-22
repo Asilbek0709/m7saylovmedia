@@ -152,6 +152,9 @@ export default async function RatingPage() {
                       </TableHead>
                     ))}
                     <TableHead className="w-40">{t("columns.smsi")}</TableHead>
+                    <TableHead className="w-16 text-right">
+                      {t("columns.change")}
+                    </TableHead>
                     <TableHead className="w-36 pr-6">
                       {t("columns.band")}
                     </TableHead>
@@ -168,9 +171,12 @@ export default async function RatingPage() {
                         </TableCell>
 
                         <TableCell>
-                          <span className="block text-sm font-medium text-foreground">
+                          <Link
+                            href={`/outlets/${row.slug}`}
+                            className="block text-sm font-medium text-foreground underline-offset-4 hover:underline"
+                          >
                             {row.name}
-                          </span>
+                          </Link>
                           <span className="block text-xs text-muted-foreground">
                             {row.website}
                           </span>
@@ -209,6 +215,14 @@ export default async function RatingPage() {
                               />
                             </span>
                           </div>
+                        </TableCell>
+
+                        <TableCell className="text-right text-sm text-muted-foreground tabular">
+                          {row.prevSmsi === null
+                            ? "—"
+                            : `${row.smsi - row.prevSmsi > 0 ? "+" : ""}${(
+                                row.smsi - row.prevSmsi
+                              ).toFixed(1)}`}
                         </TableCell>
 
                         <TableCell className="pr-6">

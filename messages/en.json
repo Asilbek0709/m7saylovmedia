@@ -229,7 +229,8 @@
       "outlet": "Outlet",
       "ownership": "Ownership",
       "smsi": "SMSI",
-      "band": "Level"
+      "band": "Level",
+      "change": "Δ"
     },
     "ownership": {
       "davlat": "State-owned",
@@ -362,5 +363,24 @@
       "label": "Critical",
       "interpretation": "The media system has systemic problems; institutional and economic reform is required."
     }
+  },
+  "outlet": {
+    "eyebrow": "Outlet",
+    "back": "Back to ranking",
+    "notFound": "Outlet not found",
+    "currentIndex": "Current index",
+    "period": "Monitoring round",
+    "change": "Change",
+    "rounds": "{count, plural, one {# monitoring round} other {# monitoring rounds}}",
+    "dynamicsTitle": "SMSI over time",
+    "dynamicsSubtitle": "How the composite index changes across monitoring rounds.",
+    "needMore": "A trend needs at least two rounds. This outlet has a single assessment so far.",
+    "profileTitle": "Criteria profile",
+    "profileSubtitle": "Current round compared with the previous one.",
+    "current": "Current round",
+    "previous": "Previous round",
+    "criterion": "Criterion",
+    "noPrevious": "No previous round",
+    "breakdownTitle": "Criteria breakdown"
   }
 }
