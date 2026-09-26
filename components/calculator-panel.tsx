@@ -44,7 +44,9 @@ import { saveEvaluation } from "@/app/actions/evaluations";
 import { type RankingRow } from "@/lib/demo-data";
 import {
   calculateSMSI,
+  criterionFromIndicators,
   DEFAULT_SCORES,
+  indicatorsFromScores,
   MS7_CRITERIA,
   resolveBand,
   SCORE_MAX,
@@ -54,6 +56,7 @@ import {
   weakestCriterion,
   type CriteriaScores,
   type CriterionId,
+  type IndicatorScores,
 } from "@/lib/ms7";
 
 /* ------------------------------------------------------------------ */
@@ -341,6 +344,43 @@ export function CalculatorPanel({
 
   const { scores, setOne, animateTo } = useAnimatedScores(DEFAULT_SCORES);
   const [weighted, setWeighted] = React.useState(true);
+
+  const indicatorNames = React.useMemo(
+    () =>
+      Object.fromEntries(
+        MS7_CRITERIA.map((c) => [
+          c.id,
+          tc.raw(`${c.id}.indicators`) as unknown as string[],
+        ]),
+      ) as Record<CriterionId, string[]>,
+    [tc],
+  );
+  const [mode, setMode] = React.useState<"direct" | "indicators">("direct");
+  const [indicators, setIndicators] = React.useState<IndicatorScores | null>(
+    null,
+  );
+
+  const switchMode = (next: "direct" | "indicators") => {
+    setMode(next);
+    setIndicators(
+      next === "indicators"
+        ? indicatorsFromScores(
+            scores,
+            Object.fromEntries(
+              MS7_CRITERIA.map((c) => [c.id, indicatorNames[c.id].length]),
+            ) as Record<CriterionId, number>,
+          )
+        : null,
+    );
+  };
+
+  const setIndicator = (id: CriterionId, index: number, value: number) => {
+    if (!indicators) return;
+    const clamped = Math.min(SCORE_MAX, Math.max(SCORE_MIN, Math.round(value)));
+    const list = indicators[id].map((v, i) => (i === index ? clamped : v));
+    setIndicators({ ...indicators, [id]: list });
+    setOne(id, criterionFromIndicators(list));
+  };
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<Outlet | null>(null);
 
@@ -392,6 +432,8 @@ export function CalculatorPanel({
     setOutletName(outlet.name);
     setSaved(null);
     setSaveError(null);
+    setMode("direct");
+    setIndicators(null);
     animateTo(outlet.scores);
   };
 
@@ -407,6 +449,7 @@ export function CalculatorPanel({
       outletName,
       period,
       scores,
+      indicators: mode === "indicators" ? indicators : null,
     });
 
     setSaving(false);
@@ -421,6 +464,8 @@ export function CalculatorPanel({
     // Пресет перекрывает профиль издания — иначе «базовая оценка» перестаёт
     // соответствовать выбранному СМИ и дельта теряет смысл.
     setSelected(null);
+    setMode("direct");
+    setIndicators(null);
     animateTo(next);
   };
 
@@ -616,6 +661,23 @@ export function CalculatorPanel({
 
               <Separator className="my-5" />
 
+              <Tabs
+                value={mode}
+                onValueChange={(v) => switchMode(v as "direct" | "indicators")}
+              >
+                <TabsList className="w-full">
+                  <TabsTrigger value="direct" className="flex-1">
+                    {t("mode.direct")}
+                  </TabsTrigger>
+                  <TabsTrigger value="indicators" className="flex-1">
+                    {t("mode.indicators")}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <p className="mt-2 mb-5 text-[11px] leading-relaxed text-muted-foreground">
+                {mode === "indicators" ? t("mode.indicatorsHint") : t("mode.directHint")}
+              </p>
+
               <div className="space-y-6">
                 {MS7_CRITERIA.map((criterion, index) => {
                   const value = scores[criterion.id];
@@ -664,6 +726,7 @@ export function CalculatorPanel({
                           max={SCORE_MAX}
                           value={value}
                           aria-label={name}
+                          disabled={mode === "indicators"}
                           onChange={(e) =>
                             setOne(criterion.id, Number(e.target.value))
                           }
@@ -671,14 +734,44 @@ export function CalculatorPanel({
                         />
                       </div>
 
-                      <Slider
-                        value={[value]}
-                        min={SCORE_MIN}
-                        max={SCORE_MAX}
-                        step={1}
-                        aria-label={name}
-                        onValueChange={([next]) => setOne(criterion.id, next)}
-                      />
+                      {mode === "indicators" && indicators ? (
+                        <div className="space-y-3 rounded-md border border-border bg-muted/30 px-3 py-3">
+                          {indicatorNames[criterion.id].map((label, i) => (
+                            <div key={label} className="space-y-1.5">
+                              <div className="flex items-baseline justify-between gap-3">
+                                <span className="min-w-0 text-xs leading-snug text-muted-foreground">
+                                  {label}
+                                </span>
+                                <span className="shrink-0 text-xs font-semibold text-foreground tabular">
+                                  {indicators[criterion.id][i]}
+                                </span>
+                              </div>
+                              <Slider
+                                value={[indicators[criterion.id][i]]}
+                                min={SCORE_MIN}
+                                max={SCORE_MAX}
+                                step={1}
+                                aria-label={`${name}: ${label}`}
+                                onValueChange={([next]) =>
+                                  setIndicator(criterion.id, i, next)
+                                }
+                              />
+                            </div>
+                          ))}
+                          <p className="border-t border-border pt-2 text-[11px] text-muted-foreground tabular">
+                            {t("mode.average")}: {value}
+                          </p>
+                        </div>
+                      ) : (
+                        <Slider
+                          value={[value]}
+                          min={SCORE_MIN}
+                          max={SCORE_MAX}
+                          step={1}
+                          aria-label={name}
+                          onValueChange={([next]) => setOne(criterion.id, next)}
+                        />
+                      )}
                     </div>
                   );
                 })}

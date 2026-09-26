@@ -8,7 +8,9 @@ import {
   MS7_CRITERIA,
   SCORE_MAX,
   SCORE_MIN,
+  scoresFromIndicators,
   type CriteriaScores,
+  type IndicatorScores,
 } from "@/lib/ms7";
 import { createClient } from "@/lib/supabase/server";
 
@@ -18,6 +20,31 @@ export interface SaveEvaluationInput {
   outletName: string;
   period: string;
   scores: CriteriaScores;
+  indicators?: IndicatorScores | null;
+}
+
+const MAX_INDICATORS = 12;
+
+function validScore(raw: unknown): number | null {
+  const value = Number(raw);
+  if (!Number.isInteger(value)) return null;
+  return value >= SCORE_MIN && value <= SCORE_MAX ? value : null;
+}
+
+function readIndicators(raw: unknown): IndicatorScores | null {
+  if (!raw || typeof raw !== "object") return null;
+
+  const result = {} as IndicatorScores;
+  for (const criterion of MS7_CRITERIA) {
+    const list = (raw as Record<string, unknown>)[criterion.id];
+    if (!Array.isArray(list) || list.length === 0 || list.length > MAX_INDICATORS) {
+      return null;
+    }
+    const values = list.map(validScore);
+    if (values.some((v) => v === null)) return null;
+    result[criterion.id] = values as number[];
+  }
+  return result;
 }
 
 export type SaveEvaluationResult =
@@ -64,16 +91,19 @@ export async function saveEvaluation(
   if (!outletName || !period) return { ok: false, reason: "invalid" };
 
 
-  const scores = {} as CriteriaScores;
-  for (const criterion of MS7_CRITERIA) {
-    const raw = Number(input.scores?.[criterion.id]);
-    if (!Number.isFinite(raw)) return { ok: false, reason: "invalid" };
+  let indicators: IndicatorScores | null = null;
+  let scores = {} as CriteriaScores;
 
-    const value = Math.round(raw);
-    if (value < SCORE_MIN || value > SCORE_MAX) {
-      return { ok: false, reason: "invalid" };
+  if (input.indicators) {
+    indicators = readIndicators(input.indicators);
+    if (!indicators) return { ok: false, reason: "invalid" };
+    scores = scoresFromIndicators(indicators);
+  } else {
+    for (const criterion of MS7_CRITERIA) {
+      const value = validScore(Math.round(Number(input.scores?.[criterion.id])));
+      if (value === null) return { ok: false, reason: "invalid" };
+      scores[criterion.id] = value;
     }
-    scores[criterion.id] = value;
   }
 
   let outletId = input.outletId;
@@ -92,15 +122,27 @@ export async function saveEvaluation(
     outletId = data.id as string;
   }
 
-  const { error } = await supabase.from("evaluations").upsert(
-    {
-      outlet_id: outletId,
-      period,
-      evaluator: user.email,
-      ...scores,
-    },
-    { onConflict: "outlet_id,period" },
-  );
+  const row = {
+    outlet_id: outletId,
+    period,
+    evaluator: user.email,
+    ...scores,
+  };
+
+  let { error } = await supabase
+    .from("evaluations")
+    .upsert({ ...row, indicators }, { onConflict: "outlet_id,period" });
+
+  if (error?.code === "42703") {
+    console.warn(
+      "[MS-7] Колонки evaluations.indicators нет. Выполните supabase/005-indicators.sql — " +
+        "без неё оценка по индикаторам не сохраняется.",
+    );
+    if (indicators) return { ok: false, reason: "failed" };
+    ({ error } = await supabase
+      .from("evaluations")
+      .upsert(row, { onConflict: "outlet_id,period" }));
+  }
 
   if (error) return { ok: false, reason: "failed" };
 

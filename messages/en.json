@@ -206,7 +206,14 @@
     "weakest": "Needs improvement",
     "allEqual": "All criteria are scored the same — vary the scores to reveal strengths and weaknesses.",
     "scaleTitle": "Assessment scale and interpretation",
-    "scaleSubtitle": "The SMSI index is interpreted on a 100-point scale."
+    "scaleSubtitle": "The SMSI index is interpreted on a 100-point scale.",
+    "mode": {
+      "direct": "By criterion",
+      "indicators": "By indicator",
+      "directHint": "Each criterion receives a single score.",
+      "indicatorsHint": "Score the indicators; each criterion is their average, rounded to a whole number. Indicators are saved with the assessment, so the result can be audited.",
+      "average": "Indicator average"
+    }
   },
   "rating": {
     "eyebrow": "Ranking",

@@ -144,3 +144,25 @@ export const DEFAULT_SCORES: CriteriaScores = {
   engagement: 81,
   convergence: 76,
 };
+
+export type IndicatorScores = Record<CriterionId, number[]>;
+
+export function criterionFromIndicators(values: readonly number[]): number {
+  if (values.length === 0) return 0;
+  return Math.round(values.reduce((sum, v) => sum + v, 0) / values.length);
+}
+
+export function scoresFromIndicators(indicators: IndicatorScores): CriteriaScores {
+  return Object.fromEntries(
+    MS7_CRITERIA.map((c) => [c.id, criterionFromIndicators(indicators[c.id])]),
+  ) as CriteriaScores;
+}
+
+export function indicatorsFromScores(
+  scores: CriteriaScores,
+  counts: Record<CriterionId, number>,
+): IndicatorScores {
+  return Object.fromEntries(
+    MS7_CRITERIA.map((c) => [c.id, Array(counts[c.id]).fill(scores[c.id])]),
+  ) as IndicatorScores;
+}
