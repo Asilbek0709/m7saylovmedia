@@ -17,6 +17,7 @@ import {
 } from "recharts";
 
 import { Reveal } from "@/components/motion/reveal";
+import { Recommendations } from "@/components/recommendations";
 import { SmsiBadge } from "@/components/smsi-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +43,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { saveEvaluation } from "@/app/actions/evaluations";
 import { type RankingRow } from "@/lib/demo-data";
+import { buildRecommendations } from "@/lib/recommendations";
 import {
   calculateSMSI,
   criterionFromIndicators,
@@ -409,6 +411,10 @@ export function CalculatorPanel({
   const band = resolveBand(smsi);
   const strongest = strongestCriterion(scores);
   const weakest = weakestCriterion(scores);
+  const plan = buildRecommendations(scores, {
+    weighted,
+    indicators: mode === "indicators" ? indicators : null,
+  });
 
   const baseline = selected?.scores ?? null;
   const baselineSmsi = baseline ? calculateSMSI(baseline, weighted) : null;
@@ -1057,6 +1063,10 @@ export function CalculatorPanel({
           </Card>
         </Reveal>
       </div>
+
+      <Reveal delay={0.2}>
+        <Recommendations plan={plan} className="mt-6" />
+      </Reveal>
 
       {/* ---------------------- шкала интерпретации (таблица) ---------------------- */}
       <Reveal delay={0.22}>

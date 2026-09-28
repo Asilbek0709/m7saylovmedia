@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Reveal } from "@/components/motion/reveal";
 import { OutletDynamics } from "@/components/outlet-dynamics";
+import { Recommendations } from "@/components/recommendations";
 import { SmsiBadge } from "@/components/smsi-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import {
 } from "@/components/ui/table";
 import { MS7_CRITERIA, resolveBand } from "@/lib/ms7";
 import { getOutletHistory } from "@/lib/rankings";
+import { buildRecommendations } from "@/lib/recommendations";
 
 const signed = (n: number) => `${n > 0 ? "+" : ""}${n.toFixed(1)}`;
 
@@ -215,6 +217,10 @@ export default async function OutletPage({
             </div>
           </CardContent>
         </Card>
+      </Reveal>
+
+      <Reveal delay={0.18}>
+        <Recommendations plan={buildRecommendations(last)} className="mt-6" />
       </Reveal>
     </div>
   );

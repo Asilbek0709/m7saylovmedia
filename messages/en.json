@@ -389,5 +389,19 @@
     "criterion": "Criterion",
     "noPrevious": "No previous round",
     "breakdownTitle": "Criteria breakdown"
+  },
+  "recommendations": {
+    "title": "Recommendations",
+    "subtitle": "Derived from scores and weights by a deterministic rule — every figure can be recalculated.",
+    "gap": "{gap} short of the “{band}” level: {from} → {to}.",
+    "top": "The outlet is at the top of the scale. Below is where headroom remains.",
+    "prioritiesTitle": "Priorities",
+    "potential": "up to +{value} potential",
+    "per10": "+{value} per 10 points",
+    "weakIndicators": "Weakest indicators",
+    "pathTitle": "Shortest path to the next level",
+    "pathResult": "Result: {value}",
+    "pathBroad": "One or two criteria are not enough: {count} of 7 criteria must reach {target}. The profile is even — broad improvement is required.",
+    "rule": "Priority = weight × headroom to 100. The path is the fewest criteria that close the gap."
   }
 }
