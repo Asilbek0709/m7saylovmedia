@@ -230,7 +230,7 @@
       "criteria": "Criteria",
       "criteriaNote": "with weighting coefficients"
     },
-    "tableTitle": "Top 10 digital outlets",
+    "tableTitle": "Digital outlets ranking",
     "columns": {
       "rank": "#",
       "outlet": "Outlet",
@@ -243,7 +243,70 @@
       "davlat": "State-owned",
       "nodavlat": "Private"
     },
-    "scaleLegend": "SMSI scale:"
+    "scaleLegend": "SMSI scale:",
+    "filters": {
+      "ownership": "Ownership",
+      "all": "All",
+      "davlat": "State-owned",
+      "nodavlat": "Private",
+      "region": "Region",
+      "allRegions": "All regions",
+      "reset": "Reset filter",
+      "shareHint": "The filter is kept in the page address, so the link can be shared."
+    },
+    "empty": {
+      "title": "No outlets in this slice",
+      "text": "Pick another ownership type or region."
+    },
+    "smallSample": "Small sample: {count, plural, one {# outlet} other {# outlets}}. The average is unstable — compare with caution.",
+    "compare": {
+      "title": "State-owned vs private outlets",
+      "subtitle": "Group averages: the SMSI index and the seven criteria.",
+      "allRegions": "all regions",
+      "outlets": "{count, plural, one {# outlet} other {# outlets}}",
+      "noOutlets": "no outlets",
+      "criterion": "Criterion",
+      "diff": "Difference",
+      "diffNote": "Difference is private minus state-owned. A positive value means private outlets score higher.",
+      "emptyGroup": "One of the groups has no outlets, so they cannot be compared.",
+      "radarTitle": "Group profiles"
+    },
+    "regions": {
+      "title": "Regional ranking",
+      "subtitle": "Average SMSI of outlets in each region.",
+      "region": "Region",
+      "outlets": "Outlets",
+      "smsi": "Average SMSI",
+      "band": "Level",
+      "unspecified": "Region not specified",
+      "single": "All assessed outlets are from one region so far. A regional comparison will appear once other regions have data.",
+      "smallNote": "* — fewer than three outlets: the average is unstable."
+    },
+    "consensusFlag": "Needs consensus",
+    "consensusHint": "SMSI range between experts: {range}",
+    "agreement": {
+      "title": "Expert agreement in this round",
+      "subtitle": "Kendall's coefficient of concordance W over the outlets rated by every expert in the round: 0 means no agreement, 1 means the experts rank the outlets identically.",
+      "w": "Kendall's W",
+      "level": "Strength",
+      "experts": "Experts",
+      "outlets": "Outlets in the common set",
+      "chi2": "χ²",
+      "p": "p-value",
+      "significant": "Agreement is statistically significant (p < 0.05): the experts' rankings are not random.",
+      "notSignificant": "Agreement is not statistically significant (p ≥ 0.05): matching ranks may be due to chance.",
+      "single": "Only one expert rated this round, so agreement is not calculated.",
+      "noCommon": "Fewer than two outlets were rated by every expert in the round, so W is not calculated. Use the per-outlet spread instead.",
+      "flagged": "{count, plural, =0 {No outlets need consensus.} one {# outlet needs consensus: the SMSI range between experts exceeds 5 points.} other {# outlets need consensus: the SMSI range between experts exceeds 5 points.}}",
+      "scale": "Scale: below 0.2 very weak, 0.2–0.4 weak, 0.4–0.6 moderate, 0.6–0.8 strong, 0.8 and above very strong.",
+      "levels": {
+        "veryWeak": "very weak",
+        "weak": "weak",
+        "moderate": "moderate",
+        "strong": "strong",
+        "veryStrong": "very strong"
+      }
+    }
   },
   "methodology": {
     "eyebrow": "Methodology",
@@ -254,7 +317,22 @@
     "formulaNote": "Each criterion is scored from 0 to 100, so the index also falls between 0 and 100. Legal compliance and information quality carry the greatest weight: during an election they determine the legality and reliability of the information flow.",
     "indicators": "Indicators",
     "scaleTitle": "Assessment scale and interpretation",
-    "scaleSubtitle": "The scale supports interpretation of results and management decisions."
+    "scaleSubtitle": "The scale supports interpretation of results and management decisions.",
+    "weights": {
+      "title": "Weight versions",
+      "subtitle": "Each assessment's index is fixed when it is saved, using the weight set in force on the assessment date. A new weight version does not recalculate past rounds.",
+      "active": "Current version",
+      "version": "Version {id}",
+      "validFrom": "in force since {date}",
+      "builtin": "Weights are shown from the application code: the database is not connected or migration 006 has not been run.",
+      "history": "Version history",
+      "versionCol": "Version",
+      "validFromCol": "In force since",
+      "noteCol": "Note",
+      "current": "current",
+      "mismatchTitle": "Interface weights differ from the database.",
+      "mismatch": "The calculator uses the weights in code (version {ui}), while new assessments are saved with version {db} from the database. Update lib/ms7.ts."
+    }
   },
   "criteria": {
     "legal": {
@@ -388,7 +466,23 @@
     "previous": "Previous round",
     "criterion": "Criterion",
     "noPrevious": "No previous round",
-    "breakdownTitle": "Criteria breakdown"
+    "breakdownTitle": "Criteria breakdown",
+    "weightsVersion": "Weights: version {id}",
+    "consensus": {
+      "title": "Expert agreement",
+      "subtitle": "Round scores are the mean of the experts' scores; SMSI is calculated from the means. Individual scores are not published.",
+      "experts": "{count, plural, one {# expert} other {# experts}}",
+      "criterion": "Criterion",
+      "mean": "Mean",
+      "sd": "σ",
+      "range": "Range",
+      "sdHint": "standard deviation",
+      "rangeHint": "maximum minus minimum",
+      "flag": "Needs consensus",
+      "flagText": "The SMSI range between experts exceeds 5 points, so the scores should be discussed and reconciled.",
+      "ok": "The experts' scores agree: the SMSI range is 5 points or less.",
+      "single": "Only one expert rated this outlet in this round, so there is no spread."
+    }
   },
   "recommendations": {
     "title": "Recommendations",
@@ -403,5 +497,51 @@
     "pathResult": "Result: {value}",
     "pathBroad": "One or two criteria are not enough: {count} of 7 criteria must reach {target}. The profile is even — broad improvement is required.",
     "rule": "Priority = weight × headroom to 100. The path is the fewest criteria that close the gap."
+  },
+  "report": {
+    "title": "Media performance assessment report",
+    "number": "Report No. {number}",
+    "print": "Print / PDF",
+    "back": "Back to outlet",
+    "open": "Assessment report",
+    "hint": "The document is laid out for A4. To get a file, choose “Save as PDF” in the print dialog.",
+    "meta": {
+      "outlet": "Outlet",
+      "website": "Website",
+      "ownership": "Ownership",
+      "region": "Region",
+      "period": "Monitoring round",
+      "evaluatedAt": "Assessment date",
+      "experts": "Experts",
+      "weights": "Weight version",
+      "generated": "Document generated"
+    },
+    "noDate": "not specified",
+    "result": "Assessment result",
+    "index": "SMSI composite index",
+    "level": "Level",
+    "profile": "Criteria profile",
+    "breakdown": "Scores by criterion",
+    "columns": {
+      "criterion": "Criterion",
+      "score": "Score",
+      "weight": "Weight",
+      "contribution": "Contribution"
+    },
+    "total": "SMSI index",
+    "contributionNote": "Contribution = score × weight. The index was recorded by the database when the assessment was saved; the sum of rounded contributions may differ from it by 0.1.",
+    "consensus": "Expert agreement",
+    "consensusLine": "SMSI standard deviation {sd}, range {range}.",
+    "recommendations": "Recommendations",
+    "path": "Shortest path to the next level:",
+    "priorities": "Improvement priorities:",
+    "signatures": "Expert signatures",
+    "signature": "Expert",
+    "nameHint": "full name",
+    "signHint": "signature",
+    "date": "Date",
+    "footer": "Generated by the MS-7: Saylov-Media platform. The report number combines the outlet's database ID and the assessment date, so the document can be matched against the database.",
+    "demo": "Demo data: this report was generated to demonstrate the interface and is not a monitoring result.",
+    "periodMissing": "Round “{period}” was not found for this outlet, so the latest round is shown."
   }
 }

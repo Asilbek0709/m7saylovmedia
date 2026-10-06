@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CircleCheck, FileText, TriangleAlert } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Reveal } from "@/components/motion/reveal";
@@ -25,8 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MS7_CRITERIA, resolveBand } from "@/lib/ms7";
+import { formatScore, MS7_CRITERIA, resolveBand } from "@/lib/ms7";
 import { getOutletHistory } from "@/lib/rankings";
+import { cn } from "@/lib/utils";
 import { buildRecommendations } from "@/lib/recommendations";
 
 const signed = (n: number) => `${n > 0 ? "+" : ""}${n.toFixed(1)}`;
@@ -57,12 +58,14 @@ export default async function OutletPage({
   const tb = await getTranslations("bands");
   const tr = await getTranslations("rating");
   const tCommon = await getTranslations("common");
+  const tReport = await getTranslations("report");
 
   const points = history.points;
   const last = points[points.length - 1];
   const prev = points.length >= 2 ? points[points.length - 2] : null;
   const band = resolveBand(last.smsi);
   const delta = prev ? last.smsi - prev.smsi : null;
+  const consensus = last.consensus;
 
   const criteria = MS7_CRITERIA.map((criterion) => ({
     id: criterion.id,
@@ -131,7 +134,17 @@ export default async function OutletPage({
 
         <p className="mt-3 text-sm text-muted-foreground">
           {t("period")}: {last.period}
+          {last.weightSetId !== null && (
+            <span> · {t("weightsVersion", { id: last.weightSetId })}</span>
+          )}
         </p>
+
+        <Button asChild variant="outline" size="sm" className="mt-4">
+          <Link href={`/outlets/${history.slug}/report`}>
+            <FileText className="size-4" />
+            {tReport("open")}
+          </Link>
+        </Button>
       </Reveal>
 
       <Reveal delay={0.08}>
@@ -199,15 +212,17 @@ export default async function OutletPage({
                           </span>
                         </TableCell>
                         <TableCell className="text-right text-sm font-semibold text-foreground tabular">
-                          {criterion.current}
+                          {formatScore(criterion.current)}
                         </TableCell>
                         <TableCell className="text-right text-sm text-muted-foreground tabular">
-                          {criterion.previous ?? "—"}
+                          {criterion.previous === null
+                            ? "—"
+                            : formatScore(criterion.previous)}
                         </TableCell>
                         <TableCell className="pr-6 text-right text-sm text-foreground tabular">
                           {diff === null
                             ? "—"
-                            : `${diff > 0 ? "+" : ""}${diff}`}
+                            : `${diff > 0 ? "+" : ""}${formatScore(Math.round(diff * 10) / 10)}`}
                         </TableCell>
                       </TableRow>
                     );
@@ -219,8 +234,137 @@ export default async function OutletPage({
         </Card>
       </Reveal>
 
+      {consensus && (
+        <Reveal delay={0.16}>
+          <Card className="ms7-surface mt-6 overflow-hidden">
+            <CardHeader className="border-b border-border pb-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <CardTitle className="text-base">
+                    {t("consensus.title")}
+                  </CardTitle>
+                  <CardDescription>{t("consensus.subtitle")}</CardDescription>
+                </div>
+                <Badge variant="outline" className="shrink-0 font-normal">
+                  {t("consensus.experts", { count: consensus.experts })}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="px-0">
+              {consensus.experts < 2 ? (
+                <p className="px-6 text-sm text-muted-foreground">
+                  {t("consensus.single")}
+                </p>
+              ) : (
+                <>
+                  <p
+                    role={consensus.needsConsensus ? "alert" : undefined}
+                    className={cn(
+                      "mx-6 flex items-start gap-2 rounded-md border px-4 py-3 text-sm",
+                      consensus.needsConsensus
+                        ? "border-destructive/40 bg-destructive/10 text-foreground"
+                        : "border-border bg-muted/40 text-muted-foreground",
+                    )}
+                  >
+                    {consensus.needsConsensus ? (
+                      <TriangleAlert
+                        aria-hidden
+                        className="mt-0.5 size-4 shrink-0 text-destructive"
+                      />
+                    ) : (
+                      <CircleCheck aria-hidden className="mt-0.5 size-4 shrink-0" />
+                    )}
+                    <span>
+                      {consensus.needsConsensus && (
+                        <strong className="font-semibold">
+                          {t("consensus.flag")}.{" "}
+                        </strong>
+                      )}
+                      {consensus.needsConsensus
+                        ? t("consensus.flagText")
+                        : t("consensus.ok")}
+                    </span>
+                  </p>
+                  <div className="mt-4 overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent">
+                          <TableHead className="pl-6">
+                            {t("consensus.criterion")}
+                          </TableHead>
+                          <TableHead className="w-24 text-right">
+                            {t("consensus.mean")}
+                          </TableHead>
+                          <TableHead
+                            className="w-20 text-right"
+                            title={t("consensus.sdHint")}
+                          >
+                            {t("consensus.sd")}
+                          </TableHead>
+                          <TableHead
+                            className="w-24 pr-6 text-right"
+                            title={t("consensus.rangeHint")}
+                          >
+                            {t("consensus.range")}
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody className="[&>tr:nth-child(even)]:bg-muted/40">
+                        {criteria.map((criterion) => {
+                          const spread = consensus.criteria?.[criterion.id];
+                          return (
+                            <TableRow key={criterion.id}>
+                              <TableCell className="pl-6 text-sm text-foreground">
+                                {criterion.name}
+                              </TableCell>
+                              <TableCell className="text-right text-sm tabular">
+                                {formatScore(criterion.current)}
+                              </TableCell>
+                              <TableCell className="text-right text-sm text-muted-foreground tabular">
+                                {spread?.sd == null ? "—" : spread.sd.toFixed(1)}
+                              </TableCell>
+                              <TableCell className="pr-6 text-right text-sm text-muted-foreground tabular">
+                                {spread ? formatScore(spread.range) : "—"}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                        <TableRow className="border-t-2 font-semibold hover:bg-transparent">
+                          <TableCell className="pl-6 text-sm">SMSI</TableCell>
+                          <TableCell className="text-right text-sm tabular">
+                            {last.smsi.toFixed(1)}
+                          </TableCell>
+                          <TableCell className="text-right text-sm tabular">
+                            {consensus.smsiSd === null
+                              ? "—"
+                              : consensus.smsiSd.toFixed(1)}
+                          </TableCell>
+                          <TableCell
+                            className={cn(
+                              "pr-6 text-right text-sm tabular",
+                              consensus.needsConsensus && "text-destructive",
+                            )}
+                          >
+                            {consensus.smsiRange.toFixed(1)}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <p className="border-t border-border px-6 pt-3 text-xs text-muted-foreground">
+                    {t("consensus.sd")} — {t("consensus.sdHint")};{" "}
+                    {t("consensus.range").toLowerCase()} —{" "}
+                    {t("consensus.rangeHint")}.
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </Reveal>
+      )}
+
       <Reveal delay={0.18}>
-        <Recommendations plan={buildRecommendations(last)} className="mt-6" />
+        <Recommendations plan={buildRecommendations(last, { smsi: last.smsi })} className="mt-6" />
       </Reveal>
     </div>
   );

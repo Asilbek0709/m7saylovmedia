@@ -15,6 +15,15 @@ export interface Criterion {
 }
 
 
+/**
+ * Веса действующей версии модели. Запись истины — таблица
+ * public.weight_sets (supabase/006-weight-sets.sql): сохранённые индексы
+ * считает база по набору своей оценки. Здесь — копия для калькулятора
+ * и демо-режима; при новой версии весов меняются оба места, а
+ * расхождение показывает страница методики (см. lib/weights.ts).
+ */
+export const WEIGHTS_VERSION = 1;
+
 export const MS7_CRITERIA: readonly Criterion[] = [
   { id: "legal", weight: 0.18 },
   { id: "quality", weight: 0.18 },
@@ -89,6 +98,11 @@ export const SMSI_BANDS: readonly SmsiBand[] = [
     ink: "var(--smsi-critical-ink)",
   },
 ] as const;
+
+/** Балл для показа: целые — как есть, средние экспертов — с одним знаком. */
+export function formatScore(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
 
 export const SCORE_MIN = 0;
 export const SCORE_MAX = 100;

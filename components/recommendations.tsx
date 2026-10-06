@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { SMSI_BANDS } from "@/lib/ms7";
+import { formatScore, SMSI_BANDS } from "@/lib/ms7";
 import type { RecommendationPlan } from "@/lib/recommendations";
 
 const BROAD = 3;
@@ -75,7 +75,7 @@ export function Recommendations({
                   </span>
                 </span>
                 <span className="shrink-0 text-sm font-semibold text-foreground tabular">
-                  {p.score}
+                  {formatScore(p.score)}
                 </span>
               </div>
               <p className="mt-1.5 pl-7.5 text-xs text-muted-foreground tabular">
@@ -114,7 +114,7 @@ export function Recommendations({
                         {tc(`${step.criterion}.name`)}
                       </span>
                       <span className="text-muted-foreground tabular">
-                        {step.from} → {step.to}{" "}
+                        {formatScore(step.from)} → {step.to}{" "}
                         <span className="text-foreground">
                           (+{step.gain.toFixed(1)})
                         </span>

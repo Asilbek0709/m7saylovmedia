@@ -20,20 +20,30 @@ export default async function OutletsPage() {
 
   if (supabase) {
     try {
-      const { data } = await supabase
-        .from("media_outlets")
-        .select("id, name, website, ownership, region, evaluations(count)")
-        .order("name");
+      // Число туров берётся из публичных итогов: сами оценки экспертов
+      // закрыты (007-experts.sql), и прямой подсчёт дал бы анониму 0.
+      const [{ data }, { data: rounds }] = await Promise.all([
+        supabase
+          .from("media_outlets")
+          .select("id, name, website, ownership, region")
+          .order("name"),
+        supabase.from("media_dynamics").select("outlet_id"),
+      ]);
+
+      const roundsByOutlet = new Map<string, number>();
+      for (const round of rounds ?? []) {
+        const id = round.outlet_id as string;
+        roundsByOutlet.set(id, (roundsByOutlet.get(id) ?? 0) + 1);
+      }
 
       outlets = (data ?? []).map((row) => {
-        const counts = row.evaluations as unknown as { count: number }[] | null;
         return {
           id: row.id as string,
           name: row.name as string,
           website: (row.website as string | null) ?? null,
           ownership: row.ownership === "davlat" ? "davlat" : "nodavlat",
           region: (row.region as string) ?? "",
-          evaluations: counts?.[0]?.count ?? 0,
+          evaluations: roundsByOutlet.get(row.id as string) ?? 0,
         };
       });
     } catch {

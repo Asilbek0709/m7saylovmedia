@@ -54,7 +54,16 @@ function weakestIndicators(values: readonly number[] | undefined) {
 
 export function buildRecommendations(
   scores: CriteriaScores,
-  options: { weighted?: boolean; indicators?: IndicatorScores | null } = {},
+  options: {
+    weighted?: boolean;
+    indicators?: IndicatorScores | null;
+    /**
+     * Индекс, записанный в базе. Он может отличаться от пересчёта по
+     * баллам: база считает от неокруглённых средних экспертов и весами
+     * своей версии. План тогда строится от записанного значения.
+     */
+    smsi?: number;
+  } = {},
 ): RecommendationPlan {
   const weighted = options.weighted ?? true;
   const weightOf = (id: CriterionId) =>
@@ -62,7 +71,14 @@ export function buildRecommendations(
       ? MS7_CRITERIA.find((c) => c.id === id)!.weight
       : 1 / MS7_CRITERIA.length;
 
-  const smsi = calculateSMSI(scores, weighted);
+  const offset =
+    options.smsi === undefined
+      ? 0
+      : options.smsi - calculateSMSI(scores, weighted);
+  const smsiOf = (s: CriteriaScores) =>
+    round1(calculateSMSI(s, weighted) + offset);
+
+  const smsi = smsiOf(scores);
   const band = resolveBand(smsi);
   const bandIndex = SMSI_BANDS.findIndex((b) => b.id === band.id);
   const next = bandIndex > 0 ? SMSI_BANDS[bandIndex - 1] : null;
@@ -109,13 +125,14 @@ export function buildRecommendations(
   const steps: RecommendationStep[] = [];
 
   for (const criterion of order) {
-    const before = calculateSMSI(working, weighted);
+    const before = smsiOf(working);
     if (before >= target) break;
 
-    let to = working[criterion.id];
+    // Средние экспертов дробные — цель шага всегда целый балл.
+    let to = Math.floor(working[criterion.id]);
     while (to < target) {
       to += 1;
-      if (calculateSMSI({ ...working, [criterion.id]: to }, weighted) >= target) {
+      if (smsiOf({ ...working, [criterion.id]: to }) >= target) {
         break;
       }
     }
@@ -125,7 +142,7 @@ export function buildRecommendations(
       criterion: criterion.id,
       from: scores[criterion.id],
       to,
-      gain: round1(calculateSMSI(working, weighted) - before),
+      gain: round1(smsiOf(working) - before),
       weakIndicators: weakestIndicators(options.indicators?.[criterion.id]),
     });
   }
@@ -137,7 +154,7 @@ export function buildRecommendations(
     target,
     gap: round1(target - smsi),
     steps,
-    projected: calculateSMSI(working, weighted),
+    projected: smsiOf(working),
     priorities,
   };
 }

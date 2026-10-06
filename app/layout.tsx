@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
@@ -10,12 +9,8 @@ import { HTML_LANG, type Locale } from "@/i18n/config";
 import { getCurrentUser } from "@/lib/auth";
 import "./globals.css";
 
-
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin", "cyrillic"],
-  display: "swap",
-});
+/** Нарезки Inter, нужные на первом экране: узбекская кириллица и латиница. */
+const PRELOADED_FONTS = ["inter-cyrillic", "inter-latin"];
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common");
@@ -44,9 +39,21 @@ export default async function RootLayout({
     
     <html
       lang={HTML_LANG[locale]}
-      className={`${inter.variable} h-full antialiased`}
+      className="h-full antialiased"
       suppressHydrationWarning
     >
+      <head>
+        {PRELOADED_FONTS.map((font) => (
+          <link
+            key={font}
+            rel="preload"
+            href={`/fonts/${font}.woff2`}
+            as="font"
+            type="font/woff2"
+            crossOrigin="anonymous"
+          />
+        ))}
+      </head>
       <body className="flex min-h-full flex-col bg-background">
         <ThemeProvider
           attribute="class"
@@ -61,7 +68,7 @@ export default async function RootLayout({
               userRole={user?.role ?? null}
             />
             <main className="flex-1">{children}</main>
-            <footer className="border-t border-border bg-card">
+            <footer className="border-t border-border bg-card print:hidden">
               <div className="mx-auto w-full max-w-7xl px-4 py-6 text-xs leading-relaxed text-muted-foreground sm:px-6">
                 <p className="font-medium text-foreground">
                   {t("brand")} — {t("tagline")}

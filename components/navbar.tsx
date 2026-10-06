@@ -41,7 +41,7 @@ export function Navbar({
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       data-scrolled={scrolled ? "" : undefined}
       className={cn(
-        "sticky top-0 z-50 transition-[background-color,border-color,box-shadow] duration-300",
+        "sticky top-0 z-50 transition-[background-color,border-color,box-shadow] duration-300 print:hidden",
         scrolled
           ? "border-b border-border bg-card/75 shadow-[0_1px_3px_rgb(15_42_71_/_0.06)] backdrop-blur-xl"
           : "border-b border-transparent bg-transparent",

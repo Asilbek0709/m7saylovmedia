@@ -129,19 +129,41 @@ export async function saveEvaluation(
     ...scores,
   };
 
-  let { error } = await supabase
-    .from("evaluations")
-    .upsert({ ...row, indicators }, { onConflict: "outlet_id,period" });
+  // Попытки от новой схемы базы к старой: база может отставать от кода.
+  //   007 — у каждого эксперта своя строка тура;
+  //   005 — оценка по индикаторам;
+  //   до 005 — только баллы мезонов.
+  // Индекс считает база по набору весов оценки (006-weight-sets.sql),
+  // поэтому эксперту возвращается сохранённое значение, а не пересчёт.
+  const attempts = [
+    {
+      payload: { ...row, evaluator_id: user.id, indicators },
+      onConflict: "outlet_id,period,evaluator_id",
+    },
+    { payload: { ...row, indicators }, onConflict: "outlet_id,period" },
+    ...(indicators ? [] : [{ payload: row, onConflict: "outlet_id,period" }]),
+  ];
 
-  if (error?.code === "42703") {
-    console.warn(
-      "[MS-7] Колонки evaluations.indicators нет. Выполните supabase/005-indicators.sql — " +
-        "без неё оценка по индикаторам не сохраняется.",
-    );
-    if (indicators) return { ok: false, reason: "failed" };
-    ({ error } = await supabase
+  let saved: { smsi: unknown } | null = null;
+  let error: { code?: string } | null = null;
+
+  for (const [i, attempt] of attempts.entries()) {
+    ({ data: saved, error } = await supabase
       .from("evaluations")
-      .upsert(row, { onConflict: "outlet_id,period" }));
+      .upsert(attempt.payload, { onConflict: attempt.onConflict })
+      .select("smsi")
+      .single());
+
+    // 42703 — нет колонки, 42P10 — нет ограничения уникальности под onConflict.
+    if (!error || (error.code !== "42703" && error.code !== "42P10")) break;
+
+    console.warn(
+      i === 0
+        ? "[MS-7] База без supabase/007-experts.sql: оценка второго эксперта " +
+            "перезапишет первого. Выполните миграцию."
+        : "[MS-7] Колонки evaluations.indicators нет. Выполните supabase/005-indicators.sql — " +
+            "без неё оценка по индикаторам не сохраняется.",
+    );
   }
 
   if (error) return { ok: false, reason: "failed" };
@@ -149,5 +171,10 @@ export async function saveEvaluation(
 
   refresh();
 
-  return { ok: true, outletName, smsi: calculateSMSI(scores) };
+  const smsi =
+    saved?.smsi === undefined || saved?.smsi === null
+      ? calculateSMSI(scores)
+      : Number(saved.smsi);
+
+  return { ok: true, outletName, smsi };
 }

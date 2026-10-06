@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { TriangleAlert } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Reveal } from "@/components/motion/reveal";
@@ -11,7 +12,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MS7_CRITERIA, SMSI_BANDS } from "@/lib/ms7";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { canWrite, getCurrentUser } from "@/lib/auth";
+import { getLongDateFormatter } from "@/lib/format-date";
+import { MS7_CRITERIA, SMSI_BANDS, WEIGHTS_VERSION } from "@/lib/ms7";
+import { cn } from "@/lib/utils";
+import { getWeightHistory } from "@/lib/weights";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("methodology");
@@ -22,8 +35,22 @@ export default async function MethodologyPage() {
   const t = await getTranslations("methodology");
   const tc = await getTranslations("criteria");
   const tb = await getTranslations("bands");
+  const formatDate = await getLongDateFormatter();
+  const [weightHistory, user] = await Promise.all([
+    getWeightHistory(),
+    getCurrentUser(),
+  ]);
 
-  const totalWeight = MS7_CRITERIA.reduce((s, c) => s + c.weight, 0);
+  // Веса на странице — из действующего набора базы, а не из кода.
+  const { active } = weightHistory;
+  const totalWeight = MS7_CRITERIA.reduce(
+    (s, c) => s + active.weights[c.id],
+    0,
+  );
+  // Расхождение — сигнал для тех, кто ведёт оценки; публике он ни к чему.
+  const showMismatch =
+    canWrite(user) &&
+    (weightHistory.mismatch.length > 0 || weightHistory.versionMismatch);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
@@ -81,7 +108,7 @@ export default async function MethodologyPage() {
                       {showLatin && <CardDescription>{latin}</CardDescription>}
                     </div>
                     <span className="shrink-0 rounded-md bg-secondary px-2 py-1 text-xs font-semibold text-secondary-foreground tabular">
-                      {criterion.weight.toFixed(2)}
+                      {active.weights[criterion.id].toFixed(2)}
                     </span>
                   </div>
                 </CardHeader>
@@ -112,6 +139,124 @@ export default async function MethodologyPage() {
           );
         })}
       </div>
+
+      <Reveal delay={0.1}>
+        <Card className="ms7-surface mt-6 overflow-hidden">
+          <CardHeader className="border-b border-border pb-4">
+            <CardTitle className="text-base">{t("weights.title")}</CardTitle>
+            <CardDescription>{t("weights.subtitle")}</CardDescription>
+          </CardHeader>
+          <CardContent className="px-0 pt-5">
+            <div className="px-6">
+              {showMismatch && (
+                <div
+                  role="alert"
+                  className="mb-4 flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs leading-relaxed text-foreground"
+                >
+                  <TriangleAlert
+                    aria-hidden
+                    className="mt-px size-3.5 shrink-0 text-destructive"
+                  />
+                  <span>
+                    <strong className="font-semibold">
+                      {t("weights.mismatchTitle")}
+                    </strong>{" "}
+                    {t("weights.mismatch", {
+                      ui: WEIGHTS_VERSION,
+                      db: active.id,
+                    })}
+                  </span>
+                </div>
+              )}
+              <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                {t("weights.active")}
+              </p>
+              <p className="mt-1 text-sm text-foreground">
+                <span className="font-semibold">
+                  {t("weights.version", { id: active.id })}
+                </span>
+                {active.validFrom && (
+                  <span className="text-muted-foreground">
+                    {" · "}
+                    {t("weights.validFrom", {
+                      date: formatDate(active.validFrom),
+                    })}
+                  </span>
+                )}
+              </p>
+              {!weightHistory.live && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("weights.builtin")}
+                </p>
+              )}
+              <p className="mt-5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                {t("weights.history")}
+              </p>
+            </div>
+
+            <div className="mt-2 overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="pl-6">
+                      {t("weights.versionCol")}
+                    </TableHead>
+                    <TableHead>{t("weights.validFromCol")}</TableHead>
+                    {MS7_CRITERIA.map((c) => (
+                      <TableHead
+                        key={c.id}
+                        title={tc(`${c.id}.name`)}
+                        className="text-center"
+                      >
+                        {tc(`${c.id}.code`)}
+                      </TableHead>
+                    ))}
+                    <TableHead className="min-w-40 pr-6">
+                      {t("weights.noteCol")}
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...weightHistory.sets].reverse().map((set) => {
+                    const current = set.id === active.id;
+                    return (
+                      <TableRow
+                        key={set.id}
+                        className={cn(current && "bg-muted/40")}
+                      >
+                        <TableCell className="pl-6 text-sm whitespace-nowrap">
+                          <span className="font-semibold tabular">
+                            v{set.id}
+                          </span>
+                          {current && (
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              {t("weights.current")}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm whitespace-nowrap text-muted-foreground">
+                          {set.validFrom ? formatDate(set.validFrom) : "—"}
+                        </TableCell>
+                        {MS7_CRITERIA.map((c) => (
+                          <TableCell
+                            key={c.id}
+                            className="text-center text-sm tabular"
+                          >
+                            {set.weights[c.id].toFixed(2)}
+                          </TableCell>
+                        ))}
+                        <TableCell className="pr-6 text-xs text-muted-foreground">
+                          {set.note ?? "—"}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </Reveal>
 
       <Reveal delay={0.2}>
         <Card className="ms7-surface mt-6">
