@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { LogOut, UserRound } from "lucide-react";
+import { ClipboardList, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { signOut } from "@/app/actions/auth";
@@ -83,6 +83,23 @@ export function UserMenu({
           <p className="mt-1 text-[11px] text-muted-foreground">{roleLabel}</p>
         </div>
         <DropdownMenuSeparator />
+        {(role === "expert" || role === "admin") && (
+          <DropdownMenuItem asChild className="gap-2">
+            <Link href="/my">
+              <ClipboardList className="size-4 text-muted-foreground" />
+              {ta("myEvaluations")}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {role === "admin" && (
+          <DropdownMenuItem asChild className="gap-2">
+            <Link href="/admin">
+              <ShieldCheck className="size-4 text-muted-foreground" />
+              {ta("admin")}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {(role === "expert" || role === "admin") && <DropdownMenuSeparator />}
         <DropdownMenuItem
           disabled={pending}
           onSelect={(event) => {

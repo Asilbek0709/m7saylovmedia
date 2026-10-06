@@ -325,6 +325,19 @@ export interface CalculatorPanelProps {
   /** Почему сохранение недоступно — показывается вместо формы. */
   saveHint: "demo" | "signin" | "pending" | null;
   defaultPeriod: string;
+  /** Своя оценка, открытая из «Моих оценок» для правки. */
+  editing?: EditingEvaluation | null;
+  /** В адресе была ?edit=…, но такой своей оценки нет. */
+  editNotFound?: boolean;
+}
+
+export interface EditingEvaluation {
+  id: string;
+  outletId: string;
+  outletName: string;
+  period: string;
+  scores: CriteriaScores;
+  indicators: IndicatorScores | null;
 }
 
 export function CalculatorPanel({
@@ -332,6 +345,8 @@ export function CalculatorPanel({
   canSave,
   saveHint,
   defaultPeriod,
+  editing = null,
+  editNotFound = false,
 }: CalculatorPanelProps) {
   const t = useTranslations("calculator");
   const tc = useTranslations("criteria");
@@ -344,7 +359,9 @@ export function CalculatorPanel({
     [outlets],
   );
 
-  const { scores, setOne, animateTo } = useAnimatedScores(DEFAULT_SCORES);
+  const { scores, setOne, animateTo } = useAnimatedScores(
+    editing?.scores ?? DEFAULT_SCORES,
+  );
   const [weighted, setWeighted] = React.useState(true);
 
   const indicatorNames = React.useMemo(
@@ -357,9 +374,20 @@ export function CalculatorPanel({
       ) as Record<CriterionId, string[]>,
     [tc],
   );
-  const [mode, setMode] = React.useState<"direct" | "indicators">("direct");
+  // Индикаторы восстанавливаются, только если их столько же, сколько в
+  // методике: интерфейс рисует ползунки по списку названий.
+  const restoredIndicators =
+    editing?.indicators &&
+    MS7_CRITERIA.every(
+      (c) => editing.indicators?.[c.id]?.length === indicatorNames[c.id].length,
+    )
+      ? editing.indicators
+      : null;
+  const [mode, setMode] = React.useState<"direct" | "indicators">(
+    restoredIndicators ? "indicators" : "direct",
+  );
   const [indicators, setIndicators] = React.useState<IndicatorScores | null>(
-    null,
+    restoredIndicators,
   );
 
   const switchMode = (next: "direct" | "indicators") => {
@@ -384,10 +412,13 @@ export function CalculatorPanel({
     setOne(id, criterionFromIndicators(list));
   };
   const [searchOpen, setSearchOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState<Outlet | null>(null);
+  // При правке базой сравнения служит итог тура этого издания, если он в каталоге.
+  const [selected, setSelected] = React.useState<Outlet | null>(
+    () => outlets.find((o) => o.outlet_id === editing?.outletId) ?? null,
+  );
 
-  const [outletName, setOutletName] = React.useState("");
-  const [period, setPeriod] = React.useState(defaultPeriod);
+  const [outletName, setOutletName] = React.useState(editing?.outletName ?? "");
+  const [period, setPeriod] = React.useState(editing?.period ?? defaultPeriod);
   const [saving, setSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState<{
@@ -435,7 +466,8 @@ export function CalculatorPanel({
   const pickOutlet = (outlet: Outlet) => {
     setSelected(outlet);
     setSearchOpen(false);
-    setOutletName(outlet.name);
+    // При правке издание зафиксировано: выбор из поиска меняет только базу сравнения.
+    if (!editing) setOutletName(outlet.name);
     setSaved(null);
     setSaveError(null);
     setMode("direct");
@@ -451,7 +483,7 @@ export function CalculatorPanel({
 
     const result = await saveEvaluation({
       // Из демо-набора приходит slug, а не UUID — действие это распознаёт.
-      outletId: selected?.outlet_id ?? null,
+      outletId: editing?.outletId ?? selected?.outlet_id ?? null,
       outletName,
       period,
       scores,
@@ -501,6 +533,37 @@ export function CalculatorPanel({
           </TabsList>
         </Tabs>
       </Reveal>
+
+      {(editing || editNotFound) && (
+        <div
+          role="status"
+          className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-secondary px-4 py-3 text-sm text-secondary-foreground"
+        >
+          {editing ? (
+            <>
+              <span className="min-w-0">
+                <strong className="font-semibold">
+                  {t("edit.banner", {
+                    outlet: editing.outletName,
+                    period: editing.period,
+                  })}
+                </strong>
+                <span className="block text-xs">{t("edit.hint")}</span>
+              </span>
+              <span className="flex shrink-0 gap-2">
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/calculator">{t("edit.cancel")}</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link href="/my">{t("edit.back")}</Link>
+                </Button>
+              </span>
+            </>
+          ) : (
+            <span>{t("edit.notFound")}</span>
+          )}
+        </div>
+      )}
 
       {/* ------------------------------ умный поиск ------------------------------ */}
       <Reveal delay={0.05}>
@@ -800,6 +863,7 @@ export function CalculatorPanel({
                       id="save-outlet"
                       value={outletName}
                       disabled={saving}
+                      readOnly={editing !== null}
                       placeholder={t("save.outletPlaceholder")}
                       onChange={(e) => setOutletName(e.target.value)}
                       className="h-8 text-sm"
@@ -814,6 +878,7 @@ export function CalculatorPanel({
                       id="save-period"
                       value={period}
                       disabled={saving}
+                      readOnly={editing !== null}
                       onChange={(e) => setPeriod(e.target.value)}
                       className="h-8 text-sm"
                     />
@@ -831,10 +896,10 @@ export function CalculatorPanel({
                       {t("save.success")} · {saved.outletName}{" "}
                       <span className="tabular">{saved.smsi.toFixed(1)}</span>
                       <Link
-                        href="/rating"
+                        href={editing ? "/my" : "/rating"}
                         className="font-medium text-foreground underline underline-offset-4"
                       >
-                        {t("save.viewRating")}
+                        {editing ? t("edit.back") : t("save.viewRating")}
                       </Link>
                     </p>
                   )}

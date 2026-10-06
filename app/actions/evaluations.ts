@@ -178,3 +178,37 @@ export async function saveEvaluation(
 
   return { ok: true, outletName, smsi };
 }
+
+export type DeleteEvaluationResult =
+  | { ok: true }
+  | { ok: false; reason: "unavailable" | "unauthorized" | "forbidden" | "failed" };
+
+/**
+ * Удаление оценки. Права проверяет база (007-experts.sql): эксперт удаляет
+ * только свою строку, администратор — любую. Чужая строка просто не
+ * найдётся — это и есть отказ.
+ */
+export async function deleteEvaluation(
+  id: string,
+): Promise<DeleteEvaluationResult> {
+  const supabase = await createClient();
+  if (!supabase) return { ok: false, reason: "unavailable" };
+
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, reason: "unauthorized" };
+  if (!canWrite(user) || !UUID_RE.test(id)) {
+    return { ok: false, reason: "forbidden" };
+  }
+
+  const { data, error } = await supabase
+    .from("evaluations")
+    .delete()
+    .eq("id", id)
+    .select("id");
+
+  if (error) return { ok: false, reason: "failed" };
+  if (!data?.length) return { ok: false, reason: "forbidden" };
+
+  refresh();
+  return { ok: true };
+}
