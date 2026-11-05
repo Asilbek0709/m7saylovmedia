@@ -28,6 +28,8 @@ export interface RankedOutlet extends RankingRow {
   prevSmsi: number | null;
   /** null — демо-режим или база до 007-experts.sql. */
   consensus: Consensus | null;
+  /** Версия весов оценки; null — база до 006-weight-sets.sql. */
+  weightSetId: number | null;
 }
 
 export interface RankingsResult {
@@ -139,6 +141,7 @@ const rank = (rows: RankingRow[]): RankedOutlet[] =>
       smsi: calculateSMSI(scoresOf(row)),
       prevSmsi: null,
       consensus: null,
+      weightSetId: WEIGHTS_VERSION,
     }))
     .sort((a, b) => b.smsi - a.smsi || a.name.localeCompare(b.name))
     .map((row, i) => ({ ...row, rank: i + 1 }));
@@ -170,6 +173,7 @@ export async function getRankings(
             smsi: Number(row.smsi),
             prevSmsi: numberOrNull(row.prev_smsi),
             consensus: consensusOf(row),
+            weightSetId: numberOrNull(row.weight_set_id),
           })),
           period: fetched[0].period ?? DEMO_PERIOD,
           live: true,
@@ -183,6 +187,83 @@ export async function getRankings(
     period: DEMO_PERIOD,
     live: false,
   };
+}
+
+/**
+ * Итоги указанного тура — для выгрузки. Без тура или в демо-режиме —
+ * последний тур, как в рейтинге.
+ */
+export async function getRoundRankings(
+  period: string | null,
+): Promise<RankingsResult> {
+  const supabase = await createClient();
+  if (!supabase || !period) return getRankings(null);
+
+  try {
+    const { data, error } = await selectLatestColumns((columns) =>
+      supabase
+        .from("media_dynamics")
+        .select(columns)
+        .eq("period", period)
+        .order("smsi", { ascending: false })
+        .order("name"),
+    );
+    if (!error && data?.length) {
+      return {
+        rows: (data as DynamicsRow[]).map((row, i) => ({
+          ...row,
+          ...scoresOf(row),
+          rank: i + 1,
+          smsi: Number(row.smsi),
+          prevSmsi: numberOrNull(row.prev_smsi),
+          consensus: consensusOf(row),
+          weightSetId: numberOrNull(row.weight_set_id),
+        })),
+        period,
+        live: true,
+      };
+    }
+  } catch {}
+
+  return getRankings(null);
+}
+
+export interface DynamicsCell {
+  slug: string;
+  name: string;
+  period: string;
+  evaluatedAt: string;
+  smsi: number;
+}
+
+/** SMSI всех изданий по всем турам — для таблицы динамики в выгрузке. */
+export async function getAllDynamics(): Promise<DynamicsCell[]> {
+  const supabase = await createClient();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("media_dynamics")
+        .select("slug, name, period, evaluated_at, smsi")
+        .order("evaluated_at");
+      if (!error && data?.length) {
+        return data.map((row) => ({
+          slug: row.slug as string,
+          name: row.name as string,
+          period: row.period as string,
+          evaluatedAt: (row.evaluated_at as string) ?? "",
+          smsi: Number(row.smsi),
+        }));
+      }
+    } catch {}
+  }
+
+  return rank(DEMO_RANKINGS).map((row) => ({
+    slug: row.slug,
+    name: row.name,
+    period: DEMO_PERIOD,
+    evaluatedAt: "",
+    smsi: row.smsi,
+  }));
 }
 
 export async function getOutletHistory(

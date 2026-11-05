@@ -648,5 +648,77 @@
       "failed": "Could not save. Has supabase/008-admin.sql been run?"
     },
     "saved": "Saved"
+  },
+  "export": {
+    "download": "Download Excel",
+    "downloadHint": "Round results, spread, expert agreement, dynamics and methodology — for dissertation tables and appendices.",
+    "sheets": {
+      "results": "Round results",
+      "spread": "Spread by criterion",
+      "agreement": "Agreement",
+      "experts": "Expert scores",
+      "ranks": "Rank matrix",
+      "dynamics": "Dynamics",
+      "method": "Methodology"
+    },
+    "col": {
+      "rank": "#",
+      "outlet": "Outlet",
+      "website": "Website",
+      "ownership": "Ownership",
+      "region": "Region",
+      "smsi": "SMSI",
+      "level": "Level",
+      "experts": "Experts",
+      "smsiSd": "SMSI σ",
+      "smsiRange": "SMSI range",
+      "needsConsensus": "Needs consensus",
+      "weights": "Weight version",
+      "sd": "σ",
+      "range": "range",
+      "expert": "Expert",
+      "date": "Assessment date",
+      "sum": "Rank sum Rᵢ",
+      "criterion": "Criterion",
+      "code": "Code",
+      "weight": "Weight",
+      "parameter": "Parameter",
+      "value": "Value",
+      "from": "from",
+      "to": "to"
+    },
+    "yes": "yes",
+    "no": "no",
+    "agreement": {
+      "period": "Round",
+      "experts": "Experts, m",
+      "outlets": "Outlets in the common set, n",
+      "w": "Kendall's W (database)",
+      "wCheck": "Kendall's W (recomputed from the rank matrix)",
+      "chi2": "χ² = m·(n − 1)·W",
+      "df": "Degrees of freedom, n − 1",
+      "p": "p-value",
+      "level": "Strength",
+      "conclusion": "Conclusion",
+      "flagged": "Outlets with SMSI range > 5",
+      "notComputed": "W is not calculated: at least 2 experts and 2 outlets rated by all of them are required."
+    },
+    "ranks": {
+      "note": "Rank 1 is the expert's best SMSI; tied scores get the average rank. Only outlets rated by every expert in the round are included.",
+      "s": "S = Σ(Rᵢ − R̄)²",
+      "ties": "ΣT = Σ(t³ − t) over ties",
+      "formula": "W = 12·S / (m²·(n³ − n) − m·ΣT)"
+    },
+    "expertsNote": "Experts are anonymised (E1, E2, …); numbering matches the “Rank matrix” sheet.",
+    "method": {
+      "formula": "SMSI = Σ (Mᵢ × Wᵢ), i = 1…7",
+      "version": "Weight version",
+      "validFrom": "In force from",
+      "bands": "Level scale",
+      "generated": "Export generated",
+      "source": "Source",
+      "demo": "Demo data: no database connected, values are illustrative."
+    },
+    "expertCode": "E{n}"
   }
 }

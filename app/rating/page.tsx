@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { TriangleAlert } from "lucide-react";
+import { Download, TriangleAlert } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Reveal } from "@/components/motion/reveal";
@@ -58,6 +58,7 @@ export default async function RatingPage({
   const tc = await getTranslations("criteria");
   const tb = await getTranslations("bands");
   const tCommon = await getTranslations("common");
+  const tExport = await getTranslations("export");
   const { rows: allRows, period, live } = await getRankings(null);
   const agreement = live ? await getPeriodAgreement(period) : null;
   const flaggedCount = allRows.filter(
@@ -150,9 +151,18 @@ export default async function RatingPage({
           </p>
         </div>
 
-        <Button asChild>
-          <Link href="/calculator">{t("openCalculator")}</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {/* Файл, а не страница — обычная ссылка, без клиентской навигации. */}
+          <Button asChild variant="outline" title={tExport("downloadHint")}>
+            <a href={`/export?period=${encodeURIComponent(period)}`} download>
+              <Download className="size-4" />
+              {tExport("download")}
+            </a>
+          </Button>
+          <Button asChild>
+            <Link href="/calculator">{t("openCalculator")}</Link>
+          </Button>
+        </div>
       </Reveal>
 
       {!live && (

@@ -287,6 +287,7 @@ async function ConsensusTab() {
 
 async function EvaluationsTab({ period }: { period: string | null }) {
   const t = await getTranslations("admin");
+  const tExport = await getTranslations("export");
   const periods = await getPeriods();
   const active = period && periods.includes(period) ? period : periods[0];
   const items = active ? await getEvaluationsForAdmin({ period: active }) : [];
@@ -319,6 +320,16 @@ async function EvaluationsTab({ period }: { period: string | null }) {
             <span className="ml-auto text-xs text-muted-foreground tabular">
               {t("evaluations.count", { count: items.length })}
             </span>
+            {active && (
+              <a
+                href={`/export?period=${encodeURIComponent(active)}`}
+                download
+                title={tExport("downloadHint")}
+                className="text-xs font-medium text-foreground underline underline-offset-4"
+              >
+                {tExport("download")}
+              </a>
+            )}
           </div>
         )}
       </CardHeader>

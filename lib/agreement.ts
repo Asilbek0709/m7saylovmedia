@@ -135,3 +135,96 @@ export async function getPeriodAgreement(
     return null;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/*  Матрица рангов — для проверки W вручную                            */
+/* ------------------------------------------------------------------ */
+
+export interface RankMatrix {
+  /** Ключи экспертов в порядке колонок; в выгрузке — Э1, Э2, … */
+  experts: string[];
+  /** Издания, которые оценили все эксперты тура. */
+  outlets: { id: string; name: string }[];
+  /** ranks[издание][эксперт]; 1 — лучший SMSI, связанные — средний ранг. */
+  ranks: number[][];
+  /** Сумма рангов издания, Rᵢ. */
+  sums: number[];
+  /** S = Σ(Rᵢ − R̄)². */
+  s: number;
+  /** ΣT = Σ(t³ − t) по группам связей всех экспертов. */
+  ties: number;
+  w: number | null;
+  chi2: number | null;
+  df: number | null;
+  p: number | null;
+}
+
+/**
+ * Та же формула, что в представлении period_agreement, но на стороне
+ * приложения — выгрузка показывает каждое промежуточное число, и W из
+ * базы можно сверить с пересчётом.
+ */
+export function buildRankMatrix(
+  evaluations: {
+    evaluatorId: string | null;
+    outletId: string;
+    outletName: string;
+    smsi: number;
+  }[],
+): RankMatrix {
+  const byExpert = new Map<string, Map<string, number>>();
+  const names = new Map<string, string>();
+  for (const e of evaluations) {
+    const key = e.evaluatorId ?? "legacy";
+    if (!byExpert.has(key)) byExpert.set(key, new Map());
+    byExpert.get(key)!.set(e.outletId, e.smsi);
+    names.set(e.outletId, e.outletName);
+  }
+
+  const experts = [...byExpert.keys()].sort();
+  const outlets = [...names.keys()]
+    .filter((id) => experts.every((x) => byExpert.get(x)!.has(id)))
+    .map((id) => ({ id, name: names.get(id)! }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  const m = experts.length;
+  const n = outlets.length;
+  const ranks = outlets.map(() => Array<number>(m).fill(0));
+  let ties = 0;
+
+  experts.forEach((expert, j) => {
+    const marks = byExpert.get(expert)!;
+    const order = outlets
+      .map((o, i) => ({ i, v: marks.get(o.id)! }))
+      .sort((a, b) => b.v - a.v);
+    for (let a = 0; a < order.length; ) {
+      let b = a;
+      while (b + 1 < order.length && order[b + 1].v === order[a].v) b++;
+      const t = b - a + 1;
+      for (let k = a; k <= b; k++) ranks[order[k].i][j] = (a + b) / 2 + 1;
+      ties += t ** 3 - t;
+      a = b + 1;
+    }
+  });
+
+  const sums = ranks.map((row) => row.reduce((s, r) => s + r, 0));
+  const mean = n ? sums.reduce((s, r) => s + r, 0) / n : 0;
+  const s = sums.reduce((acc, r) => acc + (r - mean) ** 2, 0);
+  const denominator = m * m * (n ** 3 - n) - m * ties;
+  const w = m >= 2 && n >= 2 && denominator > 0 ? (12 * s) / denominator : null;
+  const chi2 = w === null ? null : m * (n - 1) * w;
+  const df = w === null ? null : n - 1;
+
+  return {
+    experts,
+    outlets,
+    ranks,
+    sums,
+    s,
+    ties,
+    w,
+    chi2,
+    df,
+    p: chi2 !== null && df ? chiSquarePValue(chi2, df) : null,
+  };
+}
