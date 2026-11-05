@@ -59,6 +59,7 @@ import {
   type CriteriaScores,
   type CriterionId,
   type IndicatorScores,
+  type Weights,
 } from "@/lib/ms7";
 
 /* ------------------------------------------------------------------ */
@@ -77,10 +78,24 @@ export interface Outlet extends RankingRow {
   smsi: number;
 }
 
-/** Каталог для поиска: издания с посчитанным индексом, по убыванию. */
-function buildCatalog(rows: RankingRow[]): Outlet[] {
+/**
+ * Каталог для поиска: издания с индексом, по убыванию. Индекс из базы
+ * берётся как есть — при нескольких экспертах он посчитан от неокруглённых
+ * средних, и пересчёт по показанным баллам может разойтись на 0.1.
+ */
+function buildCatalog(rows: RankingRow[], weights: Weights): Outlet[] {
   return rows
-    .map((row) => ({ ...row, scores: scoresOf(row), smsi: calculateSMSI(scoresOf(row)) }))
+    .map((row) => {
+      const stored = (row as RankingRow & { smsi?: number }).smsi;
+      return {
+        ...row,
+        scores: scoresOf(row),
+        smsi:
+          stored === undefined
+            ? calculateSMSI(scoresOf(row), true, weights)
+            : Number(stored),
+      };
+    })
     .sort((a, b) => b.smsi - a.smsi);
 }
 
@@ -325,6 +340,8 @@ export interface CalculatorPanelProps {
   /** Почему сохранение недоступно — показывается вместо формы. */
   saveHint: "demo" | "signin" | "pending" | null;
   defaultPeriod: string;
+  /** Действующие веса из базы (lib/weights.ts); в демо — из кода. */
+  weights: Weights;
   /** Своя оценка, открытая из «Моих оценок» для правки. */
   editing?: EditingEvaluation | null;
   /** В адресе была ?edit=…, но такой своей оценки нет. */
@@ -345,6 +362,7 @@ export function CalculatorPanel({
   canSave,
   saveHint,
   defaultPeriod,
+  weights,
   editing = null,
   editNotFound = false,
 }: CalculatorPanelProps) {
@@ -353,7 +371,10 @@ export function CalculatorPanel({
   const tb = useTranslations("bands");
   const tCommon = useTranslations("common");
 
-  const outlets = React.useMemo(() => buildCatalog(rows), [rows]);
+  const outlets = React.useMemo(
+    () => buildCatalog(rows, weights),
+    [rows, weights],
+  );
   const sectorAverage = React.useMemo(
     () => sectorAverageOf(outlets),
     [outlets],
@@ -438,17 +459,18 @@ export function CalculatorPanel({
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  const smsi = calculateSMSI(scores, weighted);
+  const smsi = calculateSMSI(scores, weighted, weights);
   const band = resolveBand(smsi);
   const strongest = strongestCriterion(scores);
   const weakest = weakestCriterion(scores);
   const plan = buildRecommendations(scores, {
     weighted,
+    weights,
     indicators: mode === "indicators" ? indicators : null,
   });
 
   const baseline = selected?.scores ?? null;
-  const baselineSmsi = baseline ? calculateSMSI(baseline, weighted) : null;
+  const baselineSmsi = baseline ? calculateSMSI(baseline, weighted, weights) : null;
   const modified =
     baseline !== null &&
     MS7_CRITERIA.some((c) => scores[c.id] !== baseline[c.id]);
@@ -457,7 +479,7 @@ export function CalculatorPanel({
     id: criterion.id,
     axis: tc(`${criterion.id}.short`),
     name: tc(`${criterion.id}.name`),
-    weight: criterion.weight,
+    weight: weights[criterion.id],
     value: scores[criterion.id],
     benchmark: sectorAverage[criterion.id],
     baseline: baseline ? baseline[criterion.id] : null,
@@ -775,7 +797,7 @@ export function CalculatorPanel({
                             <span className="block truncate text-xs text-muted-foreground">
                               {showLatin && `${latin} · `}
                               <span className="tabular">
-                                {criterion.weight.toFixed(2)}
+                                {weights[criterion.id].toFixed(2)}
                               </span>
                               {changed && (
                                 <>

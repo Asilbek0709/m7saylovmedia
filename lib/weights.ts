@@ -49,6 +49,18 @@ export function weightMismatch(set: WeightSet): CriterionId[] {
   ).map((c) => c.id);
 }
 
+/**
+ * Набор, которым посчитана оценка. null — оценка до 006-weight-sets.sql,
+ * её считали весами версии 1 из кода.
+ */
+export function weightSetFor(
+  history: WeightHistory,
+  weightSetId: number | null,
+): WeightSet {
+  if (weightSetId === null) return BUILTIN_WEIGHT_SET;
+  return history.sets.find((s) => s.id === weightSetId) ?? history.active;
+}
+
 /** Действующий набор на дату: последний с valid_from не позже неё. */
 export function activeWeightSet(sets: WeightSet[], date: string): WeightSet {
   const valid = sets.filter((s) => !s.validFrom || s.validFrom <= date);

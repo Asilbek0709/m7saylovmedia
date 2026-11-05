@@ -29,6 +29,7 @@ import {
   SMSI_BANDS,
   type CriterionId,
 } from "@/lib/ms7";
+import { getWeightHistory } from "@/lib/weights";
 
 
 const TILE: Record<CriterionId, { span: string; icon: typeof ShieldCheck }> = {
@@ -46,10 +47,12 @@ export default async function LandingPage() {
   const tc = await getTranslations("criteria");
   const tb = await getTranslations("bands");
 
-  const profileBand = resolveBand(calculateSMSI(DEFAULT_SCORES));
+  // Модель на главной — с действующими весами из базы (в демо — из кода).
+  const { weights } = (await getWeightHistory()).active;
+  const profileBand = resolveBand(calculateSMSI(DEFAULT_SCORES, true, weights));
   const formulaSteps = MS7_CRITERIA.map((criterion) => ({
     id: criterion.id,
-    weight: criterion.weight,
+    weight: weights[criterion.id],
     value: DEFAULT_SCORES[criterion.id],
     short: tc(`${criterion.id}.short`),
     name: tc(`${criterion.id}.name`),
@@ -156,7 +159,7 @@ export default async function LandingPage() {
                           <Icon className="size-4.5" />
                         </span>
                         <span className="rounded-md bg-muted px-2 py-1 text-[11px] font-semibold text-muted-foreground tabular">
-                          {t("model.weight")} {criterion.weight.toFixed(2)}
+                          {t("model.weight")} {weights[criterion.id].toFixed(2)}
                         </span>
                       </div>
 

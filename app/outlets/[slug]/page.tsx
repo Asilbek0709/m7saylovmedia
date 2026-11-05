@@ -29,6 +29,7 @@ import { formatScore, MS7_CRITERIA, resolveBand } from "@/lib/ms7";
 import { getOutletHistory } from "@/lib/rankings";
 import { cn } from "@/lib/utils";
 import { buildRecommendations } from "@/lib/recommendations";
+import { getWeightHistory, weightSetFor } from "@/lib/weights";
 
 const signed = (n: number) => `${n > 0 ? "+" : ""}${n.toFixed(1)}`;
 
@@ -66,12 +67,14 @@ export default async function OutletPage({
   const band = resolveBand(last.smsi);
   const delta = prev ? last.smsi - prev.smsi : null;
   const consensus = last.consensus;
+  // Веса той версии, которой посчитан последний тур, — не текущие из кода.
+  const weightSet = weightSetFor(await getWeightHistory(), last.weightSetId);
 
   const criteria = MS7_CRITERIA.map((criterion) => ({
     id: criterion.id,
     short: tc(`${criterion.id}.short`),
     name: tc(`${criterion.id}.name`),
-    weight: criterion.weight,
+    weight: weightSet.weights[criterion.id],
     current: last[criterion.id],
     previous: prev ? prev[criterion.id] : null,
   }));
@@ -364,7 +367,10 @@ export default async function OutletPage({
       )}
 
       <Reveal delay={0.18}>
-        <Recommendations plan={buildRecommendations(last, { smsi: last.smsi })} className="mt-6" />
+        <Recommendations plan={buildRecommendations(last, {
+              smsi: last.smsi,
+              weights: weightSet.weights,
+            })} className="mt-6" />
       </Reveal>
     </div>
   );

@@ -16,11 +16,10 @@ export interface Criterion {
 
 
 /**
- * Веса действующей версии модели. Запись истины — таблица
- * public.weight_sets (supabase/006-weight-sets.sql): сохранённые индексы
- * считает база по набору своей оценки. Здесь — копия для калькулятора
- * и демо-режима; при новой версии весов меняются оба места, а
- * расхождение показывает страница методики (см. lib/weights.ts).
+ * Веса версии 1 модели. Запись истины — таблица public.weight_sets
+ * (supabase/006-weight-sets.sql): сохранённые индексы считает база, а
+ * страницы получают действующие веса через lib/weights.ts и передают их
+ * в calculateSMSI. Эти константы нужны только в демо-режиме, без базы.
  */
 export const WEIGHTS_VERSION = 1;
 
@@ -36,6 +35,14 @@ export const MS7_CRITERIA: readonly Criterion[] = [
 
 
 export type CriteriaScores = Record<CriterionId, number>;
+
+/** Веса мезонов: доли, в сумме 1. */
+export type Weights = Record<CriterionId, number>;
+
+/** Веса из кода — для демо-режима и как значение по умолчанию. */
+export const DEFAULT_WEIGHTS: Weights = Object.fromEntries(
+  MS7_CRITERIA.map((c) => [c.id, c.weight]),
+) as Weights;
 
 export type SmsiBandId =
   | "veryhigh"
@@ -115,9 +122,10 @@ const clampScore = (n: number) =>
 export function calculateSMSI(
   scores: CriteriaScores,
   weighted: boolean = true,
+  weights: Weights = DEFAULT_WEIGHTS,
 ): number {
   const total = MS7_CRITERIA.reduce((sum, criterion) => {
-    const weight = weighted ? criterion.weight : 1 / MS7_CRITERIA.length;
+    const weight = weighted ? weights[criterion.id] : 1 / MS7_CRITERIA.length;
     return sum + clampScore(scores[criterion.id]) * weight;
   }, 0);
 

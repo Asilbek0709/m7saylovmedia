@@ -339,8 +339,8 @@
       "validFromCol": "In force since",
       "noteCol": "Note",
       "current": "current",
-      "mismatchTitle": "Interface weights differ from the database.",
-      "mismatch": "The calculator uses the weights in code (version {ui}), while new assessments are saved with version {db} from the database. Update lib/ms7.ts."
+      "mismatchTitle": "Code weights differ from the database.",
+      "mismatch": "The site calculates with version {db} from the database. The constants in lib/ms7.ts (version {ui}) are used only in demo mode without a database — update them when convenient."
     }
   },
   "criteria": {
@@ -638,7 +638,7 @@
       "sum": "Sum of weights: {sum}",
       "sumError": "The sum must be exactly 1.000.",
       "submit": "Add version",
-      "success": "Version added. Copy the same weights into lib/ms7.ts, otherwise the calculator keeps using the old ones."
+      "success": "Version added. The calculator and new assessments use it right away; past assessments are unchanged."
     },
     "errors": {
       "unavailable": "Supabase is not connected.",

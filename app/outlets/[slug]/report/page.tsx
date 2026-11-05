@@ -12,7 +12,7 @@ import { getLongDateFormatter } from "@/lib/format-date";
 import { formatScore, MS7_CRITERIA, resolveBand, SMSI_BANDS } from "@/lib/ms7";
 import { getOutletHistory, type OutletHistory } from "@/lib/rankings";
 import { buildRecommendations } from "@/lib/recommendations";
-import { BUILTIN_WEIGHT_SET, getWeightHistory } from "@/lib/weights";
+import { getWeightHistory, weightSetFor } from "@/lib/weights";
 
 type Params = { params: Promise<{ slug: string }> };
 type SearchParams = {
@@ -69,9 +69,7 @@ export default async function ReportPage({
   const point = byPeriod ?? points[points.length - 1];
 
   const weightHistory = await getWeightHistory();
-  const weightSet =
-    weightHistory.sets.find((s) => s.id === point.weightSetId) ??
-    (point.weightSetId === null ? BUILTIN_WEIGHT_SET : weightHistory.active);
+  const weightSet = weightSetFor(weightHistory, point.weightSetId);
 
   const band = resolveBand(point.smsi);
   const consensus = point.consensus;
@@ -90,7 +88,10 @@ export default async function ReportPage({
     };
   });
 
-  const plan = buildRecommendations(point, { smsi: point.smsi });
+  const plan = buildRecommendations(point, {
+    smsi: point.smsi,
+    weights: weightSet.weights,
+  });
   const nextBand = SMSI_BANDS.find((b) => b.id === plan.nextBand);
 
   const meta = [

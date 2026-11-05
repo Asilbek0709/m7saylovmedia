@@ -8,6 +8,7 @@ import {
   type CriterionId,
   type IndicatorScores,
   type SmsiBandId,
+  type Weights,
 } from "@/lib/ms7";
 
 export interface RecommendationStep {
@@ -63,20 +64,23 @@ export function buildRecommendations(
      * своей версии. План тогда строится от записанного значения.
      */
     smsi?: number;
+    /** Веса версии, которой посчитана оценка; по умолчанию — из кода. */
+    weights?: Weights;
   } = {},
 ): RecommendationPlan {
   const weighted = options.weighted ?? true;
+  const weights = options.weights;
   const weightOf = (id: CriterionId) =>
     weighted
-      ? MS7_CRITERIA.find((c) => c.id === id)!.weight
+      ? (weights?.[id] ?? MS7_CRITERIA.find((c) => c.id === id)!.weight)
       : 1 / MS7_CRITERIA.length;
 
   const offset =
     options.smsi === undefined
       ? 0
-      : options.smsi - calculateSMSI(scores, weighted);
+      : options.smsi - calculateSMSI(scores, weighted, weights);
   const smsiOf = (s: CriteriaScores) =>
-    round1(calculateSMSI(s, weighted) + offset);
+    round1(calculateSMSI(s, weighted, weights) + offset);
 
   const smsi = smsiOf(scores);
   const band = resolveBand(smsi);

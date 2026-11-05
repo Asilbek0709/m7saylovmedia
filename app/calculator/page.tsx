@@ -6,6 +6,7 @@ import { canWrite, getCurrentUser } from "@/lib/auth";
 import { getOwnEvaluation } from "@/lib/evaluation-records";
 import { getRankings } from "@/lib/rankings";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getWeightHistory } from "@/lib/weights";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("calculator");
@@ -18,7 +19,10 @@ export default async function CalculatorPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { rows, period } = await getRankings(50);
+  const [{ rows, period }, weightHistory] = await Promise.all([
+    getRankings(50),
+    getWeightHistory(),
+  ]);
   const user = isSupabaseConfigured ? await getCurrentUser() : null;
 
   // ?edit=<id> — правка своей оценки из «Моих оценок».
@@ -43,6 +47,7 @@ export default async function CalculatorPage({
       canSave={canSave}
       saveHint={saveHint}
       defaultPeriod={period}
+      weights={weightHistory.active.weights}
       editing={
         editing && {
           id: editing.id,
