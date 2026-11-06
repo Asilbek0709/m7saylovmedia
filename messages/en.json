@@ -76,7 +76,8 @@
     "invalid": "Please fill in both email and password.",
     "submitting": "Signing in...",
     "failed": "Sign-in failed. Check your email and password.",
-    "unavailable": "Sign-in is unavailable: Supabase is not connected."
+    "unavailable": "Sign-in is unavailable: Supabase is not connected.",
+    "linkError": "The link from the email is invalid or has expired. Request a new one."
   },
   "auth": {
     "signOut": "Sign out",
@@ -85,7 +86,8 @@
     "roleExpert": "Expert",
     "roleAdmin": "Administrator",
     "myEvaluations": "My assessments",
-    "admin": "Administration"
+    "admin": "Administration",
+    "changePassword": "Change password"
   },
   "register": {
     "title": "Expert registration",
@@ -609,7 +611,10 @@
         "pending": "Pending",
         "expert": "Expert",
         "admin": "Administrator"
-      }
+      },
+      "sendReset": "Send a password reset link",
+      "sendResetShort": "Reset password",
+      "resetSent": "Reset link sent"
     },
     "consensus": {
       "subtitle": "The SMSI range between experts exceeds 5 points. Each expert's assessment is listed below, with the extremes marked.",
@@ -645,7 +650,8 @@
       "forbidden": "Insufficient permissions.",
       "invalid": "Check the data: the date must be today or later and after previous versions, and the weights must sum to exactly 1.",
       "lastAdmin": "The last administrator cannot lose the role.",
-      "failed": "Could not save. Has supabase/008-admin.sql been run?"
+      "failed": "Could not save. Has supabase/008-admin.sql been run?",
+      "tooMany": "Too many emails in a row. Wait a few minutes."
     },
     "saved": "Saved"
   },
@@ -720,5 +726,45 @@
       "demo": "Demo data: no database connected, values are illustrative."
     },
     "expertCode": "E{n}"
+  },
+  "password": {
+    "forgot": {
+      "title": "Reset your password",
+      "subtitle": "Enter the email you signed up with and we'll send a link to set a new password.",
+      "email": "Email",
+      "submit": "Send link",
+      "submitting": "Sending...",
+      "doneTitle": "Check your email",
+      "doneText": "If this address is registered, we've sent it a link. The link is valid for a limited time. Can't find it? Check your spam folder.",
+      "invalid": "Enter your email.",
+      "tooMany": "Too many requests. Wait a few minutes and try again.",
+      "unavailable": "Password reset is unavailable: Supabase is not connected.",
+      "back": "Back to sign in"
+    },
+    "reset": {
+      "titleRecovery": "New password",
+      "titleChange": "Change password",
+      "subtitleRecovery": "Choose a new password to sign in with.",
+      "subtitleChange": "Enter your current password and a new one.",
+      "current": "Current password",
+      "newPassword": "New password",
+      "confirm": "Repeat new password",
+      "placeholder": "At least {min} characters",
+      "submit": "Save password",
+      "submitting": "Saving...",
+      "short": "The password must be at least {min} characters long.",
+      "mismatch": "The passwords do not match.",
+      "wrongCurrent": "The current password is incorrect.",
+      "same": "The new password must differ from the old one.",
+      "weak": "The password is too simple. Mix upper- and lower-case letters and digits.",
+      "failed": "Could not save the password. Please try again.",
+      "doneTitle": "Password changed",
+      "doneText": "Your new password is in effect. Other devices will need to sign in again.",
+      "toSite": "Go to the ranking",
+      "noSessionTitle": "Invalid link",
+      "noSessionText": "The link has expired, was already used, or was opened in a different browser. Request a new one.",
+      "requestNew": "Request a new link",
+      "checking": "Checking..."
+    }
   }
 }

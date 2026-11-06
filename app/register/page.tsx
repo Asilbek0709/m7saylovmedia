@@ -52,7 +52,8 @@ export default function RegisterPage() {
       email: email.trim(),
       password,
       options: {
-
+        // Ссылка подтверждения из письма по умолчанию ведёт сюда.
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=%2Fmy`,
         data: {
           full_name: fullName.trim(),
           organization: organization.trim(),

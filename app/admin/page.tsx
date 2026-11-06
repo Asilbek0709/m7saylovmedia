@@ -118,7 +118,7 @@ export default async function AdminPage({
 async function errorLabels() {
   const t = await getTranslations("admin");
   return Object.fromEntries(
-    ["unavailable", "forbidden", "invalid", "lastAdmin", "failed"].map((k) => [
+    ["unavailable", "forbidden", "invalid", "lastAdmin", "tooMany", "failed"].map((k) => [
       k,
       t(`errors.${k}`),
     ]),
@@ -147,6 +147,9 @@ async function UsersTab({ currentUserId }: { currentUserId: string }) {
     },
     approve: t("users.approve"),
     saved: t("saved"),
+    sendReset: t("users.sendReset"),
+    sendResetShort: t("users.sendResetShort"),
+    resetSent: t("users.resetSent"),
     errors,
   };
 

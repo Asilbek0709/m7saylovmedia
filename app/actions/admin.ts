@@ -1,12 +1,19 @@
 "use server";
 
 import { refresh } from "next/cache";
+import { headers } from "next/headers";
 
 import { getCurrentUser, type UserRole } from "@/lib/auth";
 import { MS7_CRITERIA, type CriterionId } from "@/lib/ms7";
 import { createClient } from "@/lib/supabase/server";
 
-type Failure = "unavailable" | "forbidden" | "invalid" | "lastAdmin" | "failed";
+type Failure =
+  | "unavailable"
+  | "forbidden"
+  | "invalid"
+  | "lastAdmin"
+  | "tooMany"
+  | "failed";
 export type AdminResult = { ok: true } | { ok: false; reason: Failure };
 
 const ROLES: UserRole[] = ["pending", "expert", "admin"];
@@ -103,5 +110,37 @@ export async function addWeightSet(
   if (error) return { ok: false, reason: "failed" };
 
   refresh();
+  return { ok: true };
+}
+
+/**
+ * Письмо со ссылкой для сброса пароля. Пароль администратор не видит и не
+ * задаёт — только запускает тот же сценарий, что «Забыли пароль?».
+ *
+ * Ссылку откроет эксперт в своём браузере, поэтому шаблон письма «Reset
+ * Password» в Supabase должен вести на /auth/callback?token_hash=…:
+ * ссылка по умолчанию (PKCE) работает только в браузере, где её запросили.
+ */
+export async function sendPasswordReset(userId: string): Promise<AdminResult> {
+  const ctx = await adminClient();
+  if ("error" in ctx) return { ok: false, reason: ctx.error! };
+
+  const { data: profile } = await ctx.supabase
+    .from("profiles")
+    .select("email")
+    .eq("id", userId)
+    .maybeSingle();
+  const email = profile?.email as string | undefined;
+  if (!email) return { ok: false, reason: "invalid" };
+
+  const h = await headers();
+  const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
+
+  const { error } = await ctx.supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?next=%2Freset-password`,
+  });
+  if (error) {
+    return { ok: false, reason: error.status === 429 ? "tooMany" : "failed" };
+  }
   return { ok: true };
 }

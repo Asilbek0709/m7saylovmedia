@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ClipboardList, LogOut, ShieldCheck, UserRound } from "lucide-react";
+import { ClipboardList, KeyRound, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { signOut } from "@/app/actions/auth";
@@ -99,7 +99,13 @@ export function UserMenu({
             </Link>
           </DropdownMenuItem>
         )}
-        {(role === "expert" || role === "admin") && <DropdownMenuSeparator />}
+        <DropdownMenuItem asChild className="gap-2">
+          <Link href="/reset-password">
+            <KeyRound className="size-4 text-muted-foreground" />
+            {ta("changePassword")}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           disabled={pending}
           onSelect={(event) => {

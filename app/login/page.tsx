@@ -11,7 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { safeNext } from "@/lib/safe-next";
 import { createClient } from "@/lib/supabase/client";
+import { useHydrated } from "@/lib/use-hydrated";
 
 export default function LoginPage() {
   const t = useTranslations("login");
@@ -26,6 +28,14 @@ export default function LoginPage() {
 
   const supabase = createClient();
   const authAvailable = supabase !== null;
+
+  // /auth/callback отправляет сюда с ?error=link, если ссылка из письма
+  // просрочена или уже использована. Адрес доступен только в браузере.
+  const hydrated = useHydrated();
+  const linkError =
+    hydrated &&
+    new URLSearchParams(window.location.search).get("error") === "link";
+  const shownError = error ?? (linkError ? t("linkError") : null);
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -53,8 +63,10 @@ export default function LoginPage() {
       return;
     }
 
-    const next =
-      new URLSearchParams(window.location.search).get("next") ?? "/rating";
+    const next = safeNext(
+      new URLSearchParams(window.location.search).get("next"),
+      "/rating",
+    );
     router.push(next);
 
     router.refresh();
@@ -113,9 +125,12 @@ export default function LoginPage() {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">{t("password")}</Label>
-                  <span className="text-xs text-muted-foreground">
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                  >
                     {t("forgot")}
-                  </span>
+                  </Link>
                 </div>
                 <div className="relative">
                   <Lock
@@ -135,9 +150,9 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {error && (
+              {shownError && (
                 <p role="alert" className="text-xs text-destructive">
-                  {error}
+                  {shownError}
                 </p>
               )}
 

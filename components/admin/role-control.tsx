@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Check, Loader2 } from "lucide-react";
+import { Check, KeyRound, Loader2 } from "lucide-react";
 
-import { setUserRole } from "@/app/actions/admin";
+import { sendPasswordReset, setUserRole } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -20,6 +20,9 @@ export interface RoleControlLabels {
   roles: Record<UserRole, string>;
   approve: string;
   saved: string;
+  sendReset: string;
+  sendResetShort: string;
+  resetSent: string;
   errors: Record<string, string>;
 }
 
@@ -37,6 +40,17 @@ export function RoleControl({
   const [message, setMessage] = React.useState<
     { kind: "ok" | "error"; text: string } | null
   >(null);
+
+  const reset = () =>
+    startTransition(async () => {
+      setMessage(null);
+      const result = await sendPasswordReset(userId);
+      setMessage(
+        result.ok
+          ? { kind: "ok", text: labels.resetSent }
+          : { kind: "error", text: labels.errors[result.reason] },
+      );
+    });
 
   const apply = (next: UserRole) =>
     startTransition(async () => {
@@ -73,6 +87,18 @@ export function RoleControl({
           {labels.approve}
         </Button>
       )}
+
+      <Button
+        size="sm"
+        variant="ghost"
+        disabled={pending}
+        onClick={reset}
+        title={labels.sendReset}
+        className="text-muted-foreground"
+      >
+        <KeyRound className="size-3.5" />
+        {labels.sendResetShort}
+      </Button>
 
       {pending && (
         <Loader2 aria-hidden className="size-3.5 animate-spin text-muted-foreground" />
