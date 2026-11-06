@@ -232,7 +232,7 @@
     "subtitle": "A comparative ranking of outlets assessed with the MS-7 model, based on the SMSI composite index.",
     "openCalculator": "Open the SMSI calculator",
     "demoNoticeTitle": "Demo data.",
-    "demoNotice": "The scores below were generated to showcase the interface and are not the result of real monitoring. Once Supabase is connected, the ranking is read from the media_rankings table.",
+    "demoNotice": "The scores below were generated to showcase the interface and are not monitoring results. No database is connected.",
     "kpi": {
       "outlets": "Outlets assessed",
       "outletsNote": "with the MS-7 model",
@@ -317,7 +317,8 @@
         "strong": "strong",
         "veryStrong": "very strong"
       }
-    }
+    },
+    "demoNoticeEmpty": "There are no assessments in the database yet, so demo data is shown — it is not a monitoring result. The ranking will appear after the first assessment is saved."
   },
   "methodology": {
     "eyebrow": "Methodology",

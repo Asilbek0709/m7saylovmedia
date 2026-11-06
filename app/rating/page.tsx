@@ -42,6 +42,7 @@ import {
   SMALL_SAMPLE,
   type GroupStats,
 } from "@/lib/rating-slices";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -172,7 +173,8 @@ export default async function RatingPage({
             className="mt-5 rounded-md border border-border bg-secondary px-4 py-3 text-xs leading-relaxed text-secondary-foreground"
           >
             <strong className="font-semibold">{t("demoNoticeTitle")}</strong>{" "}
-            {t("demoNotice")}
+            {/* Подключена ли база — разные причины демо-режима, разный текст. */}
+            {isSupabaseConfigured ? t("demoNoticeEmpty") : t("demoNotice")}
           </div>
         </Reveal>
       )}
