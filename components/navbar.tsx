@@ -16,6 +16,7 @@ const NAV = [
   { href: "/calculator", key: "calculator" },
   { href: "/outlets", key: "outlets" },
   { href: "/methodology", key: "methodology" },
+  { href: "/glossary", key: "glossary" },
 ] as const;
 
 export function Navbar({

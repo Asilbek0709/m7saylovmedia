@@ -7,7 +7,8 @@
       "rating": "Ranking",
       "calculator": "SMSI Calculator",
       "methodology": "Methodology",
-      "outlets": "Outlets"
+      "outlets": "Outlets",
+      "glossary": "Glossary"
     },
     "login": "Sign in",
     "tryDemo": "Try the demo",
@@ -768,5 +769,22 @@
       "requestNew": "Request a new link",
       "checking": "Checking..."
     }
+  },
+  "glossary": {
+    "eyebrow": "Glossary",
+    "title": "Glossary of terms",
+    "langNote": "Terms are given in Uzbek with their English equivalents.",
+    "search": "Search terms and definitions",
+    "searchHint": "Search in Cyrillic or Latin script: “сиёсий” and “siyosiy” return the same results. English names are searched too.",
+    "clear": "Clear",
+    "count": "{count, plural, one {# term} other {# terms}}",
+    "found": "Found {count, plural, one {# term} other {# terms}} of {total}",
+    "inText": "match in text",
+    "empty": "Nothing found for “{query}”.",
+    "emptyHint": "Check the spelling or try part of a word.",
+    "sources": "Key sources",
+    "copyLink": "Link to term",
+    "copied": "Link copied",
+    "top": "Back to top"
   }
 }
