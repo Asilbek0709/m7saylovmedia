@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -50,7 +50,9 @@ export default async function ReportPage({
 }: Params & SearchParams) {
   const { slug } = await params;
   const history = await getOutletHistory(slug);
-  if (!history || history.points.length === 0) notFound();
+  if (!history) notFound();
+  // Протокола без оценки не бывает — на странице издания объяснено почему.
+  if (history.points.length === 0) redirect(`/outlets/${slug}`);
 
   const t = await getTranslations("report");
   const tc = await getTranslations("criteria");

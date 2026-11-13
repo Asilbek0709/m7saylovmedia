@@ -303,9 +303,32 @@ export async function getOutletHistory(
           })),
         };
       }
+
+      // Издание есть в справочнике, но оценок ещё нет. Демо-баллы сюда не
+      // подставляем: у настоящего издания (Kun.uz из справочника) они
+      // выглядели бы как результат мониторинга.
+      if (!error) {
+        const { data: outlet } = await supabase
+          .from("media_outlets")
+          .select("id, name, slug, website, ownership, region")
+          .eq("slug", slug)
+          .maybeSingle();
+        if (!outlet) return null;
+        return {
+          id: outlet.id as string,
+          name: outlet.name as string,
+          slug: outlet.slug as string,
+          website: (outlet.website as string | null) ?? null,
+          ownership: outlet.ownership === "davlat" ? "davlat" : "nodavlat",
+          region: (outlet.region as string) ?? "",
+          live: true,
+          points: [],
+        };
+      }
     } catch {}
   }
 
+  // Демо — только без базы (или если она не ответила).
   const demo = DEMO_RANKINGS.find((row) => row.slug === slug);
   if (!demo) return null;
 

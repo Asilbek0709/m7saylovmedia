@@ -52,7 +52,7 @@ export default async function OutletPage({
 }) {
   const { slug } = await params;
   const history = await getOutletHistory(slug);
-  if (!history || history.points.length === 0) notFound();
+  if (!history) notFound();
 
   const t = await getTranslations("outlet");
   const tc = await getTranslations("criteria");
@@ -60,6 +60,49 @@ export default async function OutletPage({
   const tr = await getTranslations("rating");
   const tCommon = await getTranslations("common");
   const tReport = await getTranslations("report");
+
+  // Издание из справочника без единой оценки: только карточка и путь к оценке.
+  if (history.points.length === 0) {
+    return (
+      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="-ml-2 text-muted-foreground"
+        >
+          <Link href="/outlets">
+            <ArrowLeft className="size-4" />
+            {t("backToOutlets")}
+          </Link>
+        </Button>
+        <p className="mt-3 text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+          {t("eyebrow")}
+        </p>
+        <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">
+          {history.name}
+        </h1>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
+          {history.website && <span>{history.website}</span>}
+          <Badge variant="outline" className="font-normal">
+            {tr(`ownership.${history.ownership}`)}
+          </Badge>
+          {history.region && <span>{history.region}</span>}
+        </div>
+        <div className="mt-8 rounded-lg border border-dashed border-border px-6 py-12 text-center">
+          <p className="text-sm font-medium text-foreground">
+            {t("noEvaluationsTitle")}
+          </p>
+          <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+            {t("noEvaluationsText")}
+          </p>
+          <Button asChild size="sm" className="mt-5">
+            <Link href="/calculator">{t("evaluateCta")}</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const points = history.points;
   const last = points[points.length - 1];
@@ -134,6 +177,17 @@ export default async function OutletPage({
             </div>
           </div>
         </div>
+
+        {/* Без базы баллы — демонстрационные; говорим об этом прямо. */}
+        {!history.live && (
+          <p
+            role="note"
+            className="mt-4 rounded-md border border-border bg-secondary px-4 py-3 text-xs leading-relaxed text-secondary-foreground"
+          >
+            <strong className="font-semibold">{tr("demoNoticeTitle")}</strong>{" "}
+            {tr("demoNotice")}
+          </p>
+        )}
 
         <p className="mt-3 text-sm text-muted-foreground">
           {t("period")}: {last.period}

@@ -496,7 +496,11 @@
       "flagText": "The SMSI range between experts exceeds 5 points, so the scores should be discussed and reconciled.",
       "ok": "The experts' scores agree: the SMSI range is 5 points or less.",
       "single": "Only one expert rated this outlet in this round, so there is no spread."
-    }
+    },
+    "backToOutlets": "Back to outlets",
+    "noEvaluationsTitle": "No assessments for this outlet yet",
+    "noEvaluationsText": "The SMSI index, round-by-round dynamics and the report will appear after the first expert assessment.",
+    "evaluateCta": "Assess in the calculator"
   },
   "recommendations": {
     "title": "Recommendations",
