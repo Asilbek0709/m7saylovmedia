@@ -329,3 +329,35 @@ export async function getOutletHistory(
     ],
   };
 }
+
+export interface DirectoryOutlet {
+  id: string;
+  name: string;
+  website: string | null;
+  region: string;
+}
+
+/**
+ * Все заведённые издания, в том числе ещё без оценок, — для поиска в
+ * калькуляторе. Иначе новое издание эксперт может только набрать вручную,
+ * и малейшее расхождение в названии заводит дубль.
+ */
+export async function getOutletDirectory(): Promise<DirectoryOutlet[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from("media_outlets")
+      .select("id, name, website, region")
+      .order("name");
+    if (error || !data) return [];
+    return data.map((row) => ({
+      id: row.id as string,
+      name: row.name as string,
+      website: (row.website as string | null) ?? null,
+      region: (row.region as string) ?? "",
+    }));
+  } catch {
+    return [];
+  }
+}

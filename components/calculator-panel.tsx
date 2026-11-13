@@ -43,6 +43,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { saveEvaluation } from "@/app/actions/evaluations";
 import { type RankingRow } from "@/lib/demo-data";
+import type { DirectoryOutlet } from "@/lib/rankings";
 import { buildRecommendations } from "@/lib/recommendations";
 import {
   calculateSMSI,
@@ -342,6 +343,8 @@ export interface CalculatorPanelProps {
   defaultPeriod: string;
   /** Действующие веса из базы (lib/weights.ts); в демо — из кода. */
   weights: Weights;
+  /** Все заведённые издания — чтобы выбрать и ещё не оценённое. */
+  directory?: DirectoryOutlet[];
   /** Своя оценка, открытая из «Моих оценок» для правки. */
   editing?: EditingEvaluation | null;
   /** В адресе была ?edit=…, но такой своей оценки нет. */
@@ -363,6 +366,7 @@ export function CalculatorPanel({
   saveHint,
   defaultPeriod,
   weights,
+  directory = [],
   editing = null,
   editNotFound = false,
 }: CalculatorPanelProps) {
@@ -439,6 +443,9 @@ export function CalculatorPanel({
   );
 
   const [outletName, setOutletName] = React.useState(editing?.outletName ?? "");
+  // Издание из справочника без оценок: базы для сравнения нет, но сохранять
+  // нужно в него, а не заводить новое по набранному названию.
+  const [picked, setPicked] = React.useState<DirectoryOutlet | null>(null);
   const [period, setPeriod] = React.useState(editing?.period ?? defaultPeriod);
   const [saving, setSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState<string | null>(null);
@@ -487,6 +494,7 @@ export function CalculatorPanel({
 
   const pickOutlet = (outlet: Outlet) => {
     setSelected(outlet);
+    setPicked(null);
     setSearchOpen(false);
     // При правке издание зафиксировано: выбор из поиска меняет только базу сравнения.
     if (!editing) setOutletName(outlet.name);
@@ -497,6 +505,21 @@ export function CalculatorPanel({
     animateTo(outlet.scores);
   };
 
+  // Издания без оценок — в отдельной группе поиска.
+  const unrated = React.useMemo(() => {
+    const rated = new Set(outlets.map((o) => o.outlet_id));
+    return directory.filter((o) => !rated.has(o.id));
+  }, [directory, outlets]);
+
+  const pickUnrated = (outlet: DirectoryOutlet) => {
+    setSelected(null);
+    setPicked(outlet);
+    setSearchOpen(false);
+    if (!editing) setOutletName(outlet.name);
+    setSaved(null);
+    setSaveError(null);
+  };
+
   const submitSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
@@ -505,7 +528,8 @@ export function CalculatorPanel({
 
     const result = await saveEvaluation({
       // Из демо-набора приходит slug, а не UUID — действие это распознаёт.
-      outletId: editing?.outletId ?? selected?.outlet_id ?? null,
+      outletId:
+        editing?.outletId ?? selected?.outlet_id ?? picked?.id ?? null,
       outletName,
       period,
       scores,
@@ -619,6 +643,7 @@ export function CalculatorPanel({
           <CommandInput placeholder={t("search.placeholder")} />
           <CommandList>
             <CommandEmpty>{t("search.empty")}</CommandEmpty>
+            {outlets.length > 0 && (
             <CommandGroup heading={t("search.group")}>
               {outlets.map((outlet) => {
                 const outletBand = resolveBand(outlet.smsi);
@@ -654,6 +679,32 @@ export function CalculatorPanel({
                 );
               })}
             </CommandGroup>
+            )}
+            {unrated.length > 0 && (
+              <CommandGroup heading={t("search.unrated")}>
+                {unrated.map((outlet) => (
+                  <CommandItem
+                    key={outlet.id}
+                    value={`${outlet.name} ${outlet.website ?? ""} ${outlet.region}`}
+                    onSelect={() => pickUnrated(outlet)}
+                    className="gap-3"
+                  >
+                    <span
+                      aria-hidden
+                      className="size-2 shrink-0 rounded-full border border-muted-foreground/50"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium">
+                        {outlet.name}
+                      </span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {[outlet.website, outlet.region].filter(Boolean).join(" · ")}
+                      </span>
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </CommandDialog>
@@ -887,7 +938,11 @@ export function CalculatorPanel({
                       disabled={saving}
                       readOnly={editing !== null}
                       placeholder={t("save.outletPlaceholder")}
-                      onChange={(e) => setOutletName(e.target.value)}
+                      onChange={(e) => {
+                        setOutletName(e.target.value);
+                        // Название поменяли — это уже не выбранное издание.
+                        if (picked && e.target.value !== picked.name) setPicked(null);
+                      }}
                       className="h-8 text-sm"
                     />
                   </div>

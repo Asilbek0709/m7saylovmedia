@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { CalculatorPanel } from "@/components/calculator-panel";
 import { canWrite, getCurrentUser } from "@/lib/auth";
 import { getOwnEvaluation } from "@/lib/evaluation-records";
-import { getRankings } from "@/lib/rankings";
+import { getOutletDirectory, getRankings } from "@/lib/rankings";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getWeightHistory } from "@/lib/weights";
 
@@ -19,9 +19,10 @@ export default async function CalculatorPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [{ rows, period }, weightHistory] = await Promise.all([
+  const [{ rows, period, live }, weightHistory, directory] = await Promise.all([
     getRankings(50),
     getWeightHistory(),
+    getOutletDirectory(),
   ]);
   const user = isSupabaseConfigured ? await getCurrentUser() : null;
 
@@ -43,11 +44,14 @@ export default async function CalculatorPage({
 
   return (
     <CalculatorPanel
-      rows={rows}
+      // При подключённой базе демо-издания в поиск не попадают: их выбор
+      // сохранял бы оценку в издание-дубль рядом с настоящим из справочника.
+      rows={live || !isSupabaseConfigured ? rows : []}
       canSave={canSave}
       saveHint={saveHint}
       defaultPeriod={period}
       weights={weightHistory.active.weights}
+      directory={directory}
       editing={
         editing && {
           id: editing.id,

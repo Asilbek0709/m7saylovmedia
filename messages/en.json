@@ -164,7 +164,8 @@
       "placeholder": "Type an outlet name",
       "empty": "No results found",
       "group": "Assessed outlets",
-      "hint": "Pick one — its scores load automatically"
+      "hint": "Pick one — its scores load automatically",
+      "unrated": "Not yet assessed"
     },
     "selected": {
       "label": "Selected outlet",
