@@ -34,7 +34,7 @@ const PHOTO = {
   qudratxoja: "/authors/qudratxoja.jpg",
 };
 
-export const AUTHORS: Record<Locale, AuthorsContent> = {
+const CONTENT: Record<Locale, AuthorsContent> = {
   uz: {
     intro:
       "MS-7: Saylov-Media модели Ўзбекистон журналистика ва оммавий коммуникациялар университети ва Жамшид Намозов томонидан ишлаб чиқилган. Модель рақамли оммавий ахборот воситаларининг сайлов жараёнларини ёритишдаги фаолиятини комплекс баҳолаш, мониторинг қилиш ва рейтинг асосида қиёслаш учун мўлжалланган.",
@@ -302,3 +302,18 @@ export const AUTHORS: Record<Locale, AuthorsContent> = {
     ],
   },
 };
+
+/** Порядок авторов на странице: первым — ректор, вторым — Ж. Намозов. */
+const ORDER = ["qudratxoja", "namozov"];
+
+export const AUTHORS = Object.fromEntries(
+  Object.entries(CONTENT).map(([locale, content]) => [
+    locale,
+    {
+      ...content,
+      authors: [...content.authors].sort(
+        (a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id),
+      ),
+    },
+  ]),
+) as Record<Locale, AuthorsContent>;
