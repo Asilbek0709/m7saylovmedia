@@ -8,7 +8,8 @@
       "calculator": "Калькулятор SMSI",
       "methodology": "Методика",
       "outlets": "Издания",
-      "glossary": "Глоссарий"
+      "glossary": "Глоссарий",
+      "authors": "Авторы"
     },
     "login": "Войти",
     "tryDemo": "Попробовать демо",
@@ -790,5 +791,12 @@
     "copyLink": "Ссылка на термин",
     "copied": "Ссылка скопирована",
     "top": "К началу"
+  },
+  "authors": {
+    "eyebrow": "Авторы",
+    "title": "Авторы платформы",
+    "registration": "Регистрация модели",
+    "contribution": "Вклад в платформу",
+    "photoAlt": "Фото: {name}"
   }
 }

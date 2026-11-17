@@ -17,6 +17,7 @@ const NAV = [
   { href: "/outlets", key: "outlets" },
   { href: "/methodology", key: "methodology" },
   { href: "/glossary", key: "glossary" },
+  { href: "/authors", key: "authors" },
 ] as const;
 
 export function Navbar({

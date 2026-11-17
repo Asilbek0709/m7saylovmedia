@@ -8,7 +8,8 @@
       "calculator": "SMSI Calculator",
       "methodology": "Methodology",
       "outlets": "Outlets",
-      "glossary": "Glossary"
+      "glossary": "Glossary",
+      "authors": "Authors"
     },
     "login": "Sign in",
     "tryDemo": "Try the demo",
@@ -790,5 +791,12 @@
     "copyLink": "Link to term",
     "copied": "Link copied",
     "top": "Back to top"
+  },
+  "authors": {
+    "eyebrow": "Authors",
+    "title": "Authors of the platform",
+    "registration": "Model registration",
+    "contribution": "Contribution to the platform",
+    "photoAlt": "Photo: {name}"
   }
 }
