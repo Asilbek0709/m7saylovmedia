@@ -39,9 +39,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { saveEvaluation } from "@/app/actions/evaluations";
+import { saveEvaluation, type Evidence } from "@/app/actions/evaluations";
 import { type RankingRow } from "@/lib/demo-data";
 import type { DirectoryOutlet } from "@/lib/rankings";
 import { buildRecommendations } from "@/lib/recommendations";
@@ -341,6 +349,11 @@ export interface CalculatorPanelProps {
   /** Почему сохранение недоступно — показывается вместо формы. */
   saveHint: "demo" | "signin" | "pending" | null;
   defaultPeriod: string;
+  /**
+   * Открытые туры из справочника (010). null — справочника нет, тур
+   * вводится текстом, как раньше.
+   */
+  openPeriods?: string[] | null;
   /** Действующие веса из базы (lib/weights.ts); в демо — из кода. */
   weights: Weights;
   /** Все заведённые издания — чтобы выбрать и ещё не оценённое. */
@@ -358,13 +371,18 @@ export interface EditingEvaluation {
   period: string;
   scores: CriteriaScores;
   indicators: IndicatorScores | null;
+  evidence?: Evidence | null;
 }
+
+/** Поля обоснования: по мезону и общее. */
+const EVIDENCE_KEYS = [...MS7_CRITERIA.map((c) => c.id), "general"] as const;
 
 export function CalculatorPanel({
   rows,
   canSave,
   saveHint,
   defaultPeriod,
+  openPeriods = null,
   weights,
   directory = [],
   editing = null,
@@ -447,6 +465,13 @@ export function CalculatorPanel({
   // нужно в него, а не заводить новое по набранному названию.
   const [picked, setPicked] = React.useState<DirectoryOutlet | null>(null);
   const [period, setPeriod] = React.useState(editing?.period ?? defaultPeriod);
+  const [evidence, setEvidence] = React.useState<Evidence>(
+    () => editing?.evidence ?? {},
+  );
+  const evidenceCount = Object.values(evidence).filter((v) => v?.trim()).length;
+  // Новую оценку — только в открытый тур; при правке тур уже зафиксирован.
+  const noOpenPeriod =
+    !editing && openPeriods !== null && openPeriods.length === 0;
   const [saving, setSaving] = React.useState(false);
   const [saveError, setSaveError] = React.useState<string | null>(null);
   const [saved, setSaved] = React.useState<{
@@ -534,6 +559,7 @@ export function CalculatorPanel({
       period,
       scores,
       indicators: mode === "indicators" ? indicators : null,
+      evidence,
     });
 
     setSaving(false);
@@ -951,15 +977,101 @@ export function CalculatorPanel({
                     <Label htmlFor="save-period" className="text-xs">
                       {t("save.period")}
                     </Label>
-                    <Input
-                      id="save-period"
-                      value={period}
-                      disabled={saving}
-                      readOnly={editing !== null}
-                      onChange={(e) => setPeriod(e.target.value)}
-                      className="h-8 text-sm"
-                    />
+                    {openPeriods !== null && !editing ? (
+                      noOpenPeriod ? (
+                        <p className="rounded-md border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+                          {t("save.noOpenPeriod")}
+                        </p>
+                      ) : (
+                        <Select
+                          value={period}
+                          disabled={saving}
+                          onValueChange={setPeriod}
+                        >
+                          <SelectTrigger
+                            id="save-period"
+                            className="h-8 w-full text-sm"
+                          >
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {openPeriods.map((name) => (
+                              <SelectItem key={name} value={name}>
+                                {name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )
+                    ) : (
+                      <Input
+                        id="save-period"
+                        value={period}
+                        disabled={saving}
+                        readOnly={editing !== null}
+                        onChange={(e) => setPeriod(e.target.value)}
+                        className="h-8 text-sm"
+                      />
+                    )}
                   </div>
+
+                  <details
+                    className="group rounded-md border border-border"
+                    open={evidenceCount > 0 && editing !== null}
+                  >
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-xs font-medium text-foreground select-none">
+                      <span>
+                        {t("evidence.title")}
+                        <span className="ml-1 font-normal text-muted-foreground">
+                          {evidenceCount > 0
+                            ? `· ${evidenceCount}`
+                            : `· ${t("evidence.optional")}`}
+                        </span>
+                      </span>
+                      <span
+                        aria-hidden
+                        className="text-muted-foreground transition-transform group-open:rotate-90"
+                      >
+                        ›
+                      </span>
+                    </summary>
+                    <div className="space-y-2.5 border-t border-border px-3 pt-2.5 pb-3">
+                      <p className="text-[11px] leading-relaxed text-muted-foreground">
+                        {t("evidence.hint")}
+                      </p>
+                      {EVIDENCE_KEYS.map((key) => (
+                        <div key={key} className="space-y-1">
+                          <Label
+                            htmlFor={`evidence-${key}`}
+                            className="text-[11px]"
+                          >
+                            {key === "general"
+                              ? t("evidence.general")
+                              : `${tc(`${key}.code`)} — ${tc(`${key}.name`)}`}
+                          </Label>
+                          <Textarea
+                            id={`evidence-${key}`}
+                            rows={key === "general" ? 3 : 2}
+                            maxLength={2000}
+                            value={evidence[key] ?? ""}
+                            disabled={saving}
+                            placeholder={
+                              key === "general"
+                                ? t("evidence.generalPlaceholder")
+                                : t("evidence.placeholder")
+                            }
+                            onChange={(e) =>
+                              setEvidence((prev) => ({
+                                ...prev,
+                                [key]: e.target.value,
+                              }))
+                            }
+                            className="min-h-0 text-xs"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </details>
 
                   {saveError && (
                     <p role="alert" className="text-xs text-destructive">
@@ -984,7 +1096,7 @@ export function CalculatorPanel({
                   <Button
                     type="submit"
                     size="sm"
-                    disabled={saving}
+                    disabled={saving || noOpenPeriod || !period}
                     className="w-full"
                   >
                     {saving && <Loader2 className="size-3.5 animate-spin" />}

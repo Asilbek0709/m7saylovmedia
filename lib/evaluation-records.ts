@@ -1,3 +1,4 @@
+import type { Evidence } from "@/app/actions/evaluations";
 import type { SessionUser } from "@/lib/auth";
 import {
   MS7_CRITERIA,
@@ -23,6 +24,8 @@ export interface EvaluationRecord {
   weightSetId: number | null;
   indicators: IndicatorScores | null;
   evaluatorId: string | null;
+  /** Обоснование эксперта (010); видно ему самому и администратору. */
+  evidence: Evidence | null;
   /** Заполняется только в запросах администратора. */
   evaluator: { email: string | null; fullName: string | null } | null;
 }
@@ -61,10 +64,22 @@ function toRecord(row: Row): EvaluationRecord {
         : Number(row.weight_set_id),
     indicators: (row.indicators as IndicatorScores | null | undefined) ?? null,
     evaluatorId: (row.evaluator_id as string | null | undefined) ?? null,
+    evidence: (row.evidence as Evidence | null | undefined) ?? null,
     evaluator: row.profiles
       ? { email: row.profiles.email, fullName: row.profiles.full_name }
       : null,
   };
+}
+
+/**
+ * Запрос с колонкой обоснования; если её ещё нет (база до 010, код 42703) —
+ * тот же запрос без неё.
+ */
+async function withEvidence<T extends { error: { code?: string } | null }>(
+  run: (extra: string) => PromiseLike<T>,
+): Promise<T> {
+  const first = await run(", evidence");
+  return first.error?.code === "42703" ? run("") : first;
 }
 
 const roundKey = (outletId: string, period: string) => `${outletId}|${period}`;
@@ -111,12 +126,14 @@ export async function getMyEvaluations(
   const supabase = await createClient();
   if (!supabase) return [];
 
-  const { data, error } = await supabase
-    .from("evaluations")
-    .select(`${BASE}, weight_set_id, indicators, evaluator_id`)
-    .eq("evaluator_id", user.id)
-    .order("evaluated_at", { ascending: false })
-    .order("period", { ascending: false });
+  const { data, error } = await withEvidence((extra) =>
+    supabase
+      .from("evaluations")
+      .select(`${BASE}, weight_set_id, indicators, evaluator_id${extra}`)
+      .eq("evaluator_id", user.id)
+      .order("evaluated_at", { ascending: false })
+      .order("period", { ascending: false }),
+  );
 
   if (!error) return (data as unknown as Row[]).map(toRecord);
 
@@ -143,12 +160,14 @@ export async function getOwnEvaluation(
   const supabase = await createClient();
   if (!supabase || !/^[0-9a-f-]{36}$/i.test(id)) return null;
 
-  const { data, error } = await supabase
-    .from("evaluations")
-    .select(`${BASE}, weight_set_id, indicators, evaluator_id`)
-    .eq("id", id)
-    .eq("evaluator_id", user.id)
-    .maybeSingle();
+  const { data, error } = await withEvidence((extra) =>
+    supabase
+      .from("evaluations")
+      .select(`${BASE}, weight_set_id, indicators, evaluator_id${extra}`)
+      .eq("id", id)
+      .eq("evaluator_id", user.id)
+      .maybeSingle(),
+  );
 
   return error || !data ? null : toRecord(data as unknown as Row);
 }
@@ -164,17 +183,18 @@ export async function getEvaluationsForAdmin(filter: {
   const supabase = await createClient();
   if (!supabase) return [];
 
-  let query = supabase
-    .from("evaluations")
-    .select(
-      `${BASE}, weight_set_id, evaluator_id, profiles(email, full_name)`,
-    )
-    .order("period")
-    .order("smsi", { ascending: false });
-  if (filter.period) query = query.eq("period", filter.period);
-  if (filter.outletIds) query = query.in("outlet_id", filter.outletIds);
-
-  const { data, error } = await query;
+  const { data, error } = await withEvidence((extra) => {
+    let query = supabase
+      .from("evaluations")
+      .select(
+        `${BASE}, weight_set_id, evaluator_id, profiles(email, full_name)${extra}`,
+      )
+      .order("period")
+      .order("smsi", { ascending: false });
+    if (filter.period) query = query.eq("period", filter.period);
+    if (filter.outletIds) query = query.in("outlet_id", filter.outletIds);
+    return query;
+  });
   return error || !data ? [] : (data as unknown as Row[]).map(toRecord);
 }
 

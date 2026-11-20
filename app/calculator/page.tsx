@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { CalculatorPanel } from "@/components/calculator-panel";
 import { canWrite, getCurrentUser } from "@/lib/auth";
 import { getOwnEvaluation } from "@/lib/evaluation-records";
+import { getMonitoringPeriods } from "@/lib/periods";
 import { getOutletDirectory, getRankings } from "@/lib/rankings";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getWeightHistory } from "@/lib/weights";
@@ -19,11 +20,17 @@ export default async function CalculatorPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [{ rows, period, live }, weightHistory, directory] = await Promise.all([
-    getRankings(50),
-    getWeightHistory(),
-    getOutletDirectory(),
-  ]);
+  const [{ rows, period, live }, weightHistory, directory, periods] =
+    await Promise.all([
+      getRankings(50),
+      getWeightHistory(),
+      getOutletDirectory(),
+      getMonitoringPeriods(),
+    ]);
+  // Туры из справочника (010): сохранять можно только в открытый.
+  const openPeriods = periods
+    ? periods.filter((p) => p.status === "open").map((p) => p.name)
+    : null;
   const user = isSupabaseConfigured ? await getCurrentUser() : null;
 
   // ?edit=<id> — правка своей оценки из «Моих оценок».
@@ -49,7 +56,12 @@ export default async function CalculatorPage({
       rows={live || !isSupabaseConfigured ? rows : []}
       canSave={canSave}
       saveHint={saveHint}
-      defaultPeriod={period}
+      defaultPeriod={
+        openPeriods && !openPeriods.includes(period)
+          ? (openPeriods[0] ?? "")
+          : period
+      }
+      openPeriods={openPeriods}
       weights={weightHistory.active.weights}
       directory={directory}
       editing={
@@ -60,6 +72,7 @@ export default async function CalculatorPage({
           period: editing.period,
           scores: editing.scores,
           indicators: editing.indicators,
+          evidence: editing.evidence,
         }
       }
       editNotFound={Boolean(editId) && !editing}

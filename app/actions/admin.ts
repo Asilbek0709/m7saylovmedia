@@ -13,6 +13,7 @@ type Failure =
   | "invalid"
   | "lastAdmin"
   | "tooMany"
+  | "duplicate"
   | "failed";
 export type AdminResult = { ok: true } | { ok: false; reason: Failure };
 
@@ -108,6 +109,100 @@ export async function addWeightSet(
     ...weights,
   });
   if (error) return { ok: false, reason: "failed" };
+
+  refresh();
+  return { ok: true };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Туры мониторинга (010-tours-evidence-audit.sql)                     */
+/* ------------------------------------------------------------------ */
+
+export interface PeriodInput {
+  name: string;
+  startsOn: string;
+  endsOn: string;
+}
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function readPeriod(input: PeriodInput) {
+  const name = input.name?.trim().replace(/\s+/g, " ") ?? "";
+  const startsOn = input.startsOn?.trim() || null;
+  const endsOn = input.endsOn?.trim() || null;
+  if (!name || name.length > 120) return null;
+  if ((startsOn && !DATE_RE.test(startsOn)) || (endsOn && !DATE_RE.test(endsOn))) {
+    return null;
+  }
+  if (startsOn && endsOn && endsOn < startsOn) return null;
+  return { name, starts_on: startsOn, ends_on: endsOn };
+}
+
+/** Новый тур — открытый: эксперты сразу могут вносить в него оценки. */
+export async function createPeriod(input: PeriodInput): Promise<AdminResult> {
+  const ctx = await adminClient();
+  if ("error" in ctx) return { ok: false, reason: ctx.error! };
+
+  const row = readPeriod(input);
+  if (!row) return { ok: false, reason: "invalid" };
+
+  const { error } = await ctx.supabase
+    .from("monitoring_periods")
+    .insert({ ...row, status: "open" });
+  if (error) {
+    return { ok: false, reason: error.code === "23505" ? "duplicate" : "failed" };
+  }
+
+  refresh();
+  return { ok: true };
+}
+
+/**
+ * Правка тура: даты и название. Переименование база переносит на все
+ * оценки тура (on update cascade), в том числе в закрытом туре.
+ */
+export async function updatePeriod(
+  name: string,
+  input: PeriodInput,
+): Promise<AdminResult> {
+  const ctx = await adminClient();
+  if ("error" in ctx) return { ok: false, reason: ctx.error! };
+
+  const row = readPeriod(input);
+  if (!row) return { ok: false, reason: "invalid" };
+
+  const { data, error } = await ctx.supabase
+    .from("monitoring_periods")
+    .update(row)
+    .eq("name", name)
+    .select("name");
+  if (error) {
+    return { ok: false, reason: error.code === "23505" ? "duplicate" : "failed" };
+  }
+  if (!data?.length) return { ok: false, reason: "forbidden" };
+
+  refresh();
+  return { ok: true };
+}
+
+/** Закрытый тур замораживает оценки: их нельзя добавить, изменить, удалить. */
+export async function setPeriodStatus(
+  name: string,
+  status: "open" | "closed",
+): Promise<AdminResult> {
+  const ctx = await adminClient();
+  if ("error" in ctx) return { ok: false, reason: ctx.error! };
+  if (status !== "open" && status !== "closed") {
+    return { ok: false, reason: "invalid" };
+  }
+
+  const { data, error } = await ctx.supabase
+    .from("monitoring_periods")
+    .update({ status })
+    .eq("name", name)
+    .select("name");
+  if (error) return { ok: false, reason: "failed" };
+  if (!data?.length) return { ok: false, reason: "forbidden" };
 
   refresh();
   return { ok: true };

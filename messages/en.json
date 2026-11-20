@@ -120,7 +120,7 @@
   "outlets": {
     "eyebrow": "Directory",
     "title": "Monitored outlets",
-    "subtitle": "Digital outlets covered by the assessment. Add an outlet before entering its scores.",
+    "subtitle": "Digital outlets covered by the assessment. Add and update outlets before entering their scores.",
     "addTitle": "Add an outlet",
     "name": "Name",
     "namePlaceholder": "Kun.uz",
@@ -147,8 +147,15 @@
     "columnRegion": "Region",
     "columnEvaluations": "Assessments",
     "delete": "Delete",
-    "deleteConfirm": "Delete this outlet together with all its assessments?",
-    "openCalculator": "Assess in the calculator"
+    "deleteConfirm": "Delete this outlet from the directory?",
+    "openCalculator": "Assess in the calculator",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "updateFailed": "Could not save the changes.",
+    "deleteFailed": "Could not delete the outlet.",
+    "adminOnly": "Only an administrator can delete outlets.",
+    "hasEvaluations": "This outlet has assessments, so it cannot be deleted without losing the experts' work."
   },
   "calculator": {
     "eyebrow": "MS-7 · Web calculator",
@@ -200,7 +207,10 @@
       "failed": "Could not save. Check the connection and your permissions.",
       "unauthorized": "Your session expired. Please sign in again.",
       "unavailable": "Supabase is not connected.",
-      "pending": "Your account is awaiting administrator approval — saving is unavailable."
+      "pending": "Your account is awaiting administrator approval — saving is unavailable.",
+      "noOpenPeriod": "There are no open rounds, so a new assessment cannot be saved. Contact an administrator.",
+      "closed": "This round is closed and its assessments cannot change. An administrator must reopen it to allow edits.",
+      "unknownPeriod": "That round is not in the directory. Choose a round from the list."
     },
     "chart": {
       "outlet": "Assessed outlet",
@@ -227,6 +237,14 @@
       "cancel": "Cancel editing",
       "back": "Back to my assessments",
       "notFound": "The assessment was not found or belongs to another expert, so the regular calculator is open."
+    },
+    "evidence": {
+      "title": "Justification",
+      "optional": "optional",
+      "hint": "Briefly: which materials you reviewed and what you found. Put links on new lines. Only you and administrators see it.",
+      "placeholder": "For example: 3 of 10 pieces had no source; https://…",
+      "general": "General comment",
+      "generalPlaceholder": "Sample period, number of pieces, special circumstances"
     }
   },
   "rating": {
@@ -445,23 +463,23 @@
   "bands": {
     "veryhigh": {
       "label": "Very high",
-      "interpretation": "The media system fully meets international standards, is stable and innovatively developed."
+      "interpretation": "The outlet covers the election in an exemplary way: it respects the law and balance between candidates, and delivers verified information quickly, in several formats and on all its platforms, in dialogue with its audience."
     },
     "high": {
       "label": "High",
-      "interpretation": "A stable system is in place; certain areas still require improvement."
+      "interpretation": "The election is covered well and within the law; some criteria, most often interactivity or multimedia, could be strengthened."
     },
     "moderate": {
       "label": "Moderate",
-      "interpretation": "Core institutions function, but the system has weak points."
+      "interpretation": "Core requirements are met, but there are noticeable weak points: one type of source, delays, little work with the audience or across platforms."
     },
     "poor": {
       "label": "Unsatisfactory",
-      "interpretation": "Stability is low; legal and economic problems are pronounced."
+      "interpretation": "Election coverage has serious shortcomings: candidates are not covered in balance, information goes unverified or appears late. Editorial practice needs work."
     },
     "critical": {
       "label": "Critical",
-      "interpretation": "The media system has systemic problems; institutional and economic reform is required."
+      "interpretation": "The outlet does not provide fair election coverage: there are signs of legal violations or hidden campaigning, and information is incomplete and unreliable. Urgent action is needed."
     }
   },
   "outlet": {
@@ -592,7 +610,9 @@
     "cancel": "Cancel",
     "confirm": "Delete",
     "deleting": "Deleting…",
-    "deleteFailed": "Could not delete the assessment."
+    "deleteFailed": "Could not delete the assessment.",
+    "closed": "Round closed",
+    "deleteClosed": "This round is closed, so the assessment cannot be deleted until an administrator reopens it."
   },
   "admin": {
     "eyebrow": "Administration",
@@ -603,7 +623,9 @@
       "users": "Users",
       "consensus": "Needs consensus",
       "evaluations": "Expert assessments",
-      "weights": "Weights"
+      "weights": "Weights",
+      "periods": "Rounds",
+      "audit": "Log"
     },
     "users": {
       "subtitle": "New sign-ups are marked as pending and cannot save assessments until you approve them.",
@@ -659,9 +681,55 @@
       "invalid": "Check the data: the date must be today or later and after previous versions, and the weights must sum to exactly 1.",
       "lastAdmin": "The last administrator cannot lose the role.",
       "failed": "Could not save. Has supabase/008-admin.sql been run?",
-      "tooMany": "Too many emails in a row. Wait a few minutes."
+      "tooMany": "Too many emails in a row. Wait a few minutes.",
+      "duplicate": "A round with that name already exists."
     },
-    "saved": "Saved"
+    "saved": "Saved",
+    "needs010": "This section starts working once supabase/010-tours-evidence-audit.sql is run in Supabase → SQL Editor.",
+    "evidence": {
+      "show": "Justification ({count})",
+      "general": "General comment"
+    },
+    "periods": {
+      "subtitle": "Assessments can only be saved to an open round. Closing a round freezes its assessments: they cannot be added, changed or deleted until it is reopened.",
+      "name": "Round name",
+      "namePlaceholder": "Saylov-2026, stage 2",
+      "startsOn": "Start",
+      "endsOn": "End",
+      "create": "Create round",
+      "created": "Round created",
+      "status": "Status",
+      "open": "Open",
+      "closed": "Closed",
+      "evaluations": "Assessments",
+      "dates": "Dates",
+      "close": "Close",
+      "reopen": "Reopen",
+      "closeConfirm": "Close the round “{name}”? Experts will not be able to add, change or delete its assessments.",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "renameHint": "All assessments in the round take the new name too.",
+      "empty": "No rounds yet. Create the first one and it will appear in the calculator."
+    },
+    "audit": {
+      "subtitle": "The latest 150 changes to assessments: who changed what, and when. The database writes these entries automatically; they cannot be edited.",
+      "empty": "No changes yet.",
+      "when": "When",
+      "action": "Action",
+      "evaluation": "Assessment",
+      "changes": "What changed",
+      "actor": "Who",
+      "system": "outside the site",
+      "actions": {
+        "insert": "created",
+        "update": "changed",
+        "delete": "deleted"
+      },
+      "periodChanged": "round: {before} → {after}",
+      "evidenceChanged": "justification",
+      "otherChanges": "indicators or weights"
+    }
   },
   "export": {
     "download": "Download Excel",

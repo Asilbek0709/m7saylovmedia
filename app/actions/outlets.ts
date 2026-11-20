@@ -24,8 +24,23 @@ export type OutletResult =
         | "pending"
         | "invalid"
         | "duplicate"
+        | "adminOnly"
+        | "hasEvaluations"
         | "failed";
     };
+
+/** Поля издания в том виде, в каком их хранит таблица. */
+function normalize(input: OutletInput) {
+  const name = input.name?.trim() ?? "";
+  const ownership: Ownership =
+    input.ownership === "davlat" ? "davlat" : "nodavlat";
+  // Схему адреса не храним — в таблице лежит домен вида «kun.uz».
+  const website =
+    input.website?.trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "") ||
+    null;
+  const region = input.region?.trim() || "Тошкент";
+  return { name, ownership, website, region };
+}
 
 
 function slugify(name: string): string {
@@ -52,28 +67,12 @@ export async function createOutlet(input: OutletInput): Promise<OutletResult> {
   if (!user) return { ok: false, reason: "unauthorized" };
   if (!canWrite(user)) return { ok: false, reason: "pending" };
 
-  const name = input.name?.trim() ?? "";
-  if (!name) return { ok: false, reason: "invalid" };
-
-  const ownership: Ownership =
-    input.ownership === "davlat" ? "davlat" : "nodavlat";
-
-  // Схему адреса не храним — в таблице лежит домен вида «kun.uz».
-  const website =
-    input.website?.trim().replace(/^https?:\/\//i, "").replace(/\/+$/, "") ||
-    null;
-
-  const slug = slugify(name);
+  const fields = normalize(input);
+  if (!fields.name) return { ok: false, reason: "invalid" };
 
   const { data, error } = await supabase
     .from("media_outlets")
-    .insert({
-      name,
-      slug,
-      website,
-      ownership,
-      region: input.region?.trim() || "Тошкент",
-    })
+    .insert({ ...fields, slug: slugify(fields.name) })
     .select("id, name")
     .single();
 
@@ -87,8 +86,14 @@ export async function createOutlet(input: OutletInput): Promise<OutletResult> {
   return { ok: true, id: data.id as string, name: data.name as string };
 }
 
-/** Удаление издания вместе с его оценками (ON DELETE CASCADE). */
-export async function deleteOutlet(id: string): Promise<OutletResult> {
+/**
+ * Правка издания: название, сайт, собственность, регион. slug не меняется —
+ * на него ссылаются адреса страниц изданий.
+ */
+export async function updateOutlet(
+  id: string,
+  input: OutletInput,
+): Promise<OutletResult> {
   const supabase = await createClient();
   if (!supabase) return { ok: false, reason: "unavailable" };
 
@@ -96,8 +101,47 @@ export async function deleteOutlet(id: string): Promise<OutletResult> {
   if (!user) return { ok: false, reason: "unauthorized" };
   if (!canWrite(user)) return { ok: false, reason: "pending" };
 
-  const { error } = await supabase.from("media_outlets").delete().eq("id", id);
-  if (error) return { ok: false, reason: "failed" };
+  const fields = normalize(input);
+  if (!fields.name) return { ok: false, reason: "invalid" };
+
+  const { data, error } = await supabase
+    .from("media_outlets")
+    .update(fields)
+    .eq("id", id)
+    .select("id, name");
+
+  if (error) {
+    if (error.code === "23505") return { ok: false, reason: "duplicate" };
+    return { ok: false, reason: "failed" };
+  }
+  // RLS молча отсекает строку, если правка не разрешена.
+  if (!data?.length) return { ok: false, reason: "failed" };
+
+  refresh();
+  return { ok: true, id, name: data[0].name as string };
+}
+
+/**
+ * Удаление издания — только администратор. Издание с оценками база не
+ * удалит (010: ON DELETE RESTRICT), чтобы не стереть оценки экспертов.
+ */
+export async function deleteOutlet(id: string): Promise<OutletResult> {
+  const supabase = await createClient();
+  if (!supabase) return { ok: false, reason: "unavailable" };
+
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, reason: "unauthorized" };
+  if (user.role !== "admin") return { ok: false, reason: "adminOnly" };
+
+  const { data, error } = await supabase
+    .from("media_outlets")
+    .delete()
+    .eq("id", id)
+    .select("id");
+
+  // 23503 = foreign_key_violation: у издания есть оценки.
+  if (error?.code === "23503") return { ok: false, reason: "hasEvaluations" };
+  if (error || !data?.length) return { ok: false, reason: "failed" };
 
   refresh();
   return { ok: true, id, name: "" };

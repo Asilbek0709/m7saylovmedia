@@ -61,6 +61,11 @@ export default async function OutletsPage() {
         : "pending";
 
   return (
-    <OutletsManager outlets={outlets} canManage={canManage} hint={hint} />
+    <OutletsManager
+      outlets={outlets}
+      canManage={canManage}
+      isAdmin={user?.role === "admin"}
+      hint={hint}
+    />
   );
 }

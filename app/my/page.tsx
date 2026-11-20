@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileText, Pencil, TriangleAlert } from "lucide-react";
+import { FileText, Lock, Pencil, TriangleAlert } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { DeleteEvaluationButton } from "@/components/delete-evaluation-button";
@@ -28,6 +28,7 @@ import {
   type EvaluationRecord,
 } from "@/lib/evaluation-records";
 import { getLongDateFormatter } from "@/lib/format-date";
+import { getMonitoringPeriods } from "@/lib/periods";
 import { resolveBand } from "@/lib/ms7";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -69,7 +70,14 @@ export default async function MyEvaluationsPage() {
   }
 
   const records = await getMyEvaluations(user!);
-  const summaries = await getRoundSummaries(records);
+  const [summaries, periods] = await Promise.all([
+    getRoundSummaries(records),
+    getMonitoringPeriods(),
+  ]);
+  // В закрытом туре оценки заморожены (010) — правку и удаление не предлагаем.
+  const closed = new Set(
+    (periods ?? []).filter((p) => p.status === "closed").map((p) => p.name),
+  );
 
   const byPeriod = new Map<string, EvaluationRecord[]>();
   for (const record of records) {
@@ -84,6 +92,7 @@ export default async function MyEvaluationsPage() {
     confirm: t("confirm"),
     deleting: t("deleting"),
     failed: t("deleteFailed"),
+    closed: t("deleteClosed"),
   });
 
   return (
@@ -108,7 +117,15 @@ export default async function MyEvaluationsPage() {
         [...byPeriod].map(([period, items]) => (
           <Card key={period} className="ms7-surface mt-6 overflow-hidden">
             <CardHeader className="border-b border-border pb-4">
-              <CardTitle className="text-base">{period}</CardTitle>
+              <CardTitle className="flex flex-wrap items-center gap-2 text-base">
+                {period}
+                {closed.has(period) && (
+                  <span className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-xs font-normal text-muted-foreground">
+                    <Lock aria-hidden className="size-3" />
+                    {t("closed")}
+                  </span>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent className="px-0">
               <div className="overflow-x-auto">
@@ -202,12 +219,14 @@ export default async function MyEvaluationsPage() {
 
                           <TableCell className="pr-6">
                             <div className="flex flex-wrap justify-end gap-1">
-                              <Button asChild variant="ghost" size="sm">
-                                <Link href={`/calculator?edit=${record.id}`}>
-                                  <Pencil className="size-3.5" />
-                                  {t("edit")}
-                                </Link>
-                              </Button>
+                              {!closed.has(record.period) && (
+                                <Button asChild variant="ghost" size="sm">
+                                  <Link href={`/calculator?edit=${record.id}`}>
+                                    <Pencil className="size-3.5" />
+                                    {t("edit")}
+                                  </Link>
+                                </Button>
+                              )}
                               <Button
                                 asChild
                                 variant="ghost"
@@ -221,10 +240,12 @@ export default async function MyEvaluationsPage() {
                                   {t("report")}
                                 </Link>
                               </Button>
-                              <DeleteEvaluationButton
-                                id={record.id}
-                                labels={deleteLabels(record)}
-                              />
+                              {!closed.has(record.period) && (
+                                <DeleteEvaluationButton
+                                  id={record.id}
+                                  labels={deleteLabels(record)}
+                                />
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>

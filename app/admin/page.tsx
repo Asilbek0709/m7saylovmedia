@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { PeriodsManager } from "@/components/admin/periods-manager";
 import { RoleControl } from "@/components/admin/role-control";
 import { WeightSetForm } from "@/components/admin/weight-set-form";
 import { DeleteEvaluationButton } from "@/components/delete-evaluation-button";
@@ -21,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getAuditLog } from "@/lib/audit";
 import { requireUser } from "@/lib/auth";
 import {
   getEvaluationsForAdmin,
@@ -31,10 +33,19 @@ import {
 } from "@/lib/evaluation-records";
 import { getLongDateFormatter } from "@/lib/format-date";
 import { formatScore, MS7_CRITERIA } from "@/lib/ms7";
+import { getMonitoringPeriods } from "@/lib/periods";
+import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { getWeightHistory } from "@/lib/weights";
 
-const TABS = ["users", "consensus", "evaluations", "weights"] as const;
+const TABS = [
+  "users",
+  "consensus",
+  "evaluations",
+  "periods",
+  "audit",
+  "weights",
+] as const;
 type Tab = (typeof TABS)[number];
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -105,6 +116,8 @@ export default async function AdminPage({
             {tab === "evaluations" && (
               <EvaluationsTab period={one(params.period) ?? null} />
             )}
+            {tab === "periods" && <PeriodsTab />}
+            {tab === "audit" && <AuditTab />}
             {tab === "weights" && <WeightsTab />}
           </div>
         </>
@@ -118,7 +131,15 @@ export default async function AdminPage({
 async function errorLabels() {
   const t = await getTranslations("admin");
   return Object.fromEntries(
-    ["unavailable", "forbidden", "invalid", "lastAdmin", "tooMany", "failed"].map((k) => [
+    [
+      "unavailable",
+      "forbidden",
+      "invalid",
+      "lastAdmin",
+      "tooMany",
+      "duplicate",
+      "failed",
+    ].map((k) => [
       k,
       t(`errors.${k}`),
     ]),
@@ -428,6 +449,34 @@ async function EvaluationTable({
                       {t("evaluations.noExpert")}
                     </span>
                   )}
+                  {record.evidence && (
+                    <details className="mt-1 max-w-md">
+                      <summary className="cursor-pointer text-xs font-medium text-foreground underline-offset-4 hover:underline">
+                        {t("evidence.show", {
+                          count: Object.keys(record.evidence).length,
+                        })}
+                      </summary>
+                      <dl className="mt-1.5 space-y-1.5 text-xs">
+                        {[
+                          ...MS7_CRITERIA.map((c) => c.id),
+                          "general" as const,
+                        ]
+                          .filter((key) => record.evidence?.[key])
+                          .map((key) => (
+                            <div key={key}>
+                              <dt className="font-medium text-foreground">
+                                {key === "general"
+                                  ? t("evidence.general")
+                                  : `${tc(`${key}.code`)} — ${tc(`${key}.name`)}`}
+                              </dt>
+                              <dd className="whitespace-pre-line break-words text-muted-foreground">
+                                {record.evidence?.[key]}
+                              </dd>
+                            </div>
+                          ))}
+                      </dl>
+                    </details>
+                  )}
                 </TableCell>
                 {MS7_CRITERIA.map((c) => (
                   <TableCell key={c.id} className="text-center text-sm tabular">
@@ -465,6 +514,7 @@ async function EvaluationTable({
                         confirm: tm("confirm"),
                         deleting: tm("deleting"),
                         failed: tm("deleteFailed"),
+                        closed: tm("deleteClosed"),
                       }}
                     />
                   </TableCell>
@@ -475,6 +525,199 @@ async function EvaluationTable({
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+async function MigrationNotice() {
+  const t = await getTranslations("admin");
+  return (
+    <p className="rounded-md border border-border bg-secondary px-4 py-3 text-sm text-secondary-foreground">
+      {t("needs010")}
+    </p>
+  );
+}
+
+async function PeriodsTab() {
+  const t = await getTranslations("admin");
+  const periods = await getMonitoringPeriods();
+  if (periods === null) return <MigrationNotice />;
+
+  // Администратор видит все оценки (RLS 007) — считаем их по турам.
+  const counts = new Map<string, number>();
+  const supabase = await createClient();
+  if (supabase) {
+    const { data } = await supabase.from("evaluations").select("period");
+    for (const row of data ?? []) {
+      const name = row.period as string;
+      counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
+  }
+
+  return (
+    <Card className="ms7-surface overflow-hidden">
+      <CardHeader className="border-b border-border pb-4">
+        <CardTitle className="text-base">{t("tabs.periods")}</CardTitle>
+        <CardDescription>{t("periods.subtitle")}</CardDescription>
+      </CardHeader>
+      <CardContent className="px-0 pt-5">
+        <PeriodsManager
+          periods={periods.map((p) => ({
+            name: p.name,
+            startsOn: p.startsOn,
+            endsOn: p.endsOn,
+            status: p.status,
+            evaluations: counts.get(p.name) ?? 0,
+          }))}
+          labels={{
+            name: t("periods.name"),
+            namePlaceholder: t("periods.namePlaceholder"),
+            startsOn: t("periods.startsOn"),
+            endsOn: t("periods.endsOn"),
+            create: t("periods.create"),
+            created: t("periods.created"),
+            status: t("periods.status"),
+            open: t("periods.open"),
+            closed: t("periods.closed"),
+            evaluations: t("periods.evaluations"),
+            dates: t("periods.dates"),
+            close: t("periods.close"),
+            reopen: t("periods.reopen"),
+            closeConfirm: t.raw("periods.closeConfirm") as string,
+            edit: t("periods.edit"),
+            save: t("periods.save"),
+            cancel: t("periods.cancel"),
+            renameHint: t("periods.renameHint"),
+            empty: t("periods.empty"),
+            errors: await errorLabels(),
+          }}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+async function AuditTab() {
+  const t = await getTranslations("admin");
+  const tc = await getTranslations("criteria");
+  const formatDate = await getLongDateFormatter();
+  const entries = await getAuditLog(150);
+  if (entries === null) return <MigrationNotice />;
+
+  const time = (iso: string) =>
+    new Date(iso).toLocaleTimeString("ru-RU", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Asia/Tashkent",
+    });
+  const smsi = (v: number | null) => (v === null ? "—" : v.toFixed(1));
+
+  return (
+    <Card className="ms7-surface overflow-hidden">
+      <CardHeader className="border-b border-border pb-4">
+        <CardTitle className="text-base">{t("tabs.audit")}</CardTitle>
+        <CardDescription>{t("audit.subtitle")}</CardDescription>
+      </CardHeader>
+      <CardContent className="px-0">
+        {entries.length === 0 ? (
+          <p className="px-6 py-8 text-center text-sm text-muted-foreground">
+            {t("audit.empty")}
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-36 pl-6">{t("audit.when")}</TableHead>
+                  <TableHead className="w-28">{t("audit.action")}</TableHead>
+                  <TableHead className="min-w-48">{t("audit.evaluation")}</TableHead>
+                  <TableHead className="w-32 text-right">SMSI</TableHead>
+                  <TableHead className="min-w-56">{t("audit.changes")}</TableHead>
+                  <TableHead className="min-w-40 pr-6">{t("audit.actor")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="[&>tr:nth-child(even)]:bg-muted/40">
+                {entries.map((e) => (
+                  <TableRow key={e.id}>
+                    <TableCell className="pl-6 text-sm whitespace-nowrap text-muted-foreground tabular">
+                      {formatDate(e.changedAt)}
+                      <span className="block text-xs">{time(e.changedAt)}</span>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      <span
+                        className={cn(
+                          "rounded-md border px-2 py-0.5 text-xs",
+                          e.action === "delete"
+                            ? "border-destructive/40 text-destructive"
+                            : "border-border text-foreground",
+                        )}
+                      >
+                        {t(`audit.actions.${e.action}`)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {e.outletSlug ? (
+                        <Link
+                          href={`/outlets/${e.outletSlug}`}
+                          className="font-medium text-foreground underline-offset-4 hover:underline"
+                        >
+                          {e.outletName}
+                        </Link>
+                      ) : (
+                        <span className="font-medium text-foreground">{e.outletName}</span>
+                      )}
+                      <span className="block text-xs text-muted-foreground">
+                        {e.period}
+                        {e.evaluator && ` · ${e.evaluator}`}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right text-sm whitespace-nowrap tabular">
+                      {e.action === "update" && e.smsiBefore !== e.smsiAfter
+                        ? `${smsi(e.smsiBefore)} → ${smsi(e.smsiAfter)}`
+                        : smsi(e.smsiAfter ?? e.smsiBefore)}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {e.action === "update" ? (
+                        <>
+                          {e.scoreChanges.map((c) => (
+                            <span key={c.id} className="mr-2 inline-block tabular">
+                              <span className="font-medium text-foreground">
+                                {tc(`${c.id}.code`)}
+                              </span>{" "}
+                              {c.before ?? "—"} → {c.after ?? "—"}
+                            </span>
+                          ))}
+                          {e.periodChanged && (
+                            <span className="block">
+                              {t("audit.periodChanged", e.periodChanged)}
+                            </span>
+                          )}
+                          {e.evidenceChanged && (
+                            <span className="block">{t("audit.evidenceChanged")}</span>
+                          )}
+                          {e.scoreChanges.length === 0 &&
+                            !e.periodChanged &&
+                            !e.evidenceChanged &&
+                            t("audit.otherChanges")}
+                        </>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell className="pr-6 text-sm">
+                      {e.actor ?? (
+                        <span className="text-muted-foreground">{t("audit.system")}</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

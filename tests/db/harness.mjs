@@ -20,6 +20,7 @@ export const MIGRATIONS = [
   "006-weight-sets.sql",
   "007-experts.sql",
   "008-admin.sql",
+  "010-tours-evidence-audit.sql",
 ];
 
 /** Текст миграции. pgcrypto в PGlite нет, а gen_random_uuid() встроен в Postgres 13+. */
@@ -66,7 +67,13 @@ export async function grantApiRoles(db) {
   await db.exec(`
     grant usage on schema public, auth to anon, authenticated;
     grant select on all tables in schema public to anon, authenticated;
-    grant insert, update, delete on public.evaluations, public.weight_sets to authenticated;
+    grant insert, update, delete on public.evaluations, public.weight_sets,
+      public.media_outlets to authenticated;
+    do $$ begin
+      if to_regclass('public.monitoring_periods') is not null then
+        grant insert, update, delete on public.monitoring_periods to authenticated;
+      end if;
+    end $$;
     grant update on public.profiles to authenticated;
     grant execute on all functions in schema public, auth to anon, authenticated;
   `);

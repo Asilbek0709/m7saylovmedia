@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Check, Loader2, Plus, Trash2 } from "lucide-react";
+import { Check, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Reveal } from "@/components/motion/reveal";
@@ -32,7 +32,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { createOutlet, deleteOutlet, type Ownership } from "@/app/actions/outlets";
+import {
+  createOutlet,
+  deleteOutlet,
+  updateOutlet,
+  type OutletInput,
+  type Ownership,
+} from "@/app/actions/outlets";
 
 export interface OutletRow {
   id: string;
@@ -46,12 +52,15 @@ export interface OutletRow {
 export interface OutletsManagerProps {
   outlets: OutletRow[];
   canManage: boolean;
+  /** Удалять издания может только администратор. */
+  isAdmin: boolean;
   hint: "demo" | "signin" | "pending" | null;
 }
 
 export function OutletsManager({
   outlets,
   canManage,
+  isAdmin,
   hint,
 }: OutletsManagerProps) {
   const t = useTranslations("outlets");
@@ -65,6 +74,43 @@ export function OutletsManager({
   const [error, setError] = React.useState<string | null>(null);
   const [added, setAdded] = React.useState<string | null>(null);
   const [removing, setRemoving] = React.useState<string | null>(null);
+  // Правка и удаление в списке — со своей строкой ошибки, отдельно от формы.
+  const [listError, setListError] = React.useState<string | null>(null);
+  const [editing, setEditing] = React.useState<string | null>(null);
+  const [draft, setDraft] = React.useState<OutletInput | null>(null);
+  const [saving, setSaving] = React.useState(false);
+
+  const startEdit = (outlet: OutletRow) => {
+    setListError(null);
+    setEditing(outlet.id);
+    setDraft({
+      name: outlet.name,
+      website: outlet.website ?? "",
+      ownership: outlet.ownership,
+      region: outlet.region,
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditing(null);
+    setDraft(null);
+    setListError(null);
+  };
+
+  const save = async () => {
+    if (!editing || !draft) return;
+    setSaving(true);
+    setListError(null);
+    const result = await updateOutlet(editing, draft);
+    setSaving(false);
+    if (result.ok) {
+      cancelEdit();
+    } else {
+      setListError(
+        result.reason === "failed" ? t("updateFailed") : t(result.reason),
+      );
+    }
+  };
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -88,10 +134,14 @@ export function OutletsManager({
   const remove = async (id: string) => {
     if (!window.confirm(t("deleteConfirm"))) return;
     setRemoving(id);
-    setError(null);
+    setListError(null);
     const result = await deleteOutlet(id);
     setRemoving(null);
-    if (!result.ok) setError(t(result.reason));
+    if (!result.ok) {
+      setListError(
+        result.reason === "failed" ? t("deleteFailed") : t(result.reason),
+      );
+    }
   };
 
   return (
@@ -224,6 +274,11 @@ export function OutletsManager({
             </CardDescription>
           </CardHeader>
           <CardContent className="px-0">
+            {listError && editing === null && (
+              <p role="alert" className="px-6 pb-3 text-xs text-destructive">
+                {listError}
+              </p>
+            )}
             {outlets.length === 0 ? (
               <p className="px-6 py-8 text-center text-sm text-muted-foreground">
                 {t("empty")}
@@ -243,12 +298,111 @@ export function OutletsManager({
                       <TableHead className="w-24 text-center">
                         {t("columnEvaluations")}
                       </TableHead>
-                      {canManage && <TableHead className="w-16 pr-6" />}
+                      {canManage && <TableHead className="w-24 pr-6" />}
                     </TableRow>
                   </TableHeader>
                   <TableBody className="[&>tr:nth-child(even)]:bg-muted/40">
-                    {outlets.map((outlet) => (
-                      <TableRow key={outlet.id}>
+                    {outlets.map((outlet) =>
+                      editing === outlet.id && draft ? (
+                        <TableRow key={outlet.id}>
+                          <TableCell className="pl-6 align-top">
+                            <Input
+                              aria-label={t("name")}
+                              value={draft.name}
+                              disabled={saving}
+                              onChange={(e) =>
+                                setDraft({ ...draft, name: e.target.value })
+                              }
+                              className="h-8"
+                            />
+                            <Input
+                              aria-label={t("website")}
+                              value={draft.website}
+                              disabled={saving}
+                              placeholder={t("websitePlaceholder")}
+                              onChange={(e) =>
+                                setDraft({ ...draft, website: e.target.value })
+                              }
+                              className="mt-1.5 h-8 text-xs"
+                            />
+                          </TableCell>
+                          <TableCell className="align-top">
+                            <Select
+                              value={draft.ownership}
+                              disabled={saving}
+                              onValueChange={(v) =>
+                                setDraft({ ...draft, ownership: v as Ownership })
+                              }
+                            >
+                              <SelectTrigger
+                                aria-label={t("ownership")}
+                                className="h-8 w-full"
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="nodavlat">
+                                  {t("nodavlat")}
+                                </SelectItem>
+                                <SelectItem value="davlat">
+                                  {t("davlat")}
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell className="align-top">
+                            <Input
+                              aria-label={t("region")}
+                              value={draft.region}
+                              disabled={saving}
+                              onChange={(e) =>
+                                setDraft({ ...draft, region: e.target.value })
+                              }
+                              className="h-8"
+                            />
+                          </TableCell>
+                          <TableCell className="text-center align-top text-sm text-foreground tabular">
+                            <span className="inline-block pt-1.5">
+                              {outlet.evaluations}
+                            </span>
+                          </TableCell>
+                          <TableCell className="pr-6 text-right align-top whitespace-nowrap">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={t("save")}
+                              disabled={saving}
+                              onClick={save}
+                              className="size-8 text-muted-foreground hover:text-foreground"
+                            >
+                              {saving ? (
+                                <Loader2 className="size-3.5 animate-spin" />
+                              ) : (
+                                <Check className="size-3.5" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={t("cancel")}
+                              disabled={saving}
+                              onClick={cancelEdit}
+                              className="size-8 text-muted-foreground hover:text-foreground"
+                            >
+                              <X className="size-3.5" />
+                            </Button>
+                            {listError && (
+                              <p
+                                role="alert"
+                                className="mt-1 max-w-48 text-left text-xs whitespace-normal text-destructive"
+                              >
+                                {listError}
+                              </p>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        <TableRow key={outlet.id}>
                         <TableCell className="pl-6">
                           <span className="block text-sm font-medium text-foreground">
                             {outlet.name}
@@ -271,12 +425,33 @@ export function OutletsManager({
                           {outlet.evaluations}
                         </TableCell>
                         {canManage && (
-                          <TableCell className="pr-6 text-right">
+                          <TableCell className="pr-6 text-right whitespace-nowrap">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={t("edit")}
+                              title={t("edit")}
+                              disabled={editing !== null || removing !== null}
+                              onClick={() => startEdit(outlet)}
+                              className="size-8 text-muted-foreground hover:text-foreground"
+                            >
+                              <Pencil className="size-3.5" />
+                            </Button>
+                            {isAdmin && (
                             <Button
                               variant="ghost"
                               size="icon"
                               aria-label={t("delete")}
-                              disabled={removing === outlet.id}
+                              title={
+                                outlet.evaluations > 0
+                                  ? t("hasEvaluations")
+                                  : t("delete")
+                              }
+                              disabled={
+                                removing === outlet.id ||
+                                editing !== null ||
+                                outlet.evaluations > 0
+                              }
                               onClick={() => remove(outlet.id)}
                               className="size-8 text-muted-foreground hover:text-destructive"
                             >
@@ -286,10 +461,12 @@ export function OutletsManager({
                                 <Trash2 className="size-3.5" />
                               )}
                             </Button>
+                            )}
                           </TableCell>
                         )}
                       </TableRow>
-                    ))}
+                      ),
+                    )}
                   </TableBody>
                 </Table>
               </div>

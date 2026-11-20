@@ -24,6 +24,8 @@ export interface DeleteEvaluationLabels {
   confirm: string;
   deleting: string;
   failed: string;
+  /** Тур закрыт — оценку не удалить, пока администратор его не откроет. */
+  closed?: string;
 }
 
 /** Удаление необратимо — только через диалог подтверждения. */
@@ -44,7 +46,11 @@ export function DeleteEvaluationButton({
       if (result.ok) {
         setOpen(false);
       } else {
-        setError(labels.failed);
+        setError(
+          result.reason === "closed" && labels.closed
+            ? labels.closed
+            : labels.failed,
+        );
       }
     });
 
