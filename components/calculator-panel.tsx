@@ -362,6 +362,8 @@ export interface CalculatorPanelProps {
   editing?: EditingEvaluation | null;
   /** В адресе была ?edit=…, но такой своей оценки нет. */
   editNotFound?: boolean;
+  /** Администратор: при пустом списке туров — ссылка на их создание. */
+  canManagePeriods?: boolean;
 }
 
 export interface EditingEvaluation {
@@ -387,6 +389,7 @@ export function CalculatorPanel({
   directory = [],
   editing = null,
   editNotFound = false,
+  canManagePeriods = false,
 }: CalculatorPanelProps) {
   const t = useTranslations("calculator");
   const tc = useTranslations("criteria");
@@ -979,8 +982,21 @@ export function CalculatorPanel({
                     </Label>
                     {openPeriods !== null && !editing ? (
                       noOpenPeriod ? (
-                        <p className="rounded-md border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
-                          {t("save.noOpenPeriod")}
+                        <p
+                          role="alert"
+                          className="rounded-md border border-dashed border-destructive/50 px-3 py-2 text-xs text-foreground"
+                        >
+                          {canManagePeriods
+                            ? t("save.noOpenPeriodAdmin")
+                            : t("save.noOpenPeriod")}
+                          {canManagePeriods && (
+                            <Link
+                              href="/admin?tab=periods"
+                              className="mt-1 block font-medium underline underline-offset-4"
+                            >
+                              {t("save.createPeriod")}
+                            </Link>
+                          )}
                         </p>
                       ) : (
                         <Select

@@ -76,6 +76,7 @@ export default async function CalculatorPage({
         }
       }
       editNotFound={Boolean(editId) && !editing}
+      canManagePeriods={user?.role === "admin"}
     />
   );
 }

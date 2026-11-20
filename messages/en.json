@@ -208,9 +208,11 @@
       "unauthorized": "Your session expired. Please sign in again.",
       "unavailable": "Supabase is not connected.",
       "pending": "Your account is awaiting administrator approval — saving is unavailable.",
-      "noOpenPeriod": "There are no open rounds, so a new assessment cannot be saved. Contact an administrator.",
+      "noOpenPeriod": "There is no open monitoring round, so the assessment cannot be saved. Ask an administrator to create one.",
       "closed": "This round is closed and its assessments cannot change. An administrator must reopen it to allow edits.",
-      "unknownPeriod": "That round is not in the directory. Choose a round from the list."
+      "unknownPeriod": "That round is not in the directory. Choose a round from the list.",
+      "noOpenPeriodAdmin": "There is no open monitoring round, so the assessment cannot be saved. Create a round and it will appear here.",
+      "createPeriod": "Create a round →"
     },
     "chart": {
       "outlet": "Assessed outlet",
