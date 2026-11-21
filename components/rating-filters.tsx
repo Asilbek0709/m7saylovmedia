@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { useLocale } from "next-intl";
 
 import {
   Select,
@@ -16,6 +17,7 @@ import {
   type OwnershipFilter,
   type SliceFilter,
 } from "@/lib/rating-slices";
+import { regionLabel } from "@/lib/regions";
 import { cn } from "@/lib/utils";
 
 /** Radix Select не допускает пустое значение у пункта. */
@@ -43,6 +45,7 @@ export function RatingFilters({
   regions: string[];
   labels: RatingFiltersLabels;
 }) {
+  const locale = useLocale();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const isFiltered = filter.ownership !== "all" || filter.region !== null;
@@ -112,7 +115,7 @@ export function RatingFilters({
             <SelectItem value={ALL_REGIONS}>{labels.allRegions}</SelectItem>
             {regions.map((region) => (
               <SelectItem key={region} value={region}>
-                {region}
+                {regionLabel(region, locale)}
               </SelectItem>
             ))}
           </SelectContent>

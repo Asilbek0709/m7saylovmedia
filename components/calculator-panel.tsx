@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Check, Loader2, RotateCcw, Search, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Legend,
   PolarAngleAxis,
@@ -53,6 +53,7 @@ import { saveEvaluation, type Evidence } from "@/app/actions/evaluations";
 import { type RankingRow } from "@/lib/demo-data";
 import type { DirectoryOutlet } from "@/lib/rankings";
 import { buildRecommendations } from "@/lib/recommendations";
+import { regionLabel } from "@/lib/regions";
 import {
   calculateSMSI,
   criterionFromIndicators,
@@ -395,6 +396,7 @@ export function CalculatorPanel({
   const tc = useTranslations("criteria");
   const tb = useTranslations("bands");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
 
   const outlets = React.useMemo(
     () => buildCatalog(rows, weights),
@@ -714,7 +716,7 @@ export function CalculatorPanel({
                 {unrated.map((outlet) => (
                   <CommandItem
                     key={outlet.id}
-                    value={`${outlet.name} ${outlet.website ?? ""} ${outlet.region}`}
+                    value={`${outlet.name} ${outlet.website ?? ""} ${outlet.region} ${regionLabel(outlet.region, locale)}`}
                     onSelect={() => pickUnrated(outlet)}
                     className="gap-3"
                   >
@@ -727,7 +729,9 @@ export function CalculatorPanel({
                         {outlet.name}
                       </span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        {[outlet.website, outlet.region].filter(Boolean).join(" · ")}
+                        {[outlet.website, outlet.region && regionLabel(outlet.region, locale)]
+                          .filter(Boolean)
+                          .join(" · ")}
                       </span>
                     </span>
                   </CommandItem>

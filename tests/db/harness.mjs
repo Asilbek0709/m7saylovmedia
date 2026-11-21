@@ -21,6 +21,7 @@ export const MIGRATIONS = [
   "007-experts.sql",
   "008-admin.sql",
   "010-tours-evidence-audit.sql",
+  "011-lead-expert.sql",
 ];
 
 /** Текст миграции. pgcrypto в PGlite нет, а gen_random_uuid() встроен в Postgres 13+. */

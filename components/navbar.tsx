@@ -25,7 +25,7 @@ export function Navbar({
   userRole,
 }: {
   userEmail: string | null;
-  userRole: "pending" | "expert" | "admin" | null;
+  userRole: "pending" | "expert" | "lead" | "admin" | null;
 }) {
   const t = useTranslations("common");
   const pathname = usePathname();

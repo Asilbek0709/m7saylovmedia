@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Check, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Reveal } from "@/components/motion/reveal";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,7 @@ import {
   type OutletInput,
   type Ownership,
 } from "@/app/actions/outlets";
+import { regionLabel } from "@/lib/regions";
 
 export interface OutletRow {
   id: string;
@@ -65,6 +66,7 @@ export function OutletsManager({
 }: OutletsManagerProps) {
   const t = useTranslations("outlets");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
 
   const [name, setName] = React.useState("");
   const [website, setWebsite] = React.useState("");
@@ -419,7 +421,7 @@ export function OutletsManager({
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {outlet.region}
+                          {regionLabel(outlet.region, locale)}
                         </TableCell>
                         <TableCell className="text-center text-sm text-foreground tabular">
                           {outlet.evaluations}

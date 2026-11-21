@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CircleCheck, FileText, TriangleAlert } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+
+import { regionLabel } from "@/lib/regions";
 
 import { Reveal } from "@/components/motion/reveal";
 import { OutletDynamics } from "@/components/outlet-dynamics";
@@ -50,6 +52,7 @@ export default async function OutletPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const locale = await getLocale();
   const { slug } = await params;
   const history = await getOutletHistory(slug);
   if (!history) notFound();
@@ -87,7 +90,7 @@ export default async function OutletPage({
           <Badge variant="outline" className="font-normal">
             {tr(`ownership.${history.ownership}`)}
           </Badge>
-          {history.region && <span>{history.region}</span>}
+          {history.region && <span>{regionLabel(history.region, locale)}</span>}
         </div>
         <div className="mt-8 rounded-lg border border-dashed border-border px-6 py-12 text-center">
           <p className="text-sm font-medium text-foreground">
@@ -150,7 +153,7 @@ export default async function OutletPage({
               <Badge variant="outline" className="font-normal">
                 {tr(`ownership.${history.ownership}`)}
               </Badge>
-              <span>{history.region}</span>
+              <span>{regionLabel(history.region, locale)}</span>
               <span className="tabular">
                 {t("rounds", { count: points.length })}
               </span>

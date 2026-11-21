@@ -89,7 +89,9 @@
     "roleAdmin": "Administrator",
     "myEvaluations": "My assessments",
     "admin": "Administration",
-    "changePassword": "Change password"
+    "changePassword": "Change password",
+    "roleLead": "Lead expert",
+    "periods": "Monitoring rounds"
   },
   "register": {
     "title": "Expert registration",
@@ -366,7 +368,8 @@
       "noteCol": "Note",
       "current": "current",
       "mismatchTitle": "Code weights differ from the database.",
-      "mismatch": "The site calculates with version {db} from the database. The constants in lib/ms7.ts (version {ui}) are used only in demo mode without a database — update them when convenient."
+      "mismatch": "The site calculates with version {db} from the database. The constants in lib/ms7.ts (version {ui}) are used only in demo mode without a database — update them when convenient.",
+      "initialNote": "Initial weights of the MS-7 model."
     }
   },
   "criteria": {
@@ -642,7 +645,8 @@
       "roles": {
         "pending": "Pending",
         "expert": "Expert",
-        "admin": "Administrator"
+        "admin": "Administrator",
+        "lead": "Lead expert"
       },
       "sendReset": "Send a password reset link",
       "sendResetShort": "Reset password",
@@ -731,7 +735,9 @@
       "periodChanged": "round: {before} → {after}",
       "evidenceChanged": "justification",
       "otherChanges": "indicators or weights"
-    }
+    },
+    "leadTitle": "Monitoring rounds",
+    "leadSubtitle": "As lead expert you create rounds, set their dates, and open or close them."
   },
   "export": {
     "download": "Download Excel",

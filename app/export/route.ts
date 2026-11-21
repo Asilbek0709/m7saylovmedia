@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import {
   agreementLevel,
@@ -7,6 +7,7 @@ import {
   SIGNIFICANCE,
 } from "@/lib/agreement";
 import { getCurrentUser } from "@/lib/auth";
+import { regionLabel } from "@/lib/regions";
 import { getEvaluationsForAdmin } from "@/lib/evaluation-records";
 import { MS7_CRITERIA, resolveBand, SMSI_BANDS } from "@/lib/ms7";
 import { getAllDynamics, getRoundRankings } from "@/lib/rankings";
@@ -25,6 +26,7 @@ import { buildXlsx, XLSX_MIME, type Cell, type Sheet } from "@/lib/xlsx";
  */
 export async function GET(request: Request) {
   const t = await getTranslations("export");
+  const locale = await getLocale();
   const tc = await getTranslations("criteria");
   const tb = await getTranslations("bands");
   const tr = await getTranslations("rating");
@@ -57,7 +59,7 @@ export async function GET(request: Request) {
         row.name,
         row.website,
         tr(`ownership.${row.ownership}`),
-        row.region,
+        row.region ? regionLabel(row.region, locale) : row.region,
         ...MS7_CRITERIA.map((c) => row[c.id]),
         row.smsi,
         tb(`${resolveBand(row.smsi).id}.label`),

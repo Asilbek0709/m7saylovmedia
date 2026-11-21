@@ -3,7 +3,7 @@
 import { refresh } from "next/cache";
 import { headers } from "next/headers";
 
-import { getCurrentUser, type UserRole } from "@/lib/auth";
+import { canManagePeriods, getCurrentUser, type UserRole } from "@/lib/auth";
 import { MS7_CRITERIA, type CriterionId } from "@/lib/ms7";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,7 +17,7 @@ type Failure =
   | "failed";
 export type AdminResult = { ok: true } | { ok: false; reason: Failure };
 
-const ROLES: UserRole[] = ["pending", "expert", "admin"];
+const ROLES: UserRole[] = ["pending", "expert", "lead", "admin"];
 
 /** Права дублирует база (008-admin.sql); здесь — понятный ответ интерфейсу. */
 async function adminClient() {
@@ -25,6 +25,15 @@ async function adminClient() {
   if (!supabase) return { error: "unavailable" as const };
   const user = await getCurrentUser();
   if (user?.role !== "admin") return { error: "forbidden" as const };
+  return { supabase, user };
+}
+
+/** Туры — главный эксперт или администратор (011 дублирует это в базе). */
+async function periodsClient() {
+  const supabase = await createClient();
+  if (!supabase) return { error: "unavailable" as const };
+  const user = await getCurrentUser();
+  if (!canManagePeriods(user)) return { error: "forbidden" as const };
   return { supabase, user };
 }
 
@@ -140,7 +149,7 @@ function readPeriod(input: PeriodInput) {
 
 /** Новый тур — открытый: эксперты сразу могут вносить в него оценки. */
 export async function createPeriod(input: PeriodInput): Promise<AdminResult> {
-  const ctx = await adminClient();
+  const ctx = await periodsClient();
   if ("error" in ctx) return { ok: false, reason: ctx.error! };
 
   const row = readPeriod(input);
@@ -165,7 +174,7 @@ export async function updatePeriod(
   name: string,
   input: PeriodInput,
 ): Promise<AdminResult> {
-  const ctx = await adminClient();
+  const ctx = await periodsClient();
   if ("error" in ctx) return { ok: false, reason: ctx.error! };
 
   const row = readPeriod(input);
@@ -190,7 +199,7 @@ export async function setPeriodStatus(
   name: string,
   status: "open" | "closed",
 ): Promise<AdminResult> {
-  const ctx = await adminClient();
+  const ctx = await periodsClient();
   if ("error" in ctx) return { ok: false, reason: ctx.error! };
   if (status !== "open" && status !== "closed") {
     return { ok: false, reason: "invalid" };

@@ -1,5 +1,5 @@
 import type { Evidence } from "@/app/actions/evaluations";
-import type { SessionUser } from "@/lib/auth";
+import type { SessionUser, UserRole } from "@/lib/auth";
 import {
   MS7_CRITERIA,
   type CriteriaScores,
@@ -248,7 +248,7 @@ export interface ProfileRecord {
   email: string | null;
   fullName: string | null;
   organization: string | null;
-  role: "pending" | "expert" | "admin";
+  role: UserRole;
   createdAt: string;
 }
 

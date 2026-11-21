@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Download, TriangleAlert } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+
+import { regionLabel } from "@/lib/regions";
 
 import { Reveal } from "@/components/motion/reveal";
 import { OwnershipRadar } from "@/components/ownership-radar";
@@ -55,6 +57,7 @@ export default async function RatingPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const locale = await getLocale();
   const t = await getTranslations("rating");
   const tc = await getTranslations("criteria");
   const tb = await getTranslations("bands");
@@ -494,7 +497,10 @@ export default async function RatingPage({
             {t("compare.title")}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {t("compare.subtitle")} · {filter.region ?? t("compare.allRegions")}
+            {t("compare.subtitle")} ·{" "}
+            {filter.region
+              ? regionLabel(filter.region, locale)
+              : t("compare.allRegions")}
           </p>
         </Reveal>
 
@@ -678,7 +684,7 @@ export default async function RatingPage({
                                   scroll={false}
                                   className="underline-offset-4 hover:underline"
                                 >
-                                  {row.region}
+                                  {regionLabel(row.region, locale)}
                                 </Link>
                               ) : (
                                 <span className="text-muted-foreground">

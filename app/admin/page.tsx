@@ -23,7 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getAuditLog } from "@/lib/audit";
-import { requireUser } from "@/lib/auth";
+import { canManagePeriods, requireUser } from "@/lib/auth";
 import {
   getEvaluationsForAdmin,
   getPeriods,
@@ -48,6 +48,9 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number];
 
+/** Главному эксперту из панели доступны только туры. */
+const LEAD_TABS: readonly Tab[] = ["periods"];
+
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
@@ -64,12 +67,13 @@ export default async function AdminPage({
   const user = await requireUser("/admin");
   const t = await getTranslations("admin");
 
-  // Не администратору раздел не существует — не подсказываем, что он есть.
-  if (user && user.role !== "admin") notFound();
+  // Остальным раздел не существует — не подсказываем, что он есть.
+  if (user && !canManagePeriods(user)) notFound();
 
+  const tabs: readonly Tab[] = user?.role === "lead" ? LEAD_TABS : TABS;
   const params = await searchParams;
   const tabParam = one(params.tab);
-  const tab: Tab = TABS.includes(tabParam as Tab) ? (tabParam as Tab) : "users";
+  const tab: Tab = tabs.includes(tabParam as Tab) ? (tabParam as Tab) : tabs[0];
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
@@ -77,10 +81,10 @@ export default async function AdminPage({
         {t("eyebrow")}
       </p>
       <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">
-        {t("title")}
+        {user?.role === "lead" ? t("leadTitle") : t("title")}
       </h1>
       <p className="mt-1.5 max-w-3xl text-sm text-muted-foreground">
-        {t("subtitle")}
+        {user?.role === "lead" ? t("leadSubtitle") : t("subtitle")}
       </p>
 
       {!user ? (
@@ -89,11 +93,12 @@ export default async function AdminPage({
         </p>
       ) : (
         <>
+          {tabs.length > 1 && (
           <nav
             aria-label={t("title")}
             className="mt-6 inline-flex max-w-full flex-wrap rounded-md border border-border bg-muted/50 p-0.5"
           >
-            {TABS.map((key) => (
+            {tabs.map((key) => (
               <Link
                 key={key}
                 href={`/admin?tab=${key}`}
@@ -109,6 +114,7 @@ export default async function AdminPage({
               </Link>
             ))}
           </nav>
+          )}
 
           <div className="mt-5">
             {tab === "users" && <UsersTab currentUserId={user.id} />}
@@ -164,6 +170,7 @@ async function UsersTab({ currentUserId }: { currentUserId: string }) {
     roles: {
       pending: t("users.roles.pending"),
       expert: t("users.roles.expert"),
+      lead: t("users.roles.lead"),
       admin: t("users.roles.admin"),
     },
     approve: t("users.approve"),
@@ -544,14 +551,17 @@ async function PeriodsTab() {
   const periods = await getMonitoringPeriods();
   if (periods === null) return <MigrationNotice />;
 
-  // Администратор видит все оценки (RLS 007) — считаем их по турам.
+  // Число оценок — из публичных итогов туров: главному эксперту чужие
+  // оценки не видны (RLS 007), а итоги видны всем.
   const counts = new Map<string, number>();
   const supabase = await createClient();
   if (supabase) {
-    const { data } = await supabase.from("evaluations").select("period");
+    const { data } = await supabase
+      .from("evaluation_rounds")
+      .select("period, experts");
     for (const row of data ?? []) {
       const name = row.period as string;
-      counts.set(name, (counts.get(name) ?? 0) + 1);
+      counts.set(name, (counts.get(name) ?? 0) + Number(row.experts ?? 0));
     }
   }
 

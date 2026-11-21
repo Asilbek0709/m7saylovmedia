@@ -5,7 +5,8 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
 
-export type UserRole = "pending" | "expert" | "admin";
+/** lead — главный эксперт: оценивает и управляет турами (011). */
+export type UserRole = "pending" | "expert" | "lead" | "admin";
 
 export interface SessionUser {
   id: string;
@@ -16,7 +17,14 @@ export interface SessionUser {
 
 
 export function canWrite(user: SessionUser | null): boolean {
-  return user?.role === "expert" || user?.role === "admin";
+  return (
+    user?.role === "expert" || user?.role === "lead" || user?.role === "admin"
+  );
+}
+
+/** Туры создают и закрывают главный эксперт и администратор. */
+export function canManagePeriods(user: SessionUser | null): boolean {
+  return user?.role === "lead" || user?.role === "admin";
 }
 
 

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+
+import { regionLabel } from "@/lib/regions";
 
 import { PrintButton } from "@/components/report-print";
 import { ReportRadar } from "@/components/report-radar";
@@ -48,6 +50,7 @@ export default async function ReportPage({
   params,
   searchParams,
 }: Params & SearchParams) {
+  const locale = await getLocale();
   const { slug } = await params;
   const history = await getOutletHistory(slug);
   if (!history) notFound();
@@ -103,7 +106,10 @@ export default async function ReportPage({
       label: t("meta.ownership"),
       value: tr(`ownership.${history.ownership}`),
     },
-    { label: t("meta.region"), value: history.region || "—" },
+    {
+      label: t("meta.region"),
+      value: history.region ? regionLabel(history.region, locale) : "—",
+    },
     { label: t("meta.period"), value: point.period },
     {
       label: t("meta.evaluatedAt"),

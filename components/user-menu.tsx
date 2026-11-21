@@ -2,7 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ClipboardList, KeyRound, LogOut, ShieldCheck, UserRound } from "lucide-react";
+import {
+  CalendarRange,
+  ClipboardList,
+  KeyRound,
+  LogOut,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { signOut } from "@/app/actions/auth";
@@ -20,7 +27,7 @@ export function UserMenu({
   role,
 }: {
   email: string | null;
-  role: "pending" | "expert" | "admin" | null;
+  role: "pending" | "expert" | "lead" | "admin" | null;
 }) {
   const t = useTranslations("common");
   const ta = useTranslations("auth");
@@ -49,7 +56,9 @@ export function UserMenu({
   const roleLabel =
     role === "admin"
       ? ta("roleAdmin")
-      : role === "expert"
+      : role === "lead"
+        ? ta("roleLead")
+        : role === "expert"
         ? ta("roleExpert")
         : ta("rolePending");
 
@@ -83,7 +92,7 @@ export function UserMenu({
           <p className="mt-1 text-[11px] text-muted-foreground">{roleLabel}</p>
         </div>
         <DropdownMenuSeparator />
-        {(role === "expert" || role === "admin") && (
+        {(role === "expert" || role === "lead" || role === "admin") && (
           <DropdownMenuItem asChild className="gap-2">
             <Link href="/my">
               <ClipboardList className="size-4 text-muted-foreground" />
@@ -96,6 +105,14 @@ export function UserMenu({
             <Link href="/admin">
               <ShieldCheck className="size-4 text-muted-foreground" />
               {ta("admin")}
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {role === "lead" && (
+          <DropdownMenuItem asChild className="gap-2">
+            <Link href="/admin?tab=periods">
+              <CalendarRange className="size-4 text-muted-foreground" />
+              {ta("periods")}
             </Link>
           </DropdownMenuItem>
         )}

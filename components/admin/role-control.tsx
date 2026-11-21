@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import type { UserRole } from "@/lib/auth";
 
-const ROLES: UserRole[] = ["pending", "expert", "admin"];
+const ROLES: UserRole[] = ["pending", "expert", "lead", "admin"];
 
 export interface RoleControlLabels {
   roles: Record<UserRole, string>;

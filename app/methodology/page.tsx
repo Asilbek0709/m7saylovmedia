@@ -31,6 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("eyebrow"), description: t("subtitle") };
 }
 
+const SEED_WEIGHTS_NOTE = "Исходные веса модели MS-7.";
+
 export default async function MethodologyPage() {
   const t = await getTranslations("methodology");
   const tc = await getTranslations("criteria");
@@ -246,7 +248,11 @@ export default async function MethodologyPage() {
                           </TableCell>
                         ))}
                         <TableCell className="pr-6 text-xs text-muted-foreground">
-                          {set.note ?? "—"}
+                          {/* Примечание к исходному набору записано миграцией 006
+                              по-русски — показываем его на языке страницы. */}
+                          {set.id === 1 && set.note === SEED_WEIGHTS_NOTE
+                            ? t("weights.initialNote")
+                            : (set.note ?? "—")}
                         </TableCell>
                       </TableRow>
                     );

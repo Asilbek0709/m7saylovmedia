@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { CalculatorPanel } from "@/components/calculator-panel";
-import { canWrite, getCurrentUser } from "@/lib/auth";
+import { canManagePeriods, canWrite, getCurrentUser } from "@/lib/auth";
 import { getOwnEvaluation } from "@/lib/evaluation-records";
 import { getMonitoringPeriods } from "@/lib/periods";
 import { getOutletDirectory, getRankings } from "@/lib/rankings";
@@ -76,7 +76,7 @@ export default async function CalculatorPage({
         }
       }
       editNotFound={Boolean(editId) && !editing}
-      canManagePeriods={user?.role === "admin"}
+      canManagePeriods={canManagePeriods(user)}
     />
   );
 }
