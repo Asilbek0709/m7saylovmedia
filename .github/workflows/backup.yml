@@ -1,0 +1,114 @@
+# Еженедельная резервная копия базы Supabase.
+#
+# Что сохраняется: схема public целиком (таблицы, данные, функции, триггеры,
+# политики RLS) и учётные записи (auth.users, auth.identities).
+# Копия шифруется паролем BACKUP_PASSPHRASE (AES-256): репозиторий публичный,
+# а файлы запусков Actions может скачать любой. Без пароля копия бесполезна.
+#
+# Нужны секреты репозитория (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL    — строка подключения «Session pooler» из Supabase → Connect
+#   BACKUP_PASSPHRASE  — длинный пароль шифрования; хранить отдельно от GitHub
+#
+# Как восстановить — docs/BACKUPS.md.
+
+name: Резервная копия базы
+
+on:
+  schedule:
+    # Воскресенье, 02:00 UTC (07:00 по Ташкенту).
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+      PG: /usr/lib/postgresql/17/bin
+
+    steps:
+      - name: Проверить секреты
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$PASSPHRASE" ]; then
+            echo "::error::Не заданы секреты SUPABASE_DB_URL и/или BACKUP_PASSPHRASE (см. docs/BACKUPS.md)."
+            exit 1
+          fi
+          if [ "${#PASSPHRASE}" -lt 16 ]; then
+            echo "::error::BACKUP_PASSPHRASE короче 16 символов — задайте пароль длиннее."
+            exit 1
+          fi
+
+      - name: Установить клиент PostgreSQL 17
+        # pg_dump должен быть не старше сервера; 17 читает и 15, и 17.
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+          "$PG/pg_dump" --version
+
+      - name: Снять копию
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          "$PG/pg_dump" "$DB_URL" --schema=public --no-owner --no-privileges \
+            --file=out/public.sql
+          "$PG/pg_dump" "$DB_URL" --data-only --no-owner --no-privileges \
+            --table=auth.users --table=auth.identities \
+            --file=out/auth-users.sql
+
+          # Сводка — чтобы без расшифровки видеть, что копия не пустая.
+          "$PG/psql" "$DB_URL" -At -F ' ' -c "
+            select 'evaluations',        count(*) from public.evaluations
+            union all select 'media_outlets',      count(*) from public.media_outlets
+            union all select 'profiles',           count(*) from public.profiles
+            union all select 'weight_sets',        count(*) from public.weight_sets
+            union all select 'monitoring_periods', count(*) from public.monitoring_periods
+            union all select 'evaluation_audit',   count(*) from public.evaluation_audit
+            union all select 'auth.users',         count(*) from auth.users
+          " | tee out/summary.txt
+
+          grep -q "CREATE TABLE public.evaluations" out/public.sql \
+            || { echo "::error::В копии нет таблицы evaluations — что-то не так."; exit 1; }
+
+          {
+            echo "### Резервная копия $(date -u +%Y-%m-%d)"
+            echo
+            echo "| Таблица | Строк |"
+            echo "|---|---|"
+            awk '{print "| " $1 " | " $2 " |"}' out/summary.txt
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Зашифровать
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y-%m-%d)
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          tar -czf - -C out . \
+            | gpg --batch --yes --pinentry-mode loopback \
+                  --passphrase-fd 3 3<<< "$PASSPHRASE" \
+                  --symmetric --cipher-algo AES256 \
+                  --output "ms7-backup-$STAMP.tar.gz.gpg"
+          # Незашифрованные файлы на машине не оставляем.
+          rm -rf out
+          ls -l "ms7-backup-$STAMP.tar.gz.gpg"
+
+      - name: Сохранить копию (90 дней)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ms7-backup-${{ env.STAMP }}
+          path: ms7-backup-${{ env.STAMP }}.tar.gz.gpg
+          retention-days: 90
+          if-no-files-found: error
