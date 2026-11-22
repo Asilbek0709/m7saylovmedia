@@ -15,6 +15,8 @@ import { formatScore, MS7_CRITERIA, resolveBand, SMSI_BANDS } from "@/lib/ms7";
 import { getOutletHistory, type OutletHistory } from "@/lib/rankings";
 import { buildRecommendations } from "@/lib/recommendations";
 import { getWeightHistory, weightSetFor } from "@/lib/weights";
+import { LogoMark } from "@/components/logo-mark";
+import { cn } from "@/lib/utils";
 
 type Params = { params: Promise<{ slug: string }> };
 type SearchParams = {
@@ -151,7 +153,8 @@ export default async function ReportPage({
         {/* Шапка */}
         <header className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-foreground pb-4">
           <div className="min-w-0">
-            <p className={sectionTitle}>
+            <p className={cn(sectionTitle, "flex items-center gap-2")}>
+              <LogoMark className="size-6 print:[--primary:#0F2A47] print:[--primary-foreground:#fff]" />
               {tCommon("brand")} · {tCommon("tagline")}
             </p>
             <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground">

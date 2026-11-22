@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { safeNext } from "@/lib/safe-next";
 import { createClient } from "@/lib/supabase/client";
 import { useHydrated } from "@/lib/use-hydrated";
+import { LogoMark } from "@/components/logo-mark";
 
 export default function LoginPage() {
   const t = useTranslations("login");
@@ -85,12 +86,7 @@ export default function LoginPage() {
 
       <FadeIn className="w-full max-w-sm">
         <div className="flex flex-col items-center text-center">
-          <span
-            aria-hidden
-            className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-sm font-semibold tracking-tight text-primary-foreground"
-          >
-            M7
-          </span>
+          <LogoMark className="size-12" />
           <h1 className="mt-5 text-xl font-semibold tracking-tight text-foreground">
             {t("title")}
           </h1>

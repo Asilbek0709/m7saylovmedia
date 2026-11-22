@@ -10,6 +10,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { cn } from "@/lib/utils";
+import { LogoMark } from "@/components/logo-mark";
 
 const NAV = [
   { href: "/rating", key: "rating" },
@@ -51,12 +52,7 @@ export function Navbar({
     >
       <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-3">
-          <span
-            aria-hidden
-            className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-[13px] font-semibold tracking-tight text-primary-foreground"
-          >
-            M7
-          </span>
+          <LogoMark className="size-9" />
           {/* На узких экранах остаётся только знак — иначе меню не помещается. */}
           <span className="hidden leading-tight sm:block">
             <span className="block text-sm font-semibold tracking-tight text-foreground">
