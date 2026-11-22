@@ -1,0 +1,147 @@
+#1 | Political Communication
+- the set of processes through which political actors, state institutions, the mass media and the public exchange politically relevant information and shape political meanings.
+- political communication is not a term coined by one person on a particular date. It is a field of study that developed where political science, sociology and communication research meet. Brian McNair's An Introduction to Political Communication, published by Routledge in 1995, is one of the works that set out the relationship between politics, media and democracy systematically. That date is not when the term first appeared; it is bibliographic evidence of the field being covered systematically in the scholarly literature.
+- provides the theoretical basis for studying the activities of candidates and parties, campaign platforms, how voters are informed and how public opinion forms.
+
+#2 | Agenda-Setting Theory
+- the theory that by giving more attention to some issues, the mass media influence which problems the public sees as important.
+- American researchers Maxwell E. McCombs and Donald L. Shaw published The Agenda-Setting Function of Mass Media in 1972 in Public Opinion Quarterly (vol. 36, no. 2, pp. 176–187). The article examined the relationship between the issues the media covered during an election campaign and the issues voters considered important.
+- used to analyse how much attention the media give to a particular candidate, problem or political issue.
+
+#3 | Framing
+- the process of highlighting certain aspects of an event or problem and presenting it within a particular frame of meaning.
+- American sociologist Erving Goffman's Frame Analysis: An Essay on the Organization of Experience was published in 1974. It examines social experience and how people make sense of situations through the concept of frames. The year of publication and authorship are also recorded in the WorldCat and Smithsonian Libraries and Archives catalogues.
+- helps compare the headlines, context, commentary and evaluations through which the same political event is presented in different outlets.
+
+#4 | Priming
+- a media-effects mechanism: when the media emphasise certain issues, audiences rely more on the related criteria when judging political leaders and their performance.
+- Shanto Iyengar, Mark D. Peters and Donald R. Kinder published Experimental Demonstrations of the “Not-So-Minimal” Consequences of Television News Programs in 1982 in the American Political Science Review. Through experiments, the authors showed that the problems television news covered more heavily affected how important viewers found those problems and how they judged the president's performance.
+- useful for studying how a constant emphasis on certain topics in campaign coverage relates to the criteria voters use to judge candidates.
+
+#5 | Two-Step Flow of Communication
+- an approach explaining that part of the information spread by the mass media first reaches opinion leaders and then passes from them to other people.
+- Paul F. Lazarsfeld, Bernard Berelson and Hazel Gaudet's The People's Choice was published in 1944. It studied the political decisions of voters in Erie County, Ohio, USA, and showed that personal conversations and the influence of acquaintances played an important part in voters' decisions. The two-step flow theory was later associated with the work of Lazarsfeld and his colleagues.
+- helps study how campaign information spreads through journalists, political commentators, civic activists and other influential people.
+
+#6 | Uses and Gratifications Approach
+- an approach that treats the audience not as passive recipients of information but as active participants who choose media and content to suit their own needs and goals.
+- Elihu Katz, Jay G. Blumler and Michael Gurevitch published Uses and Gratifications Research in 1973 in Public Opinion Quarterly (vol. 37, no. 4, pp. 509–523). The authors set out how to study systematically why people use media and what audiences need from them.
+- useful for researching which platforms voters use, for what purposes, and to meet which information needs.
+
+#7 | Mediatization
+- the process by which activities, institutions and relationships in politics and other areas of society change under the influence of the media and the rules of media work.
+- research on mediatization did not emerge in one step or from one author. The literature distinguishes several strands in how the concept took shape. For example, David L. Altheide and Robert P. Snow published Media Logic in 1979, and Kent Asp studied the mediatization of politics in 1986. Later, scholars such as Stig Hjarvard and Winfried Schulz developed the theoretical foundations of the concept.
+- helps analyse how political parties, candidates and election bodies adapt their activity to media demands, news formats and distribution platforms.
+
+#8 | Public Opinion
+- the overall expression of the views, attitudes and judgements of members of society on social and political issues. Public opinion need not be uniform or fixed; it can differ under the influence of different groups, information sources and social conditions.
+- important for studying voters' attitudes to candidates, political platforms and the electoral process, and for analysing the relationship between media content and public opinion.
+
+#9 | Political Pluralism
+- the principle that different political views, interests, parties and social groups exist in a society and take part in political life.
+- political pluralism is not a single theory created by one author on a particular date. It took shape in political philosophy and political science over a long period. Rather than linking the concept to one book or year, it is more accurate to trace its development in political theory through independent literature.
+- important when assessing how much space the media give to different parties, candidates and views.
+
+#10 | Public Sphere
+- the social space in which citizens discuss matters of public importance, exchange views and form public opinion.
+- German philosopher Jürgen Habermas's Strukturwandel der Öffentlichkeit (The Structural Transformation of the Public Sphere) was published in 1962. It analyses the historical formation of the public sphere and its place in society. Although the concept was used in various senses before Habermas, his book holds an important place in its modern scholarly interpretation.
+- helps explain the role of the media in enabling election debates, political discussion and citizen participation.
+
+#11 | Mass Media
+- newspapers, magazines, radio, television and other means of mass communication designed to deliver information to a wide audience.
+- the concept developed alongside the print press, mass publishing, radio and television. Establishing exactly when the term “mass media” was first used would require a dedicated etymological or historical source, so no single author or year is given.
+- identifies the main institutions and channels that spread election information.
+
+#12 | State-Owned Media
+- mass media owned or controlled by the state.
+- the term describes a form of ownership and control. Naming a single originator or an exact year of origin would require reliable historical evidence.
+- used to study how state-owned media report on elections, how editorially independent they are, and how they treat different political actors.
+
+#13 | Non-State Media
+- media organisations whose ownership or control does not belong to the state. They may be private, public-service or non-profit; their legal status depends on national legislation.
+- the distinction between state and non-state media is not a theory devised by one person but a classification describing media ownership and institutional structure.
+- makes it possible to compare how outlets with different forms of ownership cover an election campaign.
+
+#14 | Editorial Policy
+- a media organisation's professional principles and internal rules for selecting, verifying, preparing and publishing information, working with sources and ensuring impartiality.
+- editorial policy is a practical concept that took shape as the press and journalistic institutions developed. It is not accurate to attribute it to one person or a specific year.
+- used to analyse the rules for giving candidates airtime and space, verifying information and managing conflicts of interest.
+
+#15 | Media Space
+- the overall environment of media institutions, platforms, communication channels and audiences in which information is created, distributed and received.
+- the concept of media space broadened with the development of mass communication and digital technology. Without a reliable source, no conclusion can be drawn about when it was first used or who coined it.
+- helps examine election information on television, in print, on websites and on social media as a single system.
+
+#16 | Information Environment
+- the sum of information sources, communication channels, technologies and information flows that people and organisations use.
+- the term is used differently in information science, communication studies, cybernetics and other fields. No single author or date of origin applies across all of them.
+- makes it possible to study how voters use official information, journalistic content, political advertising and social media posts.
+
+#17 | Media Pluralism
+- the presence of diversity in information sources, ownership, opinions and views.
+- media pluralism developed through scholarly and legal debate about democratic society, press freedom and the media market. There is no basis for attributing it to any one person.
+- used to assess whether voters have access to information about different political positions and platforms.
+
+#18 | Media Competition
+- competition between media organisations for audience attention, distribution channels, advertising revenue and position in the information market.
+- the concept developed in mass communication and media economics research. No single originator or date of first use is clearly established.
+- helps analyse the speed of election reporting, headlines, presentation style and the contest for audiences.
+
+#19 | Digital Journalism
+- journalism based on gathering, verifying, preparing and distributing information and engaging with audiences using digital technology and the internet.
+- in Ramón Salaverría's article reviewing 25 years of research on digital journalism, 1994 is identified as the year the first web-based media appeared in several countries. This is an important point in the history of digital journalism, but it does not mean the term was coined that year.
+- covers the rapid distribution of election information through websites, mobile devices and digital platforms.
+
+#20 | Digital Media
+- media formats and platforms that make it possible to create, store, process and distribute information in digital form.
+- the concept of digital media grew with the development of computer technology, digital communications and the internet. Its emergence cannot be tied to one author or date.
+- describes how text, photos, video, audio, infographics and interactive data about elections are presented through digital channels.
+
+#21 | Public Relations (PR)
+- professional activity aimed at building relationships between an organisation or person and its publics, exchanging information and managing trust.
+- helps explain how political organisations relate to the public and to journalists.
+
+#22 | Political Public Relations
+- communication activity aimed at planning and managing the relationships of political parties, candidates, state institutions or political movements with the public.
+- political PR took shape alongside modern public relations practice and the development of election campaigns. It is not justified to link it to one author and a single date. Research on the history of PR shows that the field became a profession in the 20th century.
+- used to analyse how candidates work with the media, press conferences, statements, interviews and campaign information strategies.
+
+#23 | Public Relations Strategy
+- a plan drawn up in advance that sets out the audience, key messages, channels, resources and methods of evaluating results needed to achieve an organisation's communication goals.
+- PR strategy is not a single theory created by one person; it developed where strategic management and public relations practice meet.
+- helps assess the consistency of a political actor's messages, audience engagement and media activity during an election period.
+
+#24 | Communication Strategy
+- a systematic approach that determines who should receive which message, through which channel and at what time, in order to achieve a set goal.
+- communication strategy is a broad concept used in many fields; its single originator or first year of use cannot be stated in general terms.
+- serves to compare how parties, candidates and election bodies distribute information.
+
+#25 | Political Image
+- the set of perceptions, judgements and associations about a political figure or organisation that has formed in the public mind.
+- political image is not a term that appeared on a particular date; it developed in research on political communication, social psychology, advertising and PR.
+- important when analysing how the media portray a candidate's personal qualities, political experience, reputation and platform.
+
+#26 | Agenda-Setting
+- the theory that the media's choice of which topics to cover more heavily influences which issues the public considers important.
+- the 1972 article by Maxwell McCombs and Donald Shaw. Using the 1968 US presidential election, the authors studied the relationship between the media agenda and the issues voters considered important.
+- makes it possible to assess which topics the media cover more, which problems they neglect, and what place this choice has in the political information environment.
+
+#27 | Framing
+- the process of presenting an event or problem from a particular point of view and highlighting certain of its aspects.
+- Erving Goffman's Frame Analysis was published in 1974. Later, in Framing: Toward Clarification of a Fractured Paradigm (1993), Robert M. Entman analysed the approaches in framing research and clarified the concept's place in communication studies.
+- used to compare the content, headlines and context through which the same candidate or event is interpreted by different outlets.
+
+#28 | Priming
+- the mechanism by which the media, by covering certain issues more, affect the criteria audiences rely on when judging political figures or decisions.
+- the 1982 experimental study by Shanto Iyengar, Mark D. Peters and Donald R. Kinder examined the relationship between the importance of issues in television news and judgements of the president's performance.
+- helps analyse how the media agenda can affect how candidates are judged on the economy, security, corruption and other issues.
+
+#29 | Mediatization
+- the process by which the activities, institutions and communication practices of politics and other social spheres change under the influence of their relationship with the media.
+- David L. Altheide and Robert P. Snow's Media Logic was published in 1979. Mediatization later developed into a distinct theoretical strand used to analyse how politics and other institutions interact with the media. Media Logic is one of the important sources in debates about mediatization, but the two concepts are not the same.
+- makes it possible to analyse how political actors adapt their activity to media formats and audience attention.
+
+#30 | Institutional Communication
+- the exchange of information by organisations and institutions about their activities, decisions, goals and relations with the public.
+- the concept is used within organisational communication and institutional theory. Its single originator or exact year of origin cannot be stated without reliable evidence.
+- important for studying the official information exchange of election commissions, state bodies, parties and media organisations.

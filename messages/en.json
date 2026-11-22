@@ -854,9 +854,9 @@
   "glossary": {
     "eyebrow": "Glossary",
     "title": "Glossary of terms",
-    "langNote": "Terms are given in Uzbek with their English equivalents.",
+    "langNote": "Translated from the Uzbek original. The Uzbek term is shown next to each English one.",
     "search": "Search terms and definitions",
-    "searchHint": "Search in Cyrillic or Latin script: “сиёсий” and “siyosiy” return the same results. English names are searched too.",
+    "searchHint": "Search by term name or definition text. Uzbek term names are searched too, in Cyrillic or Latin script.",
     "clear": "Clear",
     "count": "{count, plural, one {# term} other {# terms}}",
     "found": "Found {count, plural, one {# term} other {# terms}} of {total}",

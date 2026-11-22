@@ -1,4 +1,6 @@
 import data from "@/lib/glossary-data.json";
+import dataEn from "@/lib/glossary-data.en.json";
+import dataRu from "@/lib/glossary-data.ru.json";
 
 /**
  * Глоссарий терминов. Данные — lib/glossary-data.json, их собирает
@@ -14,16 +16,37 @@ export interface GlossarySection {
 export interface GlossaryTerm {
   n: number;
   term: string;
-  /** Английский эквивалент; у некоторых терминов его нет. */
+  /**
+   * Вторая подпись термина: в узбекском и русском — английский эквивалент,
+   * в английском — узбекский оригинал. У некоторых терминов её нет.
+   */
   en: string | null;
   sections: GlossarySection[];
 }
 
-export const GLOSSARY = data as {
+export interface Glossary {
   subtitle: string;
   terms: GlossaryTerm[];
   sources: string[];
+}
+
+/** Узбекский оригинал — из Word-документа. */
+export const GLOSSARY = data as Glossary;
+
+/**
+ * Глоссарий на языке страницы. Русский и английский переводы собирает
+ * scripts/build-glossary-translations.mjs из glossary/*.txt; номера
+ * терминов (якоря #term-N) совпадают во всех языках.
+ */
+const BY_LOCALE: Record<string, Glossary> = {
+  uz: GLOSSARY,
+  ru: dataRu as Glossary,
+  en: dataEn as Glossary,
 };
+
+export function getGlossary(locale: string): Glossary {
+  return BY_LOCALE[locale] ?? GLOSSARY;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Поиск: кириллица и латиница — одно и то же                        */

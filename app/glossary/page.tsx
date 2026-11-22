@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { GlossarySearch } from "@/components/glossary-search";
-import { GLOSSARY } from "@/lib/glossary";
+import { getGlossary } from "@/lib/glossary";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("glossary");
-  return { title: t("eyebrow"), description: GLOSSARY.subtitle };
+  const glossary = getGlossary(await getLocale());
+  return { title: t("eyebrow"), description: glossary.subtitle };
 }
 
 export default async function GlossaryPage({
@@ -16,6 +17,7 @@ export default async function GlossaryPage({
 }) {
   const t = await getTranslations("glossary");
   const locale = await getLocale();
+  const glossary = getGlossary(locale);
   const q = (await searchParams).q;
 
   return (
@@ -26,18 +28,20 @@ export default async function GlossaryPage({
       <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">
         {t("title")}
       </h1>
-      {/* Подзаголовок — из самого документа, на узбекском. */}
-      <p lang="uz-Cyrl" className="mt-1.5 max-w-3xl text-sm text-muted-foreground">
-        {GLOSSARY.subtitle}
+      <p className="mt-1.5 max-w-3xl text-sm text-muted-foreground">
+        {glossary.subtitle}
       </p>
-      {/* Глоссарий только на узбекском — на других языках интерфейса предупреждаем. */}
-      {locale !== "uz" && t("langNote") && (
+      {/* Оригинал глоссария — узбекский; на других языках — перевод. */}
+      {locale !== "uz" && (
         <p className="mt-1 text-xs text-muted-foreground">{t("langNote")}</p>
       )}
 
       <GlossarySearch
-        terms={GLOSSARY.terms}
-        sources={GLOSSARY.sources}
+        // Новый язык — новый список: сбрасываем состояние поиска.
+        key={locale}
+        terms={glossary.terms}
+        sources={glossary.sources}
+        altLang={locale === "en" ? "uz-Cyrl" : "en"}
         initialQuery={(Array.isArray(q) ? q[0] : q) ?? ""}
       />
     </div>

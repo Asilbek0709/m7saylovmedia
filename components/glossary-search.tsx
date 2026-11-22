@@ -38,10 +38,13 @@ function Highlight({ text, query }: { text: string; query: string }) {
 export function GlossarySearch({
   terms,
   sources,
+  altLang = "en",
   initialQuery,
 }: {
   terms: GlossaryTerm[];
   sources: string[];
+  /** Язык второй подписи термина: обычно английский, в английской версии — узбекский. */
+  altLang?: string;
   initialQuery: string;
 }) {
   const t = useTranslations("glossary");
@@ -137,7 +140,7 @@ export function GlossarySearch({
                     <Highlight text={term.term} query={deferred} />
                   </h2>
                   {term.en && (
-                    <p lang="en" className="mt-0.5 text-sm text-muted-foreground italic">
+                    <p lang={altLang} className="mt-0.5 text-sm text-muted-foreground italic">
                       <Highlight text={term.en} query={deferred} />
                     </p>
                   )}
