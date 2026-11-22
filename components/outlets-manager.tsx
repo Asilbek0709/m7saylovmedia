@@ -39,7 +39,7 @@ import {
   type OutletInput,
   type Ownership,
 } from "@/app/actions/outlets";
-import { regionLabel } from "@/lib/regions";
+import { REGIONS, regionLabel } from "@/lib/regions";
 
 export interface OutletRow {
   id: string;
@@ -71,7 +71,8 @@ export function OutletsManager({
   const [name, setName] = React.useState("");
   const [website, setWebsite] = React.useState("");
   const [ownership, setOwnership] = React.useState<Ownership>("nodavlat");
-  const [region, setRegion] = React.useState("");
+  // Регион — ключ из базы (кириллица); подпись — на языке страницы.
+  const [region, setRegion] = React.useState(REGIONS[0]);
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [added, setAdded] = React.useState<string | null>(null);
@@ -127,7 +128,7 @@ export function OutletsManager({
       setAdded(result.name);
       setName("");
       setWebsite("");
-      setRegion("");
+      setRegion(REGIONS[0]);
     } else {
       setError(t(result.reason));
     }
@@ -212,12 +213,12 @@ export function OutletsManager({
 
                 <div className="space-y-1.5">
                   <Label htmlFor="outlet-region">{t("region")}</Label>
-                  <Input
+                  <RegionSelect
                     id="outlet-region"
                     value={region}
                     disabled={pending}
-                    placeholder={t("regionPlaceholder")}
-                    onChange={(e) => setRegion(e.target.value)}
+                    locale={locale}
+                    onChange={setRegion}
                     className="h-9"
                   />
                 </div>
@@ -353,12 +354,13 @@ export function OutletsManager({
                             </Select>
                           </TableCell>
                           <TableCell className="align-top">
-                            <Input
-                              aria-label={t("region")}
+                            <RegionSelect
+                              label={t("region")}
                               value={draft.region}
                               disabled={saving}
-                              onChange={(e) =>
-                                setDraft({ ...draft, region: e.target.value })
+                              locale={locale}
+                              onChange={(value) =>
+                                setDraft({ ...draft, region: value })
                               }
                               className="h-8"
                             />
@@ -485,5 +487,40 @@ export function OutletsManager({
         </div>
       </Reveal>
     </div>
+  );
+}
+
+/** Выбор региона из списка; незнакомый регион из базы тоже остаётся в списке. */
+function RegionSelect({
+  id,
+  label,
+  value,
+  disabled,
+  locale,
+  onChange,
+  className,
+}: {
+  id?: string;
+  label?: string;
+  value: string;
+  disabled: boolean;
+  locale: string;
+  onChange: (value: string) => void;
+  className?: string;
+}) {
+  const options = REGIONS.includes(value) || !value ? REGIONS : [value, ...REGIONS];
+  return (
+    <Select value={value} disabled={disabled} onValueChange={onChange}>
+      <SelectTrigger id={id} aria-label={label} className={`w-full ${className ?? ""}`}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((r) => (
+          <SelectItem key={r} value={r}>
+            {regionLabel(r, locale)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

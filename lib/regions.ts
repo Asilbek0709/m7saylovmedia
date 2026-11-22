@@ -1,9 +1,10 @@
 import type { Locale } from "@/i18n/config";
+import { toLatin } from "@/lib/translit";
 
 /**
- * Регионы хранятся в базе по-узбекски (кириллица) — это и ключ фильтра.
- * Здесь только подпись для показа на русском и английском; неизвестный
- * регион показывается как есть.
+ * Регионы хранятся в базе по-узбекски кириллицей — это ключ фильтра.
+ * Здесь только подпись для показа: узбекский — латиницей, русский и
+ * английский — по таблице; неизвестный регион показывается как есть.
  */
 const LABELS: Record<string, { ru: string; en: string }> = {
   "Тошкент": { ru: "Ташкент", en: "Tashkent" },
@@ -22,8 +23,11 @@ const LABELS: Record<string, { ru: string; en: string }> = {
   "Қорақалпоғистон": { ru: "Каракалпакстан", en: "Karakalpakstan" },
 };
 
+/** Регионы в порядке показа в списках (ключи — как в базе). */
+export const REGIONS = Object.keys(LABELS);
+
 export function regionLabel(region: string, locale: string): string {
-  if (locale === "uz") return region;
+  if (locale === "uz") return toLatin(region);
   const entry = LABELS[region.trim()];
   return entry ? entry[locale as Exclude<Locale, "uz">] ?? region : region;
 }

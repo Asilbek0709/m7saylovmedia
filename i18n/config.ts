@@ -9,14 +9,14 @@ export const LOCALE_COOKIE = "ms7-locale";
 
 export const LOCALE_LABELS: Record<Locale, { native: string; short: string }> =
   {
-    uz: { native: "O'zbekcha", short: "UZ" },
+    uz: { native: "Oʻzbekcha", short: "UZ" },
     ru: { native: "Русский", short: "RU" },
     en: { native: "English", short: "EN" },
   };
 
 
 export const HTML_LANG: Record<Locale, string> = {
-  uz: "uz-Cyrl",
+  uz: "uz-Latn",
   ru: "ru",
   en: "en",
 };

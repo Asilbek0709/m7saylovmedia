@@ -1,6 +1,7 @@
 import data from "@/lib/glossary-data.json";
 import dataEn from "@/lib/glossary-data.en.json";
 import dataRu from "@/lib/glossary-data.ru.json";
+import { toLatinDeep } from "@/lib/translit";
 
 /**
  * Глоссарий терминов. Данные — lib/glossary-data.json, их собирает
@@ -39,7 +40,8 @@ export const GLOSSARY = data as Glossary;
  * терминов (якоря #term-N) совпадают во всех языках.
  */
 const BY_LOCALE: Record<string, Glossary> = {
-  uz: GLOSSARY,
+  // Оригинал из Word на кириллице; на сайте узбекский — латиницей.
+  uz: toLatinDeep(GLOSSARY),
   ru: dataRu as Glossary,
   en: dataEn as Glossary,
 };

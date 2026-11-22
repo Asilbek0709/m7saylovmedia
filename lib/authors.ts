@@ -37,86 +37,86 @@ const PHOTO = {
 const CONTENT: Record<Locale, AuthorsContent> = {
   uz: {
     intro:
-      "MS-7: Saylov-Media модели Ўзбекистон журналистика ва оммавий коммуникациялар университети ва Жамшид Намозов томонидан ишлаб чиқилган. Модель рақамли оммавий ахборот воситаларининг сайлов жараёнларини ёритишдаги фаолиятини комплекс баҳолаш, мониторинг қилиш ва рейтинг асосида қиёслаш учун мўлжалланган.",
+      "MS-7: Saylov-Media modeli Oʻzbekiston jurnalistika va ommaviy kommunikatsiyalar universiteti va Jamshid Namozov tomonidan ishlab chiqilgan. Model raqamli ommaviy axborot vositalarining saylov jarayonlarini yoritishdagi faoliyatini kompleks baholash, monitoring qilish va reyting asosida qiyoslash uchun moʻljallangan.",
     registration:
-      "Ўзбекистон Республикаси Адлия вазирлиги ҳузуридаги Интеллектуал мулк маркази томонидан 2026 йил 30 июлда 010589-сонли депонентлаш тўғрисидаги гувоҳнома берилган.",
+      "Oʻzbekiston Respublikasi Adliya vazirligi huzuridagi Intellektual mulk markazi tomonidan 2026 yil 30 iyulda 010589-sonli deponentlash toʻgʻrisidagi guvohnoma berilgan.",
     authors: [
       {
         id: "namozov",
         photo: PHOTO.namozov,
-        name: "Жамшид Абдумўминович Намозов",
+        name: "Jamshid Abdumoʻminovich Namozov",
         roles: [
-          "MS-7: Saylov-Media модели муаллифи",
-          "Ўзбекистон журналистика ва оммавий коммуникациялар университети мустақил тадқиқотчиси",
+          "MS-7: Saylov-Media modeli muallifi",
+          "Oʻzbekiston jurnalistika va ommaviy kommunikatsiyalar universiteti mustaqil tadqiqotchisi",
         ],
         contribution:
-          "MS-7 модели ва SMSI индексини ишлаб чиққан; платформа унинг диссертация тадқиқоти асосида яратилган.",
+          "MS-7 modeli va SMSI indeksini ishlab chiqqan; platforma uning dissertatsiya tadqiqoti asosida yaratilgan.",
         sections: [
           {
-            title: "Илмий тадқиқот",
+            title: "Ilmiy tadqiqot",
             items: [
-              "Диссертация мавзуси: «Ўзбекистонда сайлов жараёнларини давлат ва нодавлат оммавий ахборот воситаларида ёритилишида янгича ёндашув» (10.00.09 — Журналистика).",
-              "Илмий раҳбар — сиёсий фанлар доктори, профессор Ш. Т. Қудратхўжа.",
-              "Мавзу 2021 йил 29 июнда университет Кенгашида тасдиқланган; диссертация 2025 йил 24 сентябрда Тўғон ва Қудрат Эрназаровлар номидаги Жамоатчилик билан алоқалар кафедрасида муҳокамадан ўтган ва илмий семинарга тақдим этилган.",
-              "Тадқиқот бўйича 10 та илмий иш чоп этилган, жумладан Олий аттестация комиссияси тавсия этган журналларда 8 та мақола (5 таси — импакт-факторли хорижий журналларда).",
-              "2011 йилда «Ахборот коммуникацион технологиялари ва Интернет журналистикаси» ўқув қўлланмаси нашр этилган.",
+              "Dissertatsiya mavzusi: «Oʻzbekistonda saylov jarayonlarini davlat va nodavlat ommaviy axborot vositalarida yoritilishida yangicha yondashuv» (10.00.09 — Jurnalistika).",
+              "Ilmiy rahbar — siyosiy fanlar doktori, professor Sh. T. Qudratxoʻja.",
+              "Mavzu 2021 yil 29 iyunda universitet Kengashida tasdiqlangan; dissertatsiya 2025 yil 24 sentyabrda Toʻgʻon va Qudrat Ernazarovlar nomidagi Jamoatchilik bilan aloqalar kafedrasida muhokamadan oʻtgan va ilmiy seminarga taqdim etilgan.",
+              "Tadqiqot boʻyicha 10 ta ilmiy ish chop etilgan, jumladan Oliy attestatsiya komissiyasi tavsiya etgan jurnallarda 8 ta maqola (5 tasi — impakt-faktorli xorijiy jurnallarda).",
+              "2011 yilda «Axborot kommunikatsion texnologiyalari va Internet jurnalistikasi» oʻquv qoʻllanmasi nashr etilgan.",
             ],
           },
           {
-            title: "Таълим",
+            title: "Taʼlim",
             items: [
-              "2008–2012 — Мирзо Улуғбек номидаги Ўзбекистон Миллий университети, журналистика факультети.",
-              "2018–2020 — Ўзбекистон журналистика ва оммавий коммуникациялар университети, магистратура.",
+              "2008–2012 — Mirzo Ulugʻbek nomidagi Oʻzbekiston Milliy universiteti, jurnalistika fakulteti.",
+              "2018–2020 — Oʻzbekiston jurnalistika va ommaviy kommunikatsiyalar universiteti, magistratura.",
             ],
           },
           {
-            title: "Фаолияти",
+            title: "Faoliyati",
             items: [
-              "2007 — Денов АТР телеканали «Ахборот» дастури муҳаррири.",
-              "2007–2009 — NTT телеканали журналисти, ижтимоий кўрсатувлар бўлими муҳаррири.",
-              "2012–2015 — Ўзбекистон — Ҳиндистон дўстлик жамияти ижрочи директори.",
-              "2012 йилдан — Халқаро кураш ассоциацияси матбуот котиби, медиа гуруҳи раҳбари.",
-              "2016–2021 — Президент сайловлари ҳамда 2019 йилги Олий Мажлис Қонунчилик палатаси ва маҳаллий Кенгашлар депутатлари сайловини ўтказувчи Республика матбуот маркази.",
+              "2007 — Denov ATR telekanali «Axborot» dasturi muharriri.",
+              "2007–2009 — NTT telekanali jurnalisti, ijtimoiy koʻrsatuvlar boʻlimi muharriri.",
+              "2012–2015 — Oʻzbekiston — Hindiston doʻstlik jamiyati ijrochi direktori.",
+              "2012 yildan — Xalqaro kurash assotsiatsiyasi matbuot kotibi, media guruhi rahbari.",
+              "2016–2021 — Prezident saylovlari hamda 2019 yilgi Oliy Majlis Qonunchilik palatasi va mahalliy Kengashlar deputatlari saylovini oʻtkazuvchi Respublika matbuot markazi.",
             ],
           },
           {
-            title: "Мукофотлар",
-            items: ["2009 — «Ўзбекистон белгиси» кўкрак нишони."],
+            title: "Mukofotlar",
+            items: ["2009 — «Oʻzbekiston belgisi» koʻkrak nishoni."],
           },
         ],
       },
       {
         id: "qudratxoja",
         photo: PHOTO.qudratxoja,
-        name: "Шерзодхон Тожиддинхон ўғли Қудратхўжа",
+        name: "Sherzodxon Tojiddinxon oʻgʻli Qudratxoʻja",
         roles: [
-          "Ўзбекистон журналистика ва оммавий коммуникациялар университети ректори",
-          "Сиёсий фанлар доктори, профессор",
+          "Oʻzbekiston jurnalistika va ommaviy kommunikatsiyalar universiteti rektori",
+          "Siyosiy fanlar doktori, professor",
         ],
         contribution:
-          "Тадқиқотнинг илмий раҳбари; модель унинг раҳбарлигидаги университетда ишлаб чиқилган.",
+          "Tadqiqotning ilmiy rahbari; model uning rahbarligidagi universitetda ishlab chiqilgan.",
         sections: [
           {
-            title: "Таълим",
+            title: "Taʼlim",
             items: [
-              "1991–1996 — ҳозирги Ўзбекистон Миллий университети, журналистика факультети.",
+              "1991–1996 — hozirgi Oʻzbekiston Milliy universiteti, jurnalistika fakulteti.",
             ],
           },
           {
-            title: "Фаолияти",
+            title: "Faoliyati",
             items: [
-              "Турли йилларда Ўзбекистон Миллий телерадиокомпанияси, Марказий сайлов комиссияси матбуот маркази, Президент матбуот хизмати ва Ўзбекистон Миллий университетида ишлаган.",
-              "2005–2008 — Ўзбекистон Бош вазирининг матбуот котиби.",
-              "2017–2022 — «Халқаро пресс-клуб» нодавлат нотижорат ташкилоти раиси.",
-              "2018 йилдан — Ўзбекистон журналистика ва оммавий коммуникациялар университети ректори.",
-              "2022 йил февралидан — Ўзбекистон электрон оммавий ахборот воситалари миллий ассоциацияси бошқарув раиси.",
+              "Turli yillarda Oʻzbekiston Milliy teleradiokompaniyasi, Markaziy saylov komissiyasi matbuot markazi, Prezident matbuot xizmati va Oʻzbekiston Milliy universitetida ishlagan.",
+              "2005–2008 — Oʻzbekiston Bosh vazirining matbuot kotibi.",
+              "2017–2022 — «Xalqaro press-klub» nodavlat notijorat tashkiloti raisi.",
+              "2018 yildan — Oʻzbekiston jurnalistika va ommaviy kommunikatsiyalar universiteti rektori.",
+              "2022 yil fevralidan — Oʻzbekiston elektron ommaviy axborot vositalari milliy assotsiatsiyasi boshqaruv raisi.",
             ],
           },
           {
-            title: "Мукофотлар",
+            title: "Mukofotlar",
             items: [
-              "2019 — «Олтин қалам» миллий мукофоти гран-при соҳиби, «Меҳнат шуҳрати» ордени.",
-              "2020 — «Қорақалпоғистон Республикасида хизмат кўрсатган журналист» унвони.",
+              "2019 — «Oltin qalam» milliy mukofoti gran-pri sohibi, «Mehnat shuhrati» ordeni.",
+              "2020 — «Qoraqalpogʻiston Respublikasida xizmat koʻrsatgan jurnalist» unvoni.",
             ],
           },
         ],

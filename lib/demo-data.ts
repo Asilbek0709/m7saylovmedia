@@ -10,7 +10,7 @@ export interface RankingRow extends CriteriaScores {
   website: string;
 }
 
-export const DEMO_PERIOD = "Сайлов-2026, 1-босқич";
+export const DEMO_PERIOD = "Saylov-2026, 1-bosqich";
 
 export const DEMO_RANKINGS: RankingRow[] = [
   {
@@ -60,7 +60,7 @@ export const DEMO_RANKINGS: RankingRow[] = [
   },
   {
     outlet_id: "uza",
-    name: "UzA — Ўзбекистон МА",
+    name: "UzA — Oʻzbekiston MA",
     slug: "uza",
     website: "uza.uz",
     ownership: "davlat",
