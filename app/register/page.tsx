@@ -68,7 +68,10 @@ export default function RegisterPage() {
       setError(
         signUpError.message.toLowerCase().includes("already")
           ? t("exists")
-          : t("failed"),
+          : // 429 — лимит Supabase на письма (встроенная почта: ~2 в час).
+            signUpError.status === 429
+            ? t("tooMany")
+            : t("failed"),
       );
       return;
     }

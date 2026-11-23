@@ -117,7 +117,8 @@
     "doneReview": "The account has been created and is awaiting administrator approval. Until then it is read-only.",
     "toLogin": "Go to sign in",
     "back": "Back to home",
-    "haveAccount": "Already have an account? Sign in"
+    "haveAccount": "Already have an account? Sign in",
+    "tooMany": "Too many sign-ups in a short time, so the mail server has temporarily limited sending. Try again in an hour or tell an administrator."
   },
   "outlets": {
     "eyebrow": "Directory",

@@ -117,7 +117,8 @@
     "doneReview": "Hisob yaratildi va administrator tasdigʻini kutmoqda. Ungacha faqat koʻrish mumkin.",
     "toLogin": "Kirishga oʻtish",
     "back": "Bosh sahifaga",
-    "haveAccount": "Hisobingiz bormi? Kirish"
+    "haveAccount": "Hisobingiz bormi? Kirish",
+    "tooMany": "Qisqa vaqt ichida juda koʻp ariza yuborildi — pochta serveri xat yuborishni vaqtincha cheklab qoʻydi. Bir soatdan keyin urinib koʻring yoki administratorga xabar bering."
   },
   "outlets": {
     "eyebrow": "Maʼlumotnoma",
