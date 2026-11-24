@@ -21,7 +21,7 @@ export function StaggerList({
       className={className}
       initial={reduced ? false : "hidden"}
       whileInView={reduced ? undefined : "show"}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: true, margin: "-60px 0px" }}
       variants={{ show: { transition: { staggerChildren: 0.09 } } }}
     >
       {children}

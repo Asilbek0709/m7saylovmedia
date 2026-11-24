@@ -23,7 +23,9 @@
     "footer": "University of Journalism and Mass Communications of Uzbekistan. MVP built on the author's methodology.",
     "points": "pts",
     "of100": "/ 100",
-    "register": "Register"
+    "register": "Register",
+    "menu": "Menu",
+    "closeMenu": "Close menu"
   },
   "landing": {
     "eyebrow": "MS-7 model · SMSI composite index",
@@ -62,6 +64,11 @@
       "score": "Score",
       "weight": "Weight",
       "profile": "Outlet profile (example)"
+    },
+    "visual": {
+      "title": "Outlet monitoring",
+      "round": "Round {n}",
+      "growth": "this round"
     }
   },
   "login": {

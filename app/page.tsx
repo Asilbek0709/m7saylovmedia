@@ -15,6 +15,7 @@ import { AnimatedHeading } from "@/components/motion/animated-heading";
 import { CountUp } from "@/components/motion/count-up";
 import { FadeIn } from "@/components/motion/fade-in";
 import { HeroBackdrop } from "@/components/motion/hero-backdrop";
+import { HeroVisual } from "@/components/motion/hero-visual";
 import { Reveal } from "@/components/motion/reveal";
 import { ScrollFormula } from "@/components/motion/scroll-formula";
 import { StaggerItem, StaggerList } from "@/components/motion/stagger-list";
@@ -64,7 +65,8 @@ export default async function LandingPage() {
       <section className="relative overflow-hidden">
         <HeroBackdrop />
 
-        <div className="mx-auto w-full max-w-7xl px-4 pt-16 pb-20 sm:px-6 sm:pt-24 sm:pb-28">
+        <div className="mx-auto grid w-full max-w-7xl items-center gap-14 px-4 pt-16 pb-20 sm:px-6 sm:pt-24 sm:pb-28 lg:grid-cols-[minmax(0,1fr)_440px] xl:gap-20">
+          <div className="min-w-0">
           <div className="max-w-3xl">
             <FadeIn>
               <span className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
@@ -115,6 +117,23 @@ export default async function LandingPage() {
                 </div>
               ))}
             </dl>
+          </FadeIn>
+          </div>
+
+          {/* Справа — живая иллюстрация модели; на телефонах — под текстом. */}
+          <FadeIn delay={0.3} className="px-4 sm:px-0">
+            <HeroVisual
+              weights={weights}
+              labels={{
+                codes: MS7_CRITERIA.map((c) => tc(`${c.id}.code`)),
+                bands: Object.fromEntries(
+                  SMSI_BANDS.map((b) => [b.id, tb(`${b.id}.label`)]),
+                ),
+                title: t("visual.title"),
+                round: t.raw("visual.round") as string,
+                growth: t("visual.growth"),
+              }}
+            />
           </FadeIn>
         </div>
       </section>

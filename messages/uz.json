@@ -23,7 +23,9 @@
     "footer": "Oʻzbekiston jurnalistika va ommaviy kommunikatsiyalar universiteti. Mualliflik metodikasi asosida ishlab chiqilgan MVP.",
     "points": "ball",
     "of100": "/ 100",
-    "register": "Roʻyxatdan oʻtish"
+    "register": "Roʻyxatdan oʻtish",
+    "menu": "Menyu",
+    "closeMenu": "Menyuni yopish"
   },
   "landing": {
     "eyebrow": "MS-7 modeli · SMSI integral indeksi",
@@ -62,6 +64,11 @@
       "score": "Baho",
       "weight": "Vazn",
       "profile": "Nashr profili (misol)"
+    },
+    "visual": {
+      "title": "Nashr monitoringi",
+      "round": "{n}-tur",
+      "growth": "tur davomida"
     }
   },
   "login": {

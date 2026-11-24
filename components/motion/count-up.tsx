@@ -22,7 +22,9 @@ export function CountUp({
   className?: string;
 }) {
   const ref = React.useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  // Отступ только сверху и снизу: с «-80px» со всех сторон число у левого
+  // края экрана (первая колонка) никогда не считалось видимым и застревало на 0.
+  const inView = useInView(ref, { once: true, margin: "-80px 0px" });
   const reduced = useReducedMotion();
 
   const count = useMotionValue(reduced ? value : 0);
