@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Onest } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
@@ -25,11 +25,25 @@ const display = Onest({
 /** Нарезки Inter, нужные на первом экране: узбекская кириллица и латиница. */
 const PRELOADED_FONTS = ["inter-cyrillic", "inter-latin"];
 
+/** Цвет панели браузера и системной строки на телефоне. */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0f2a47" },
+    { media: "(prefers-color-scheme: dark)", color: "#080e1a" },
+  ],
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common");
   const landing = await getTranslations("landing");
 
   return {
+    // Абсолютные адреса картинок-превью (og:image) — от основного домена.
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.m7saylovmedia.uz",
+    ),
+    openGraph: { siteName: t("brand"), type: "website" },
+    twitter: { card: "summary_large_image" },
     title: {
       default: `${t("brand")} — ${t("tagline")}`,
       template: `%s · ${t("brand")}`,

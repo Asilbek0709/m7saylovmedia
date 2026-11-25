@@ -1,13 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CircleCheck, FileText, TriangleAlert } from "lucide-react";
+import {
+  ArrowLeft,
+  CircleCheck,
+  FileText,
+  TrendingDown,
+  TrendingUp,
+  TriangleAlert,
+} from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { regionLabel } from "@/lib/regions";
 
 import { Reveal } from "@/components/motion/reveal";
 import { OutletDynamics } from "@/components/outlet-dynamics";
+import { OutletEmbed, ShareButton } from "@/components/outlet-embed";
+import { OutletLogo } from "@/components/outlet-logo";
 import { Recommendations } from "@/components/recommendations";
 import { SmsiBadge } from "@/components/smsi-badge";
 import { Badge } from "@/components/ui/badge";
@@ -27,8 +36,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatScore, MS7_CRITERIA, resolveBand } from "@/lib/ms7";
-import { getOutletHistory } from "@/lib/rankings";
+import {
+  formatScore,
+  MS7_CRITERIA,
+  resolveBand,
+  SMSI_BANDS,
+  strongestCriterion,
+  weakestCriterion,
+} from "@/lib/ms7";
+import { getOutletHistory, getRankings } from "@/lib/rankings";
 import { cn } from "@/lib/utils";
 import { buildRecommendations } from "@/lib/recommendations";
 import { getWeightHistory, weightSetFor } from "@/lib/weights";
@@ -44,7 +60,21 @@ export async function generateMetadata({
   const history = await getOutletHistory(slug);
   const t = await getTranslations("outlet");
 
-  return { title: history?.name ?? t("notFound") };
+  const last = history?.points.at(-1);
+  if (!history || !last) return { title: history?.name ?? t("notFound") };
+  // Текст под карточкой в Telegram: индекс и уровень сразу видны.
+  const tb = await getTranslations("bands");
+  const description = `SMSI ${last.smsi.toFixed(1)} — ${tb(`${resolveBand(last.smsi).id}.label`)} · ${last.period}`;
+  return {
+    title: history.name,
+    description,
+    openGraph: {
+      title: `${history.name} — MS-7: Saylov-Media`,
+      description,
+      siteName: "MS-7: Saylov-Media",
+      type: "website",
+    },
+  };
 }
 
 export default async function OutletPage({
@@ -63,6 +93,8 @@ export default async function OutletPage({
   const tr = await getTranslations("rating");
   const tCommon = await getTranslations("common");
   const tReport = await getTranslations("report");
+  const tp = await getTranslations("outlet.profile");
+  const te = await getTranslations("outlet.embed");
 
   // Издание из справочника без единой оценки: только карточка и путь к оценке.
   if (history.points.length === 0) {
@@ -116,6 +148,12 @@ export default async function OutletPage({
   // Веса той версии, которой посчитан последний тур, — не текущие из кода.
   const weightSet = weightSetFor(await getWeightHistory(), last.weightSetId);
 
+  // Место в текущем рейтинге (если издание в нём есть).
+  const { rows: ranking } = await getRankings(null);
+  const ranked = ranking.find((r) => r.slug === history.slug) ?? null;
+  const strong = strongestCriterion(last);
+  const weak = weakestCriterion(last);
+
   const criteria = MS7_CRITERIA.map((criterion) => ({
     id: criterion.id,
     short: tc(`${criterion.id}.short`),
@@ -140,45 +178,136 @@ export default async function OutletPage({
           </Link>
         </Button>
 
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-              {t("eyebrow")}
-            </p>
-            <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">
-              {history.name}
-            </h1>
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
-              {history.website && <span>{history.website}</span>}
-              <Badge variant="outline" className="font-normal">
-                {tr(`ownership.${history.ownership}`)}
-              </Badge>
-              <span>{regionLabel(history.region, locale)}</span>
-              <span className="tabular">
-                {t("rounds", { count: points.length })}
-              </span>
+        {/* Профиль издания: логотип, место, индекс, уровень, сильное и слабое. */}
+        <div className="ms7-surface relative mt-3 overflow-hidden rounded-2xl border border-border bg-card">
+          <span
+            aria-hidden
+            className="absolute inset-x-0 top-0 h-1.5"
+            style={{ backgroundColor: band.color }}
+          />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full opacity-[0.12] blur-3xl"
+            style={{ backgroundColor: band.color }}
+          />
+          <div className="relative flex flex-wrap items-start justify-between gap-6 p-5 pt-7 sm:p-7 sm:pt-8">
+            <div className="flex min-w-0 items-center gap-4">
+              <OutletLogo
+                name={history.name}
+                website={history.website}
+                className="size-16 rounded-2xl text-lg"
+              />
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+                  {t("eyebrow")}
+                </p>
+                <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                  {history.name}
+                </h1>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
+                  {history.website && <span>{history.website}</span>}
+                  <Badge variant="outline" className="font-normal">
+                    {tr(`ownership.${history.ownership}`)}
+                  </Badge>
+                  <span>{regionLabel(history.region, locale)}</span>
+                  <span className="tabular">
+                    {t("rounds", { count: points.length })}
+                  </span>
+                </div>
+                {ranked && (
+                  <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-gold-wash px-3 py-1 text-xs font-semibold text-gold-ink">
+                    <span aria-hidden className="size-1.5 rounded-full bg-gold" />
+                    {tp("rank", { rank: ranked.rank, total: ranking.length })}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="text-left sm:text-right">
+              <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                {t("currentIndex")}
+              </p>
+              <p
+                className="mt-1 font-display text-6xl leading-none font-bold tracking-tight tabular"
+                style={{ color: band.color }}
+              >
+                {last.smsi.toFixed(1)}
+              </p>
+              <div className="mt-2 flex items-center gap-2 sm:justify-end">
+                <SmsiBadge band={band} label={tb(`${band.id}.label`)} size="sm" />
+                {delta !== null && Math.abs(delta) >= 0.05 && (
+                  <span
+                    className="inline-flex items-center gap-1 text-xs font-semibold tabular"
+                    style={{ color: delta > 0 ? "var(--smsi-high)" : "var(--smsi-poor)" }}
+                  >
+                    {delta > 0 ? (
+                      <TrendingUp aria-hidden className="size-3.5" />
+                    ) : (
+                      <TrendingDown aria-hidden className="size-3.5" />
+                    )}
+                    {signed(delta)}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="text-right">
-            <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-              {t("currentIndex")}
-            </p>
-            <p
-              className="mt-1 text-4xl leading-none font-semibold tracking-tight tabular"
-              style={{ color: band.color }}
-            >
-              {last.smsi.toFixed(1)}
-            </p>
-            <div className="mt-2 flex items-center justify-end gap-2">
-              <SmsiBadge band={band} label={tb(`${band.id}.label`)} size="sm" />
-              {delta !== null && (
-                <span className="text-xs font-medium text-muted-foreground tabular">
-                  {signed(delta)}
-                </span>
-              )}
+          {/* Шкала уровней с положением издания */}
+          <div className="px-5 sm:px-7">
+            <div className="relative">
+            <div className="flex h-2 overflow-hidden rounded-full">
+              {[...SMSI_BANDS].reverse().map((b) => (
+                <div
+                  key={b.id}
+                  title={tb(`${b.id}.label`)}
+                  style={{ backgroundColor: b.color, flexGrow: b.max - b.min + 1, opacity: 0.85 }}
+                />
+              ))}
+            </div>
+            <span
+              aria-hidden
+              className="absolute -top-1 size-4 -translate-x-1/2 rounded-full border-2 bg-card shadow-sm"
+              style={{
+                left: `${Math.min(99, Math.max(1, last.smsi))}%`,
+                borderColor: band.color,
+              }}
+            />
             </div>
           </div>
+
+          <dl className="relative mt-5 grid grid-cols-1 gap-px border-t border-border bg-border sm:grid-cols-3">
+            {[
+              {
+                label: tp("strongest"),
+                value: `${tc(`${strong.id}.name`)}`,
+                score: last[strong.id],
+              },
+              {
+                label: tp("weakest"),
+                value: `${tc(`${weak.id}.name`)}`,
+                score: last[weak.id],
+              },
+              {
+                label: tp("experts"),
+                value: consensus ? String(consensus.experts) : "—",
+                score: null,
+              },
+            ].map((item) => (
+              <div key={item.label} className="bg-card px-5 py-3 sm:px-7">
+                <dt className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                  {item.label}
+                </dt>
+                <dd className="mt-0.5 flex items-baseline justify-between gap-2 text-sm font-medium text-foreground">
+                  <span className="truncate">{item.value}</span>
+                  {item.score !== null && (
+                    <span className="font-display text-base font-bold tabular">
+                      {formatScore(item.score)}
+                    </span>
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
         {/* Без базы баллы — демонстрационные; говорим об этом прямо. */}
@@ -199,12 +328,18 @@ export default async function OutletPage({
           )}
         </p>
 
-        <Button asChild variant="outline" size="sm" className="mt-4">
-          <Link href={`/outlets/${history.slug}/report`}>
-            <FileText className="size-4" />
-            {tReport("open")}
-          </Link>
-        </Button>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/outlets/${history.slug}/report`}>
+              <FileText className="size-4" />
+              {tReport("open")}
+            </Link>
+          </Button>
+          <ShareButton
+            title={`${history.name} — SMSI ${last.smsi.toFixed(1)}`}
+            labels={{ share: tp("share"), copied: tp("copied") }}
+          />
+        </div>
       </Reveal>
 
       <Reveal delay={0.08}>
@@ -428,6 +563,22 @@ export default async function OutletPage({
               smsi: last.smsi,
               weights: weightSet.weights,
             })} className="mt-6" />
+      </Reveal>
+
+      <Reveal delay={0.2}>
+        <OutletEmbed
+          slug={history.slug}
+          name={history.name}
+          defaultLang={locale}
+          labels={{
+            title: te("title"),
+            subtitle: te("subtitle"),
+            code: te("code"),
+            copy: te("copy"),
+            copied: te("copied"),
+            language: te("language"),
+          }}
+        />
       </Reveal>
     </div>
   );

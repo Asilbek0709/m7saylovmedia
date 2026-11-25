@@ -550,7 +550,23 @@
     "backToOutlets": "Back to outlets",
     "noEvaluationsTitle": "No assessments for this outlet yet",
     "noEvaluationsText": "The SMSI index, round-by-round dynamics and the report will appear after the first expert assessment.",
-    "evaluateCta": "Assess in the calculator"
+    "evaluateCta": "Assess in the calculator",
+    "profile": {
+      "rank": "#{rank} of {total} in the ranking",
+      "strongest": "Strongest criterion",
+      "weakest": "Needs attention",
+      "experts": "Experts this round",
+      "share": "Share",
+      "copied": "Link copied"
+    },
+    "embed": {
+      "title": "Badge for your website",
+      "subtitle": "Put a live badge with the current SMSI index on the outlet's website. It updates itself and links back to this page.",
+      "code": "Embed code (HTML)",
+      "copy": "Copy code",
+      "copied": "Code copied",
+      "language": "Badge language"
+    }
   },
   "recommendations": {
     "title": "Recommendations",
@@ -900,5 +916,8 @@
     "registration": "Model registration",
     "contribution": "Contribution to the platform",
     "photoAlt": "Photo: {name}"
+  },
+  "badge": {
+    "notRated": "Not assessed yet"
   }
 }

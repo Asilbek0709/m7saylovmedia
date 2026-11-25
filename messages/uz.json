@@ -550,7 +550,23 @@
     "backToOutlets": "Nashrlar roʻyxatiga",
     "noEvaluationsTitle": "Nashr boʻyicha hali baholar yoʻq",
     "noEvaluationsText": "SMSI indeksi, turlar boʻyicha dinamika va bayonnoma ekspertning birinchi bahosidan keyin paydo boʻladi.",
-    "evaluateCta": "Kalkulyatorda baholash"
+    "evaluateCta": "Kalkulyatorda baholash",
+    "profile": {
+      "rank": "Reytingda {total} tadan {rank}-oʻrin",
+      "strongest": "Kuchli mezon",
+      "weakest": "Eʼtibor talab etadi",
+      "experts": "Turdagi ekspertlar",
+      "share": "Ulashish",
+      "copied": "Havola nusxalandi"
+    },
+    "embed": {
+      "title": "Sayt uchun nishon",
+      "subtitle": "Nashr saytiga joriy SMSI indeksi koʻrsatilgan jonli nishonni joylashtiring — u oʻzi yangilanadi va shu sahifaga olib boradi.",
+      "code": "Joylashtirish kodi (HTML)",
+      "copy": "Kodni nusxalash",
+      "copied": "Kod nusxalandi",
+      "language": "Nishon tili"
+    }
   },
   "recommendations": {
     "title": "Tavsiyalar",
@@ -900,5 +916,8 @@
     "registration": "Model roʻyxatdan oʻtkazilgan",
     "contribution": "Platformadagi hissasi",
     "photoAlt": "Surat: {name}"
+  },
+  "badge": {
+    "notRated": "Hali baholanmagan"
   }
 }

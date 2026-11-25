@@ -1,10 +1,12 @@
 // Иконки сайта из app/icon.svg:
 //   app/favicon.ico      — 16, 32, 48 px (PNG внутри ICO) для старых браузеров;
-//   app/apple-icon.png   — 180 px на белом фоне для экрана «Домой» в iOS.
+//   app/apple-icon.png   — 180 px на белом фоне для экрана «Домой» в iOS;
+//   public/icons/icon-192.png, icon-512.png — для установки как приложение
+//   (манифест app/manifest.ts), icon-maskable-512.png — с полями под маску Android.
 //
 //   node scripts/build-icons.mjs
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
@@ -41,4 +43,21 @@ await sharp({ create: { width: 180, height: 180, channels: 4, background: "#ffff
   .png()
   .toFile(path("app/apple-icon.png"));
 
-console.log("favicon.ico (16/32/48) и apple-icon.png (180) готовы");
+// Иконки PWA: обычные — на белом с небольшим полем, maskable — с полем 20 %
+// (Android обрезает их кругом или «каплей»).
+mkdirSync(path("public/icons"), { recursive: true });
+for (const [file, size, pad] of [
+  ["icon-192.png", 192, 0.1],
+  ["icon-512.png", 512, 0.1],
+  ["icon-maskable-512.png", 512, 0.2],
+]) {
+  const inner = Math.round(size * (1 - pad * 2));
+  const art = await sharp(svg, { density: 512 }).resize(inner, inner).png().toBuffer();
+  const offset = Math.round((size - inner) / 2);
+  await sharp({ create: { width: size, height: size, channels: 4, background: "#ffffff" } })
+    .composite([{ input: art, top: offset, left: offset }])
+    .png()
+    .toFile(path(`public/icons/${file}`));
+}
+
+console.log("favicon.ico, apple-icon.png и иконки PWA готовы");
