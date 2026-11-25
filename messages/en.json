@@ -69,6 +69,18 @@
       "title": "Outlet monitoring",
       "round": "Round {n}",
       "growth": "this round"
+    },
+    "live": {
+      "eyebrow": "The platform in numbers",
+      "title": "Monitoring is happening now",
+      "subtitle": "These numbers update with the database: every new expert assessment shows up here and in the ranking right away.",
+      "outlets": "outlets in the directory",
+      "rated": "outlets assessed so far",
+      "evaluations": "expert assessments",
+      "regions": "regions covered",
+      "recent": "Latest assessments",
+      "allRating": "Full ranking",
+      "empty": "No assessments yet — the first ones will appear here."
     }
   },
   "login": {
@@ -351,7 +363,13 @@
         "veryStrong": "very strong"
       }
     },
-    "demoNoticeEmpty": "There are no assessments in the database yet, so demo data is shown — it is not a monitoring result. The ranking will appear after the first assessment is saved."
+    "demoNoticeEmpty": "There are no assessments in the database yet, so demo data is shown — it is not a monitoring result. The ranking will appear after the first assessment is saved.",
+    "map": {
+      "outlets": "outlets",
+      "noData": "No assessments",
+      "attribution": "Map © OpenStreetMap",
+      "hint": "Hover a region — click to filter"
+    }
   },
   "methodology": {
     "eyebrow": "Methodology",

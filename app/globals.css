@@ -63,7 +63,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-display), var(--font-sans);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-gold-wash: var(--gold-wash);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -124,6 +127,12 @@
   --input: #dfe3e9;
   --ring: #1c3f66;
   --radius: 0.5rem;
+
+  /* Золото из логотипа: --gold — заливки и штрихи, --gold-ink — текст
+     (контраст ≥ 4.5 на белом), --gold-wash — фон плашек. */
+  --gold: #ef9f27;
+  --gold-ink: #8a5300;
+  --gold-wash: #fdf3e2;
 
  
   --navy-900: #0b1f35;
@@ -199,6 +208,10 @@
   --input: #24314b;
   --ring: #4d7ab5;
 
+  --gold: #f2b14a;
+  --gold-ink: #f5c374;
+  --gold-wash: #2a2110;
+
   --navy-900: #050b16;
   --navy-800: #0b1424;
   --navy-700: #13203a;
@@ -259,6 +272,14 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Заголовки — Onest: плотнее и характернее основного Inter. */
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
   }
   
   .tabular {

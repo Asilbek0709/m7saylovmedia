@@ -69,6 +69,18 @@
       "title": "Nashr monitoringi",
       "round": "{n}-tur",
       "growth": "tur davomida"
+    },
+    "live": {
+      "eyebrow": "Platforma raqamlarda",
+      "title": "Monitoring hozir davom etmoqda",
+      "subtitle": "Raqamlar baza bilan birga yangilanadi: ekspertning har bir yangi bahosi shu yerda va reytingda darhol paydo boʻladi.",
+      "outlets": "nashr maʼlumotnomada",
+      "rated": "nashr allaqachon baholangan",
+      "evaluations": "ekspert bahosi",
+      "regions": "hudud qamrab olingan",
+      "recent": "Soʻnggi baholar",
+      "allRating": "Butun reyting",
+      "empty": "Hozircha baholar yoʻq — birinchilari shu yerda paydo boʻladi."
     }
   },
   "login": {
@@ -351,7 +363,13 @@
         "veryStrong": "juda kuchli"
       }
     },
-    "demoNoticeEmpty": "Bazada hali birorta baho yoʻq, shuning uchun demo-maʼlumot koʻrsatilmoqda — u monitoring natijasi emas. Reyting birinchi baho saqlangandan soʻng paydo boʻladi."
+    "demoNoticeEmpty": "Bazada hali birorta baho yoʻq, shuning uchun demo-maʼlumot koʻrsatilmoqda — u monitoring natijasi emas. Reyting birinchi baho saqlangandan soʻng paydo boʻladi.",
+    "map": {
+      "outlets": "nashr",
+      "noData": "Baholar yoʻq",
+      "attribution": "Xarita © OpenStreetMap",
+      "hint": "Hudud ustiga olib boring — saralash uchun bosing"
+    }
   },
   "methodology": {
     "eyebrow": "Metodika",

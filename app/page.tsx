@@ -1,7 +1,12 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  ClipboardCheck,
   FileSearch,
+  MapPin,
+  Newspaper,
+  TrendingDown,
+  TrendingUp,
   Layers,
   MessagesSquare,
   Network,
@@ -9,7 +14,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { AnimatedHeading } from "@/components/motion/animated-heading";
 import { CountUp } from "@/components/motion/count-up";
@@ -19,6 +24,7 @@ import { HeroVisual } from "@/components/motion/hero-visual";
 import { Reveal } from "@/components/motion/reveal";
 import { ScrollFormula } from "@/components/motion/scroll-formula";
 import { StaggerItem, StaggerList } from "@/components/motion/stagger-list";
+import { OutletLogo } from "@/components/outlet-logo";
 import { SmsiBadge } from "@/components/smsi-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +36,9 @@ import {
   SMSI_BANDS,
   type CriterionId,
 } from "@/lib/ms7";
+import { getLongDateFormatter } from "@/lib/format-date";
+import { getLandingStats } from "@/lib/landing-stats";
+import { regionLabel } from "@/lib/regions";
 import { getWeightHistory } from "@/lib/weights";
 
 
@@ -47,6 +56,10 @@ export default async function LandingPage() {
   const t = await getTranslations("landing");
   const tc = await getTranslations("criteria");
   const tb = await getTranslations("bands");
+
+  const locale = await getLocale();
+  const stats = await getLandingStats();
+  const formatDate = await getLongDateFormatter();
 
   // Модель на главной — с действующими весами из базы (в демо — из кода).
   const { weights } = (await getWeightHistory()).active;
@@ -69,7 +82,8 @@ export default async function LandingPage() {
           <div className="min-w-0">
           <div className="max-w-3xl">
             <FadeIn>
-              <span className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+                <span aria-hidden className="size-1.5 rounded-full bg-gold" />
                 {t("eyebrow")}
               </span>
             </FadeIn>
@@ -137,6 +151,134 @@ export default async function LandingPage() {
           </FadeIn>
         </div>
       </section>
+
+      {/* ---------------- Платформа в цифрах: живые данные ---------------- */}
+      <section className="border-t border-border">
+        <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+          <Reveal>
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-gold-ink uppercase">
+              {t("live.eyebrow")}
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              {t("live.title")}
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+              {t("live.subtitle")}
+            </p>
+          </Reveal>
+
+          <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { icon: Newspaper, value: stats.outlets, label: t("live.outlets") },
+                { icon: ClipboardCheck, value: stats.rated, label: t("live.rated") },
+                { icon: Users, value: stats.evaluations, label: t("live.evaluations") },
+                { icon: MapPin, value: stats.regions, label: t("live.regions"), suffix: " / 14" },
+              ].map((tile, i) => (
+                <Reveal key={tile.label} delay={0.05 * i}>
+                  <Card className="ms7-surface group h-full gap-0 overflow-hidden py-5 transition-transform duration-300 hover:-translate-y-0.5">
+                    <CardContent className="relative px-5">
+                      <span className="flex size-10 items-center justify-center rounded-lg bg-gold-wash text-gold-ink">
+                        <tile.icon aria-hidden className="size-5" />
+                      </span>
+                      <p className="mt-4 font-display text-4xl font-bold tracking-tight text-foreground tabular">
+                        <CountUp value={tile.value} />
+                        {tile.suffix && (
+                          <span className="text-lg font-semibold text-muted-foreground">
+                            {tile.suffix}
+                          </span>
+                        )}
+                      </p>
+                      <p className="mt-1 text-xs leading-snug text-muted-foreground">
+                        {tile.label}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Reveal>
+              ))}
+            </div>
+
+            <Reveal delay={0.1}>
+              <Card className="ms7-surface h-full gap-0 py-0">
+                <CardContent className="px-0">
+                  <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+                    <p className="font-display text-base font-semibold text-foreground">
+                      {t("live.recent")}
+                    </p>
+                    <Link
+                      href="/rating"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-foreground underline-offset-4 hover:underline"
+                    >
+                      {t("live.allRating")}
+                      <ArrowRight aria-hidden className="size-3.5" />
+                    </Link>
+                  </div>
+                  {stats.recent.length === 0 ? (
+                    <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+                      {t("live.empty")}
+                    </p>
+                  ) : (
+                    <ul className="divide-y divide-border">
+                      {stats.recent.map((item) => {
+                        const band = resolveBand(item.smsi);
+                        const delta = item.prevSmsi === null ? null : item.smsi - item.prevSmsi;
+                        return (
+                          <li key={`${item.slug}|${item.period}`}>
+                            <Link
+                              href={`/outlets/${item.slug}`}
+                              className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/50"
+                            >
+                              <OutletLogo name={item.name} website={item.website} />
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-medium text-foreground">
+                                  {item.name}
+                                </span>
+                                <span className="block truncate text-xs text-muted-foreground">
+                                  {[
+                                    item.region && regionLabel(item.region, locale),
+                                    item.period,
+                                    item.evaluatedAt && formatDate(item.evaluatedAt),
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" · ")}
+                                </span>
+                              </span>
+                              {delta !== null && Math.abs(delta) >= 0.05 && (
+                                <span
+                                  className="hidden items-center gap-1 text-xs font-medium tabular sm:inline-flex"
+                                  style={{ color: delta > 0 ? "var(--smsi-high)" : "var(--smsi-poor)" }}
+                                >
+                                  {delta > 0 ? (
+                                    <TrendingUp aria-hidden className="size-3.5" />
+                                  ) : (
+                                    <TrendingDown aria-hidden className="size-3.5" />
+                                  )}
+                                  {delta > 0 ? "+" : ""}
+                                  {delta.toFixed(1)}
+                                </span>
+                              )}
+                              <span className="flex shrink-0 flex-col items-end gap-1">
+                                <span
+                                  className="font-display text-lg leading-none font-bold tabular"
+                                  style={{ color: band.color }}
+                                >
+                                  {item.smsi.toFixed(1)}
+                                </span>
+                                <SmsiBadge band={band} label={tb(`${band.id}.label`)} size="sm" />
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
 
       
       <section className="border-t border-border bg-card/40">

@@ -3,9 +3,12 @@ import Link from "next/link";
 import { Download, TriangleAlert } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
-import { regionLabel } from "@/lib/regions";
+import { REGIONS, regionLabel } from "@/lib/regions";
 
 import { Reveal } from "@/components/motion/reveal";
+import { OutletLogo } from "@/components/outlet-logo";
+import { RatingPodium } from "@/components/rating-podium";
+import { RegionMap } from "@/components/region-map";
 import { OwnershipRadar } from "@/components/ownership-radar";
 import { RatingFilters } from "@/components/rating-filters";
 import { SmsiBadge } from "@/components/smsi-badge";
@@ -242,6 +245,18 @@ export default async function RatingPage({
         ))}
       </div>
 
+      <RatingPodium
+        rows={rows}
+        labels={{
+          bands: Object.fromEntries(
+            SMSI_BANDS.map((b) => [b.id, tb(`${b.id}.label`)]),
+          ),
+          region: (r) => regionLabel(r, locale),
+          points: tCommon("points"),
+          change: t("columns.change"),
+        }}
+      />
+
       <Reveal delay={0.2}>
         <Card className="ms7-surface mt-6 overflow-hidden">
           <CardHeader className="border-b border-border pb-4">
@@ -297,6 +312,9 @@ export default async function RatingPage({
                         </TableCell>
 
                         <TableCell>
+                          <div className="flex items-center gap-3">
+                          <OutletLogo name={row.name} website={row.website} className="size-8" />
+                          <div className="min-w-0">
                           <Link
                             href={`/outlets/${row.slug}`}
                             className="block text-sm font-medium text-foreground underline-offset-4 hover:underline"
@@ -320,6 +338,8 @@ export default async function RatingPage({
                               {t("consensusFlag")}
                             </span>
                           )}
+                          </div>
+                          </div>
                         </TableCell>
 
                         <TableCell>
@@ -643,8 +663,42 @@ export default async function RatingPage({
           </p>
         </Reveal>
 
+        <div className="mt-4 grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+        <Reveal delay={0.03}>
+          <Card className="ms7-surface gap-0 p-4">
+            <RegionMap
+              data={Object.fromEntries(
+                regionRows
+                  .filter((row) => row.region)
+                  .map((row) => [
+                    row.region,
+                    {
+                      smsi: row.smsi,
+                      count: row.count,
+                      href: sliceHref({ ...filter, region: row.region }),
+                    },
+                  ]),
+              )}
+              active={filter.region}
+              allHref={sliceHref({ ...filter, region: null })}
+              labels={{
+                names: Object.fromEntries(
+                  REGIONS.map((r) => [r, regionLabel(r, locale)]),
+                ),
+                bands: Object.fromEntries(
+                  SMSI_BANDS.map((b) => [b.id, tb(`${b.id}.label`)]),
+                ),
+                outlets: t("map.outlets"),
+                noData: t("map.noData"),
+                attribution: t("map.attribution"),
+                showAll: t("map.hint"),
+              }}
+            />
+          </Card>
+        </Reveal>
+
         <Reveal delay={0.05}>
-          <Card className="ms7-surface mt-4 overflow-hidden">
+          <Card className="ms7-surface overflow-hidden">
             <CardContent className="px-0">
               {regionRows.length === 0 ? (
                 <p className="px-6 py-8 text-center text-sm text-muted-foreground">
@@ -729,6 +783,7 @@ export default async function RatingPage({
             </CardContent>
           </Card>
         </Reveal>
+        </div>
       </section>
     </div>
   );

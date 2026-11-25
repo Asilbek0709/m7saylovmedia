@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Onest } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
@@ -8,6 +9,18 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { HTML_LANG, type Locale } from "@/i18n/config";
 import { getCurrentUser } from "@/lib/auth";
 import "./globals.css";
+
+/**
+ * Шрифт заголовков. Onest — один из немногих, где есть и ʻ/ʼ узбекской
+ * латиницы, и Ў Қ Ғ Ҳ кириллицы. next/font скачивает его при сборке и
+ * раздаёт с нашего домена — без запросов к Google у посетителя.
+ */
+const display = Onest({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  weight: ["600", "700"],
+  variable: "--font-display",
+  display: "swap",
+});
 
 /** Нарезки Inter, нужные на первом экране: узбекская кириллица и латиница. */
 const PRELOADED_FONTS = ["inter-cyrillic", "inter-latin"];
@@ -39,7 +52,7 @@ export default async function RootLayout({
     
     <html
       lang={HTML_LANG[locale]}
-      className="h-full antialiased"
+      className={`h-full antialiased ${display.variable}`}
       suppressHydrationWarning
     >
       <head>

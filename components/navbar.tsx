@@ -112,9 +112,9 @@ export function Navbar({
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-2 py-2 text-xs font-medium whitespace-nowrap transition-colors lg:px-3 lg:text-sm",
+                  "relative rounded-md px-2 py-2 text-xs font-medium whitespace-nowrap transition-colors lg:px-3 lg:text-sm",
                   active
-                    ? "bg-secondary text-secondary-foreground"
+                    ? "bg-secondary text-secondary-foreground after:absolute after:inset-x-3 after:bottom-0.5 after:h-0.5 after:rounded-full after:bg-gold"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
